@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -170,7 +170,6 @@ const SelectField = ({
 };
 
 export default function EditProfile() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -366,7 +365,7 @@ export default function EditProfile() {
         complexion: profileData.complexion,
         hasDisability: profileData.hasDisability,
       });
-
+      
       // Update lifestyle
       await ApiService.updateLifestyle({
         diet: profileData.diet,

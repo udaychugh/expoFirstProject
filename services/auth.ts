@@ -1,34 +1,6 @@
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-interface RegisterRequest {
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-}
-
-interface AuthResponse {
-  success: boolean;
-  data?: {
-    user: {
-      id: string;
-      email: string;
-      fullName: string;
-      phone: string;
-      isVerified: boolean;
-      profileComplete: boolean;
-    };
-    token: string;
-    refreshToken: string;
-  };
-  message?: string;
-  error?: string;
-}
-
-const API_BASE_URL = 'https://your-api-domain.com/api'; // Replace with your actual API URL
+import { API_BASE_URL } from "./model/constants";
+import { LoginRequest, RegisterRequest } from "./model/preauth/preauthRequest";
+import { AuthResponse } from "./model/preauth/preauthResponse";
 
 class AuthService {
   private static instance: AuthService;

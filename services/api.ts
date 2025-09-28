@@ -1,66 +1,9 @@
 import AuthService from './auth';
+import { ApiResponse } from './model/apiResponse';
+import { API_BASE_URL } from './model/constants';
+import { MatchResult, SwipeAction } from './model/postauth/actions';
+import { UserProfile } from './model/postauth/userProfile';
 
-const API_BASE_URL = 'https://your-api-domain.com/api';
-
-interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
-
-interface UserProfile {
-  id: string;
-  name: string;
-  age: number;
-  location: string;
-  occupation: string;
-  education: string;
-  religion: string;
-  caste?: string;
-  height: string;
-  weight?: string;
-  maritalStatus: string;
-  bio: string;
-  images: string[];
-  interests: string[];
-  lifestyle: {
-    smoking: string;
-    drinking: string;
-    diet: string;
-  };
-  phoneNumber?: string;
-  email?: string;
-  bloodGroup?: string;
-  languagesSpoken: string[];
-  dressStyle?: string;
-  favoriteBooks?: string;
-  favoriteSongs?: string;
-  favoriteMovies?: string;
-  vacationDestination?: string;
-  bodyType?: string;
-  complexion?: string;
-  hasDisability: boolean;
-  drinkingHabit?: string;
-  smokingHabit?: string;
-  hobbies: string[];
-  sportsAndFitness: string[];
-  hasChildren?: string;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface SwipeAction {
-  profileId: string;
-  action: 'like' | 'pass';
-}
-
-interface MatchResult {
-  isMatch: boolean;
-  matchId?: string;
-  profile?: UserProfile;
-}
 class ApiService {
   private static instance: ApiService;
 
