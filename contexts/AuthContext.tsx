@@ -60,6 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await AuthService.login({ email, password });
       
       if (response.success && response.data) {
+        console.log("Login successful, user data:", response.data.user);
         setUser(response.data.user);
         return { success: true };
       } else {

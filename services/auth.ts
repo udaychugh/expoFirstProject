@@ -28,6 +28,10 @@ class AuthService {
 
       const data = await response.json();
 
+      console.debug("login request at = ", API_BASE_URL + "/auth/login");
+      console.debug("login credentials = ",  JSON.stringify(credentials));
+      console.debug("login response = ", data);
+
       if (response.ok && data.success) {
         this.token = data.data.token;
         this.refreshToken = data.data.refreshToken;
@@ -38,6 +42,7 @@ class AuthService {
         
         return data;
       } else {
+        console.error('Login failed:', data.message);
         return {
           success: false,
           error: data.message || 'Login failed',

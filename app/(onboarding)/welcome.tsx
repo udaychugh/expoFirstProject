@@ -1,59 +1,61 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Heart, Users, MessageCircle, Shield } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-
-const { width } = Dimensions.get('window');
+import { Colors } from '@/assets/colors/colors';
+import PrimaryButton from '@/components/PrimaryButton';
+import SecondaryButton from '@/components/SecondaryButton';
 
 export default function Welcome() {
   const router = useRouter();
 
   return (
-    <LinearGradient
-      colors={['#FDF2F8', '#FCE7F3', '#FAE8FF']}
-      style={styles.container}
-    >
+    <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
       <View style={styles.header}>
-        <Heart color="#E11D48" size={48} />
+        <Heart color={Colors.primary} size={48} />
         <Text style={styles.title}>LifeMatch</Text>
         <Text style={styles.subtitle}>Find your perfect life partner</Text>
       </View>
 
       <View style={styles.features}>
         <View style={styles.feature}>
-          <Users color="#EC4899" size={32} />
+          <Users color={Colors.pink} size={32} />
           <Text style={styles.featureTitle}>Verified Profiles</Text>
-          <Text style={styles.featureText}>Connect with genuine people looking for marriage</Text>
+          <Text style={styles.featureText}>
+            Connect with genuine people looking for marriage
+          </Text>
         </View>
 
         <View style={styles.feature}>
-          <MessageCircle color="#8B5CF6" size={32} />
+          <MessageCircle color={Colors.purple} size={32} />
           <Text style={styles.featureTitle}>Secure Messaging</Text>
           <Text style={styles.featureText}>Chat safely with your matches</Text>
         </View>
 
         <View style={styles.feature}>
-          <Shield color="#10B981" size={32} />
+          <Shield color={Colors.green} size={32} />
           <Text style={styles.featureTitle}>Privacy First</Text>
-          <Text style={styles.featureText}>Your data is secure and private</Text>
+          <Text style={styles.featureText}>
+            Your data is secure and private
+          </Text>
         </View>
       </View>
 
       <View style={styles.buttons}>
-        <TouchableOpacity 
-          style={styles.primaryButton}
+        <PrimaryButton
+          title="Get Started"
           onPress={() => router.push('/(onboarding)/register')}
-        >
-          <Text style={styles.primaryButtonText}>Get Started</Text>
-        </TouchableOpacity>
+        />
 
-        <TouchableOpacity 
-          style={styles.secondaryButton}
+        <SecondaryButton
+          title="I already have an account"
           onPress={() => router.push('/(onboarding)/login')}
-        >
-          <Text style={styles.secondaryButtonText}>I already have an account</Text>
-        </TouchableOpacity>
+        />
       </View>
     </LinearGradient>
   );
@@ -106,25 +108,5 @@ const styles = StyleSheet.create({
   buttons: {
     gap: 16,
     marginBottom: 32,
-  },
-  primaryButton: {
-    backgroundColor: '#E11D48',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: '#E11D48',
-    fontSize: 16,
-    fontWeight: '500',
   },
 });

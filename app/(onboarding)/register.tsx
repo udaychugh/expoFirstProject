@@ -35,40 +35,40 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    // if (
-    //   !formData.fullName ||
-    //   !formData.email ||
-    //   !formData.phone ||
-    //   !formData.password
-    // ) {
-    //   Alert.alert('Error', 'Please fill in all fields');
-    //   return;
-    // }
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.password
+    ) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
 
-    // // Basic email validation
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // if (!emailRegex.test(formData.email)) {
-    //   Alert.alert('Error', 'Please enter a valid email address');
-    //   return;
-    // }
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
 
-    // // Password strength validation
-    // if (formData.password.length < 6) {
-    //   Alert.alert('Error', 'Password must be at least 6 characters long');
-    //   return;
-    // }
+    // Password strength validation
+    if (formData.password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters long');
+      return;
+    }
 
-    // if (formData.password !== formData.confirmPassword) {
-    //   Alert.alert('Error', 'Passwords do not match');
-    //   return;
-    // }
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
 
-    // // Phone number validation (basic)
-    // const phoneRegex = /^[+]?[\d\s\-\(\)]{10,}$/;
-    // if (!phoneRegex.test(formData.phone)) {
-    //   Alert.alert('Error', 'Please enter a valid phone number');
-    //   return;
-    // }
+    // Phone number validation (basic)
+    const phoneRegex = /^[+]?[\d\s\-\(\)]{10,}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      Alert.alert('Error', 'Please enter a valid phone number');
+      return;
+    }
 
     const result = await register({
       fullName: formData.fullName,
@@ -77,7 +77,7 @@ export default function Register() {
       password: formData.password,
     });
 
-    if (!result.success) {
+    if (result.success) {
       Alert.alert(
         'Registration Successful',
         'Your account has been created successfully. Please complete your profile.',

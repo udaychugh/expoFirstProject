@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Heart, Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { Colors } from '@/assets/colors/colors';
+import PrimaryButton from '@/components/PrimaryButton';
+import OutlineButton from '@/components/OutlineButton';
+import ErrorBox from '@/components/ErrorBox';
 
 export default function Login() {
   const router = useRouter();
@@ -17,7 +28,7 @@ export default function Login() {
   const [error, setError] = useState('');
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (error) setError('');
   };
 
@@ -35,36 +46,34 @@ export default function Login() {
     }
 
     const result = await login(formData.email, formData.password);
-    
-    if (!result.success) {
+
+    if (result.success) {
       router.push('/(tabs)');
     } else {
       setError(result.error || 'Login failed');
-      Alert.alert('Login Failed', result.error || 'Please check your credentials and try again');
+      Alert.alert(
+        'Login Failed',
+        result.error || 'Please check your credentials and try again'
+      );
     }
   };
 
-  const handleForgotPassword = () => {
-    router.push('/(onboarding)/forgot-password');
-  };
-
   return (
-    <LinearGradient
-      colors={['#FDF2F8', '#FCE7F3', '#FAE8FF']}
-      style={styles.container}
-    >
+    <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <Heart color="#E11D48" size={48} />
+          <Heart color={Colors.primary} size={48} />
           <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to find your perfect match</Text>
+          <Text style={styles.subtitle}>
+            Sign in to find your perfect match
+          </Text>
         </View>
 
         <View style={styles.formContainer}>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email Address</Text>
             <View style={styles.inputWithIcon}>
-              <Mail color="#9CA3AF" size={20} />
+              <Mail color={Colors.placeholderGray} size={20} />
               <TextInput
                 style={styles.inputText}
                 value={formData.email}
@@ -72,7 +81,7 @@ export default function Login() {
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={Colors.placeholderGray}
               />
             </View>
           </View>
@@ -80,44 +89,36 @@ export default function Login() {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Password</Text>
             <View style={styles.inputWithIcon}>
-              <Lock color="#9CA3AF" size={20} />
+              <Lock color={Colors.placeholderGray} size={20} />
               <TextInput
                 style={styles.inputText}
                 value={formData.password}
                 onChangeText={(value) => handleInputChange('password', value)}
                 placeholder="Enter your password"
                 secureTextEntry={!showPassword}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={Colors.placeholderGray}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
-                  <EyeOff color="#9CA3AF" size={20} />
+                  <EyeOff color={Colors.placeholderGray} size={20} />
                 ) : (
-                  <Eye color="#9CA3AF" size={20} />
+                  <Eye color={Colors.placeholderGray} size={20} />
                 )}
               </TouchableOpacity>
             </View>
           </View>
 
-          <TouchableOpacity onPress={handleForgotPassword}>
+          <TouchableOpacity onPress={() => router.push('/(onboarding)/forgot-password')}>
             <Text style={styles.forgotPassword}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          {error ? (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
+          {error ? <ErrorBox error={error} /> : null}
 
-          <TouchableOpacity 
-            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
+          <PrimaryButton
+            title={isLoading ? 'Signing In...' : 'Sign In'}
             onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <Text style={styles.loginButtonText}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
-            </Text>
-          </TouchableOpacity>
+            enabled={!isLoading}
+          />
 
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
@@ -125,12 +126,10 @@ export default function Login() {
             <View style={styles.dividerLine} />
           </View>
 
-          <TouchableOpacity 
-            style={styles.registerButton}
+          <OutlineButton
+            title="Create New Account"
             onPress={() => router.push('/(onboarding)/register')}
-          >
-            <Text style={styles.registerButtonText}>Create New Account</Text>
-          </TouchableOpacity>
+          />
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -153,12 +152,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#E11D48',
+    color: Colors.primary,
     marginTop: 16,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: Colors.placeholderGray,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -172,18 +171,18 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#374151',
+    color: Colors.labelGray,
     marginBottom: 8,
   },
   inputWithIcon: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     gap: 12,
-    shadowColor: '#000',
+    shadowColor: Colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -199,38 +198,15 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     fontSize: 14,
-    color: '#E11D48',
+    color: Colors.primary,
     textAlign: 'right',
     marginBottom: 32,
     fontWeight: '500',
   },
-  loginButton: {
-    backgroundColor: '#E11D48',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#E11D48',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  loginButtonDisabled: {
-    opacity: 0.7,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginVertical: 24,
   },
   dividerLine: {
     flex: 1,
@@ -241,31 +217,5 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     fontSize: 14,
     color: '#6B7280',
-  },
-  registerButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#E11D48',
-  },
-  registerButtonText: {
-    color: '#E11D48',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorContainer: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#FECACA',
-  },
-  errorText: {
-    color: '#DC2626',
-    fontSize: 14,
-    textAlign: 'center',
   },
 });

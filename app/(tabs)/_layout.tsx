@@ -1,5 +1,6 @@
+import React from 'react';
 import { Tabs } from 'expo-router';
-import { Heart, Users, Search, MessageCircle, User } from 'lucide-react-native';
+import { Heart, Users, User } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -14,6 +15,7 @@ export default function TabLayout() {
           borderTopColor: '#F3F4F6',
           paddingTop: 8,
           paddingBottom: 8,
+          marginBottom: 12,
           height: 60,
         },
         tabBarLabelStyle: {
@@ -36,24 +38,6 @@ export default function TabLayout() {
           title: 'Matches',
           tabBarIcon: ({ size, color }) => (
             <Users size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: 'Search',
-          tabBarIcon: ({ size, color }) => (
-            <Search size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="messages"
-        options={{
-          title: 'Messages',
-          tabBarIcon: ({ size, color }) => (
-            <MessageCircle size={size} color={color} />
           ),
         }}
       />
