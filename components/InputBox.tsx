@@ -19,7 +19,7 @@ export default function InputBox({
   isPassword = false,
 }: {
   label: string;
-  icon: 'Mail' | 'User' | 'Lock';
+  icon: any;
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
@@ -32,9 +32,7 @@ export default function InputBox({
     <View style={styles.inputGroup}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputWithIcon}>
-        {icon === 'Mail' && <Mail color={Colors.placeholderGray} size={20} />}
-        {icon === 'User' && <User color={Colors.placeholderGray} size={20} />}
-        {icon === 'Lock' && <Lock color={Colors.placeholderGray} size={20} />}
+       {icon}
         <TextInput
           style={styles.inputText}
           value={value}

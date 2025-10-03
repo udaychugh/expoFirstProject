@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings, CreditCard as Edit3, Camera, MapPin, Briefcase, GraduationCap, Heart, Users, MessageCircle, LogOut, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -41,7 +41,10 @@ export default function Profile() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
+    if (Platform.OS === 'web') {
+      router.push('/(onboarding)/welcome');
+    } else {
+      Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
       [
@@ -52,6 +55,7 @@ export default function Profile() {
         }},
       ]
     );
+    }
   };
 
   const handleSettings = () => {

@@ -16,6 +16,7 @@ import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
 import OutlineButton from '@/components/OutlineButton';
 import ErrorBox from '@/components/ErrorBox';
+import InputBox from '@/components/InputBox';
 
 export default function Login() {
   const router = useRouter();
@@ -61,6 +62,7 @@ export default function Login() {
   return (
     <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+        
         <View style={styles.header}>
           <Heart color={Colors.primary} size={48} />
           <Text style={styles.title}>Welcome Back</Text>
@@ -70,45 +72,27 @@ export default function Login() {
         </View>
 
         <View style={styles.formContainer}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email Address</Text>
-            <View style={styles.inputWithIcon}>
-              <Mail color={Colors.placeholderGray} size={20} />
-              <TextInput
-                style={styles.inputText}
-                value={formData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                placeholderTextColor={Colors.placeholderGray}
-              />
-            </View>
-          </View>
+          <InputBox
+            label="Email Address"
+            icon={<Mail color={Colors.placeholderGray} size={20} />}
+            value={formData.email}
+            onChangeText={(value) => handleInputChange('email', value)}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+          />
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.inputWithIcon}>
-              <Lock color={Colors.placeholderGray} size={20} />
-              <TextInput
-                style={styles.inputText}
-                value={formData.password}
-                onChangeText={(value) => handleInputChange('password', value)}
-                placeholder="Enter your password"
-                secureTextEntry={!showPassword}
-                placeholderTextColor={Colors.placeholderGray}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                {showPassword ? (
-                  <EyeOff color={Colors.placeholderGray} size={20} />
-                ) : (
-                  <Eye color={Colors.placeholderGray} size={20} />
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
+          <InputBox
+            label="Password"
+            icon={<Lock color={Colors.placeholderGray} size={20} />}
+            value={formData.password}
+            onChangeText={(value) => handleInputChange('password', value)}
+            placeholder="Enter your password"
+            isPassword={true}
+          />
 
-          <TouchableOpacity onPress={() => router.push('/(onboarding)/forgot-password')}>
+          <TouchableOpacity
+            onPress={() => router.push('/(onboarding)/forgot-password')}
+          >
             <Text style={styles.forgotPassword}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -131,6 +115,7 @@ export default function Login() {
             onPress={() => router.push('/(onboarding)/register')}
           />
         </View>
+        
       </SafeAreaView>
     </LinearGradient>
   );

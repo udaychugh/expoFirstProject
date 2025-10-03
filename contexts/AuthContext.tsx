@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AuthService from '@/services/auth';
+import { clearAllData } from '@/services/db/dataManager';
 
 interface User {
   id: string;
@@ -99,6 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       await AuthService.logout();
+      await clearAllData();
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);
