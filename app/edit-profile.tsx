@@ -173,9 +173,9 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({
-    name: 'John Doe',
-    location: 'Mumbai, Maharashtra',
-    occupation: 'Software Engineer',
+    name: '',
+    location: '',
+    occupation: '',
     gender: '',
     phoneNumber: '',
     email: '',
@@ -200,10 +200,7 @@ export default function EditProfile() {
     hobbies: [],
     sportsAndFitness: [],
     hasChildren: '',
-    images: [
-      'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
-      'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=400',
-    ],
+    images: [],
   });
 
   const [expandedSections, setExpandedSections] = useState({

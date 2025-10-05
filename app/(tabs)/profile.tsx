@@ -1,36 +1,28 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Settings, CreditCard as Edit3, Camera, MapPin, Briefcase, GraduationCap, Heart, Users, MessageCircle, LogOut, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-
-// Mock user data
-const mockUser = {
-  name: 'John Doe',
-  age: 28,
-  location: 'Mumbai, Maharashtra',
-  occupation: 'Software Engineer',
-  education: 'B.Tech Computer Science',
-  religion: 'Hindu',
-  height: '5\'10"',
-  bio: 'Love traveling, reading books, and trying new cuisines. Looking for someone who shares similar values and interests.',
-  images: [
-    'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
-    'https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=400',
-  ],
-  stats: {
-    likes: 45,
-    matches: 12,
-    messages: 8,
-  },
-  isVerified: false, // Added verification status
-};
+import { getUserInfo } from '@/services/db/dataManager';
+import { UserProfile } from '@/services/model/postauth/userProfile';
 
 export default function Profile() {
   const router = useRouter();
-  const [user] = useState(mockUser);
+
+  const [user, setUser] = useState<UserProfile | null>(null)
+
   const { logout, user: authUser } = useAuth();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      await getUserInfo().then(data => {
+        setUser(data);
+      });
+    }
+
+    fetchUser();
+  }, []);
 
   const handleEditProfile = () => {
     router.push('/edit-profile');
@@ -73,7 +65,7 @@ export default function Profile() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Verification Status */}
-        {!user.isVerified && (
+        {!authUser?.isVerified && (
           <View style={styles.verificationBanner}>
             <View style={styles.verificationContent}>
               <AlertTriangle color="#F59E0B" size={24} />
@@ -90,7 +82,7 @@ export default function Profile() {
           </View>
         )}
 
-        {user.isVerified && (
+        {authUser?.isVerified && (
           <View style={styles.verifiedBanner}>
             <CheckCircle color="#10B981" size={24} />
             <Text style={styles.verifiedText}>Account Verified</Text>
@@ -100,15 +92,15 @@ export default function Profile() {
         {/* Profile Images */}
         <View style={styles.imagesContainer}>
           <View style={styles.mainImageContainer}>
-            <Image source={{ uri: user.images[0] }} style={styles.mainImage} />
+            <Image source={{ uri: user?.images[0] }} style={styles.mainImage} />
             <TouchableOpacity style={styles.cameraButton}>
               <Camera color="#FFFFFF" size={20} />
             </TouchableOpacity>
           </View>
           
-          {user.images[1] && (
+          {user?.images[1] && (
             <View style={styles.secondaryImageContainer}>
-              <Image source={{ uri: user.images[1] }} style={styles.secondaryImage} />
+              <Image source={{ uri: user?.images[1] }} style={styles.secondaryImage} />
             </View>
           )}
         </View>
@@ -117,7 +109,7 @@ export default function Profile() {
         <View style={styles.basicInfo}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>
-              {authUser?.fullName || user.name}, {user.age}
+              {authUser?.fullName || user?.name}, {user?.age}
             </Text>
             <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
               <Edit3 color="#E11D48" size={20} />
@@ -126,17 +118,17 @@ export default function Profile() {
           
           <View style={styles.infoRow}>
             <MapPin color="#6B7280" size={16} />
-            <Text style={styles.infoText}>{user.location}</Text>
+            <Text style={styles.infoText}>{JSON.stringify(user?.location)}</Text>
           </View>
           
           <View style={styles.infoRow}>
             <Briefcase color="#6B7280" size={16} />
-            <Text style={styles.infoText}>{user.occupation}</Text>
+            <Text style={styles.infoText}>{user?.occupation}</Text>
           </View>
           
           <View style={styles.infoRow}>
             <GraduationCap color="#6B7280" size={16} />
-            <Text style={styles.infoText}>{user.education}</Text>
+            <Text style={styles.infoText}>{user?.education}</Text>
           </View>
         </View>
 
@@ -144,19 +136,19 @@ export default function Profile() {
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Heart color="#E11D48" size={24} />
-            <Text style={styles.statNumber}>{user.stats.likes}</Text>
+            <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Likes</Text>
           </View>
           
           <View style={styles.statItem}>
             <Users color="#EC4899" size={24} />
-            <Text style={styles.statNumber}>{user.stats.matches}</Text>
+            <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Matches</Text>
           </View>
           
           <View style={styles.statItem}>
             <MessageCircle color="#8B5CF6" size={24} />
-            <Text style={styles.statNumber}>{user.stats.messages}</Text>
+            <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Messages</Text>
           </View>
         </View>
@@ -164,7 +156,7 @@ export default function Profile() {
         {/* About Me */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About Me</Text>
-          <Text style={styles.bio}>{user.bio}</Text>
+          <Text style={styles.bio}>{user?.bio}</Text>
         </View>
 
         {/* Profile Details */}
@@ -173,12 +165,12 @@ export default function Profile() {
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Religion</Text>
-            <Text style={styles.detailValue}>{user.religion}</Text>
+            <Text style={styles.detailValue}>{user?.religion}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Height</Text>
-            <Text style={styles.detailValue}>{user.height}</Text>
+            <Text style={styles.detailValue}>{user?.height}</Text>
           </View>
         </View>
 

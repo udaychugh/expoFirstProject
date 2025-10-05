@@ -24,11 +24,11 @@ export const getUserInfo = async (): Promise<UserProfile | null> =>  {
     }
 }
 
-export const storeToken = async (token: string, refreshToken: string) => {
+export const storeToken = async (token: string | null, refreshToken: string | null) => {
     try {
         await AsyncStorage.setItem(DBKeys.TOKEN, JSON.stringify({
-            token: token,
-            refreshToken: refreshToken
+            token: token ?? "",
+            refreshToken: refreshToken ?? ""
         }));
     } catch (error) {
         console.error("Error in storing token: ", error);

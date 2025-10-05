@@ -1,3 +1,4 @@
+import { storeToken } from "./db/dataManager";
 import { API_BASE_URL } from "./model/constants";
 import { LoginRequest, RegisterRequest } from "./model/preauth/preauthRequest";
 import { AuthResponse } from "./model/preauth/preauthResponse";
@@ -39,7 +40,9 @@ class AuthService {
         // Store tokens securely (you might want to use secure storage)
         // await SecureStore.setItemAsync('auth_token', this.token);
         // await SecureStore.setItemAsync('refresh_token', this.refreshToken);
-        
+
+        storeToken(this.token, this.refreshToken)
+
         return data;
       } else {
         console.error('Login failed:', data.message);

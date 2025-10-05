@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,20 @@ import { useRouter } from 'expo-router';
 import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
 import SecondaryButton from '@/components/SecondaryButton';
+import { getStoreToken } from '@/services/db/dataManager';
 
 export default function Welcome() {
   const router = useRouter();
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await getStoreToken();
+      if (token?.token) {
+        router.replace('/(tabs)');
+      }
+    };
+    checkToken();
+  }, []);
 
   return (
     <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>

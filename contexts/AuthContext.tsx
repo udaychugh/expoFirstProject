@@ -63,6 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.success && response.data) {
         console.log("Login successful, user data:", response.data.user);
         setUser(response.data.user);
+        
         return { success: true };
       } else {
         return { success: false, error: response.error || 'Login failed' };

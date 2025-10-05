@@ -1,4 +1,5 @@
 import AuthService from './auth';
+import { storeUserInfo } from './db/dataManager';
 import { ApiResponse } from './model/apiResponse';
 import { API_BASE_URL } from './model/constants';
 import { MatchResult, SwipeAction } from './model/postauth/actions';
@@ -72,7 +73,11 @@ class ApiService {
 
   // User Profile APIs
   async getCurrentUserProfile(): Promise<ApiResponse<UserProfile>> {
-    return this.makeRequest('/profile');
+    const response = await this.makeRequest<UserProfile>('/profile');
+    if (response.success && response.data) {
+      storeUserInfo(response.data);
+    }
+    return response;
   }
 
   async updateUserProfile(profileData: Partial<UserProfile>): Promise<ApiResponse<UserProfile>> {
