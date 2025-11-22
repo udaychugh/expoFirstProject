@@ -1,4 +1,4 @@
-import { storeToken } from "./db/dataManager";
+import { clearAllData, storeToken } from "./db/dataManager";
 import { API_BASE_URL } from "./model/constants";
 import { LoginRequest, RegisterRequest } from "./model/preauth/preauthRequest";
 import { AuthResponse } from "./model/preauth/preauthResponse";
@@ -36,7 +36,7 @@ class AuthService {
       if (response.ok && data.success) {
         this.token = data.data.token;
         this.refreshToken = data.data.refreshToken;
-        
+
         // Store tokens securely (you might want to use secure storage)
         // await SecureStore.setItemAsync('auth_token', this.token);
         // await SecureStore.setItemAsync('refresh_token', this.refreshToken);
@@ -103,12 +103,17 @@ class AuthService {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      this.token = null;
-      this.refreshToken = null;
+      this.unsetTokens();
       // Clear stored tokens
       // await SecureStore.deleteItemAsync('auth_token');
       // await SecureStore.deleteItemAsync('refresh_token');
     }
+  }
+
+  async unsetTokens(): Promise<void> {
+    await clearAllData();
+    this.token = null;
+    this.refreshToken = null;
   }
 
   getToken(): string | null {

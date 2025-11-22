@@ -38,11 +38,12 @@ export const storeToken = async (token: string | null, refreshToken: string | nu
 export const getStoreToken = async (): Promise<{ token: string; refreshToken: string } | null> => {
     try {
         const tokenData = await AsyncStorage.getItem(DBKeys.TOKEN);
+        console.log("Retrieved token data: ", tokenData);
         if (tokenData) {
             return JSON.parse(tokenData) as { token: string; refreshToken: string };
         } else {
             return null;
-        }            
+        }
     } catch (error) {
         console.error("Error in getting token: ", error);
         return null;
@@ -51,6 +52,7 @@ export const getStoreToken = async (): Promise<{ token: string; refreshToken: st
 
 export const clearAllData = async () => {
     try {
+        console.log("Clearing all stored data");
         await AsyncStorage.clear();
     } catch (error) {
         console.error("Error in clearing all data: ", error);

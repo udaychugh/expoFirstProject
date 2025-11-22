@@ -17,13 +17,14 @@ class ApiService {
     return ApiService.instance;
   }
 
+  // Function to make api requests with token handling
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     try {
       const token = AuthService.getToken();
-      
+
       const defaultHeaders: HeadersInit = {
         'Content-Type': 'application/json',
       };
@@ -32,6 +33,7 @@ class ApiService {
         defaultHeaders.Authorization = `Bearer ${token}`;
       }
 
+      console.debug("Making API request to: ", API_BASE_URL + endpoint);
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
@@ -39,6 +41,9 @@ class ApiService {
           ...options.headers,
         },
       });
+
+      console.debug("API response status: ", response.status);
+      console.debug("API response headers: ", JSON.stringify(response.json()));
 
       // Handle token expiration
       if (response.status === 401) {
@@ -56,7 +61,8 @@ class ApiService {
           });
         } else {
           // Redirect to login
-          throw new Error('Authentication expired');
+          await AuthService.unsetTokens();
+          throw new Error('401 Authentication expired');
         }
       }
 
@@ -184,7 +190,7 @@ class ApiService {
 
   async uploadMultipleImages(imageUris: string[]): Promise<ApiResponse> {
     const formData = new FormData();
-    
+
     imageUris.forEach((uri, index) => {
       formData.append('images', {
         uri: uri,

@@ -1,25 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Alert,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Settings, CreditCard as Edit3, Camera, MapPin, Briefcase, GraduationCap, Heart, Users, MessageCircle, LogOut, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle } from 'lucide-react-native';
+import {
+  Settings,
+  CreditCard as Edit3,
+  Camera,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Heart,
+  Users,
+  MessageCircle,
+  LogOut,
+  TriangleAlert as AlertTriangle,
+  CircleCheck as CheckCircle,
+} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserInfo } from '@/services/db/dataManager';
 import { UserProfile } from '@/services/model/postauth/userProfile';
+import ApiService from '@/services/api';
 
 export default function Profile() {
   const router = useRouter();
 
-  const [user, setUser] = useState<UserProfile | null>(null)
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   const { logout, user: authUser } = useAuth();
 
   useEffect(() => {
     const fetchUser = async () => {
-      await getUserInfo().then(data => {
-        setUser(data);
-      });
-    }
+      const response = await ApiService.getCurrentUserProfile();
+      if (response.success && response.data) {
+        await getUserInfo().then((data) => {
+          setUser(data);
+        });
+      }
+    };
 
     fetchUser();
   }, []);
@@ -36,17 +62,17 @@ export default function Profile() {
     if (Platform.OS === 'web') {
       router.push('/(onboarding)/welcome');
     } else {
-      Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
+      Alert.alert('Logout', 'Are you sure you want to logout?', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: async () => {
-          await logout();
-          router.push('/(onboarding)/welcome');
-        }},
-      ]
-    );
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            router.push('/(onboarding)/welcome');
+          },
+        },
+      ]);
     }
   };
 
@@ -70,14 +96,21 @@ export default function Profile() {
             <View style={styles.verificationContent}>
               <AlertTriangle color="#F59E0B" size={24} />
               <View style={styles.verificationText}>
-                <Text style={styles.verificationTitle}>Account Not Verified</Text>
+                <Text style={styles.verificationTitle}>
+                  Account Not Verified
+                </Text>
                 <Text style={styles.verificationSubtitle}>
                   Complete verification to gain trust and get more matches
                 </Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.verificationButton} onPress={handleVerification}>
-              <Text style={styles.verificationButtonText}>Complete Verification</Text>
+            <TouchableOpacity
+              style={styles.verificationButton}
+              onPress={handleVerification}
+            >
+              <Text style={styles.verificationButtonText}>
+                Complete Verification
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -97,10 +130,13 @@ export default function Profile() {
               <Camera color="#FFFFFF" size={20} />
             </TouchableOpacity>
           </View>
-          
+
           {user?.images[1] && (
             <View style={styles.secondaryImageContainer}>
-              <Image source={{ uri: user?.images[1] }} style={styles.secondaryImage} />
+              <Image
+                source={{ uri: user?.images[1] }}
+                style={styles.secondaryImage}
+              />
             </View>
           )}
         </View>
@@ -111,21 +147,26 @@ export default function Profile() {
             <Text style={styles.name}>
               {authUser?.fullName || user?.name}, {user?.age}
             </Text>
-            <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={handleEditProfile}
+            >
               <Edit3 color="#E11D48" size={20} />
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.infoRow}>
             <MapPin color="#6B7280" size={16} />
-            <Text style={styles.infoText}>{JSON.stringify(user?.location)}</Text>
+            <Text style={styles.infoText}>
+              {JSON.stringify(user?.location)}
+            </Text>
           </View>
-          
+
           <View style={styles.infoRow}>
             <Briefcase color="#6B7280" size={16} />
             <Text style={styles.infoText}>{user?.occupation}</Text>
           </View>
-          
+
           <View style={styles.infoRow}>
             <GraduationCap color="#6B7280" size={16} />
             <Text style={styles.infoText}>{user?.education}</Text>
@@ -139,13 +180,13 @@ export default function Profile() {
             <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Likes</Text>
           </View>
-          
+
           <View style={styles.statItem}>
             <Users color="#EC4899" size={24} />
             <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Matches</Text>
           </View>
-          
+
           <View style={styles.statItem}>
             <MessageCircle color="#8B5CF6" size={24} />
             <Text style={styles.statNumber}>0</Text>
@@ -162,12 +203,12 @@ export default function Profile() {
         {/* Profile Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Details</Text>
-          
+
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Religion</Text>
             <Text style={styles.detailValue}>{user?.religion}</Text>
           </View>
-          
+
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Height</Text>
             <Text style={styles.detailValue}>{user?.height}</Text>
@@ -176,11 +217,14 @@ export default function Profile() {
 
         {/* Action Buttons */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.editProfileButton} onPress={handleEditProfile}>
+          <TouchableOpacity
+            style={styles.editProfileButton}
+            onPress={handleEditProfile}
+          >
             <Edit3 color="#FFFFFF" size={20} />
             <Text style={styles.editProfileButtonText}>Edit Profile</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <LogOut color="#EF4444" size={20} />
             <Text style={styles.logoutButtonText}>Logout</Text>

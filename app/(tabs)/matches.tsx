@@ -17,20 +17,22 @@ export default function Matches() {
   }, []);
 
   const loadMatches = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await ApiService.getMatches();
-      if (response.success && response.data) {
-        setMatches(response.data);
-      } else {
-        setError(response.error || 'Failed to load matches');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // setLoading(true);
+    // setError(null);
+    // try {
+    //   const response = await ApiService.getMatches();
+    //   if (response.success && response.data) {
+    //     setMatches(response.data);
+    //   } else {
+    //     setError(response.error || 'Failed to load matches');
+    //   }
+    // } catch (err) {
+    //   setError('Network error. Please try again.');
+    // } finally {
+    //   setLoading(false);
+    // }
+
+    setError("No matches found")
   };
 
   const newMatches = matches.filter(match => match.unread);

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Heart, X, MapPin, Briefcase, GraduationCap, Info } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import ApiService from '@/services/api';
+import { DUMMY_PROFILES } from '@/assets/profile';
 
 const { width, height } = Dimensions.get('window');
 const CARD_HEIGHT = height * 0.7;
@@ -11,33 +12,45 @@ const CARD_HEIGHT = height * 0.7;
 
 export default function Home() {
   const router = useRouter();
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const pan = useRef(new Animated.ValueXY()).current;
 
-  // Load profiles on component mount
-  React.useEffect(() => {
-    loadProfiles();
-  }, []);
+  // TODO: TO be removed once get working with API
+  const userGender: 'male' | 'female' = 'male';
+  const filteredProfiles = DUMMY_PROFILES.filter(
+    p => p.gender !== userGender
+  );
 
-  const loadProfiles = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await ApiService.getDiscoveryProfiles({ limit: 10 });
-      if (response.success && response.data) {
-        setProfiles(response.data);
-      } else {
-        setError(response.error || 'Failed to load profiles');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
+  const [profiles, setProfiles] = useState<any[]>(filteredProfiles);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Load profiles on component mount
+  // React.useEffect(() => {
+  //   loadProfiles();
+  // }, []);
+
+  // const loadProfiles = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const response = await ApiService.getDiscoveryProfiles({ limit: 10 });
+  //     if (response.success && response.data) {
+  //       setProfiles(response.data);
+  //     } else {
+  //       if (response.error?.startsWith('401')) {
+  //         router.replace('/welcome');
+  //       } else {
+  //       setError(response.error || 'Failed to load profiles');
+  //       }
+  //     }
+  //   } catch (err) {
+  //     setError('Network error. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
@@ -46,11 +59,11 @@ export default function Home() {
     }),
     onPanResponderRelease: (evt, gestureState) => {
       const { dx } = gestureState;
-      
+
       if (Math.abs(dx) > 100) {
         // Swipe threshold reached
         const direction = dx > 0 ? 'right' : 'left';
-        
+
         Animated.timing(pan, {
           toValue: { x: direction === 'right' ? width : -width, y: 0 },
           duration: 200,
@@ -74,17 +87,17 @@ export default function Home() {
 
     // Call API for swipe action
     try {
-      const action = direction === 'right' ? 'like' : 'pass';
-      const response = await ApiService.swipeProfile({
-        profileId: currentProfile.id,
-        action,
-      });
+      // const action = direction === 'right' ? 'like' : 'pass';
+      // const response = await ApiService.swipeProfile({
+      //   profileId: currentProfile.id,
+      //   action,
+      // });
 
-      if (response.success && response.data?.isMatch && direction === 'right') {
-        // Show match notification or navigate to match screen
-        console.log('It\'s a match!', response.data);
-        // You can show a match modal here
-      }
+      // if (response.success && response.data?.isMatch && direction === 'right') {
+      //   // Show match notification or navigate to match screen
+      //   console.log('It\'s a match!', response.data);
+      //   // You can show a match modal here
+      // }
     } catch (error) {
       console.error('Swipe error:', error);
     }
@@ -94,12 +107,12 @@ export default function Home() {
     } else {
       console.log('Passed profile');
     }
-    
+
     // Move to next profile
     const nextIndex = currentIndex + 1;
     if (nextIndex >= profiles.length) {
       // Load more profiles or show end message
-      loadProfiles();
+      //loadProfiles();
       setCurrentIndex(0);
     } else {
       setCurrentIndex(nextIndex);
@@ -144,7 +157,7 @@ export default function Home() {
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadProfiles}>
+          <TouchableOpacity style={styles.retryButton} onPress={() => {}}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
@@ -157,7 +170,7 @@ export default function Home() {
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No more profiles to show</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadProfiles}>
+          <TouchableOpacity style={styles.retryButton} onPress={() => {}}>
             <Text style={styles.retryButtonText}>Load More</Text>
           </TouchableOpacity>
         </View>
