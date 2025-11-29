@@ -1,6 +1,7 @@
 export const Colors = {
     // Primary brand color
     primary: '#E11D48',
+    primaryPressed: '#BE123C',
 
     // Accent colors
     pink: '#EC4899',

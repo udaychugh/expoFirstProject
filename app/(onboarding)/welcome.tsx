@@ -1,60 +1,43 @@
-import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Heart, Users, MessageCircle, Shield } from 'lucide-react-native';
+import { Users, MessageCircle, Shield } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
 import SecondaryButton from '@/components/SecondaryButton';
-import { getStoreToken } from '@/services/db/dataManager';
+import { GlobalStyles } from '@/styles/globalStyle';
+import Brand from '@/components/Brand';
+import Info from './components/info';
 
 export default function Welcome() {
   const router = useRouter();
 
-  useEffect(() => {
-    const checkToken = async () => {
-      const token = await getStoreToken();
-      if (token?.token) {
-        router.replace('/(tabs)');
-      }
-    };
-    checkToken();
-  }, []);
-
   return (
-    <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
-      <View style={styles.header}>
-        <Heart color={Colors.primary} size={48} />
-        <Text style={styles.title}>LifeMatch</Text>
-        <Text style={styles.subtitle}>Find your perfect life partner</Text>
-      </View>
+    <LinearGradient
+      colors={Colors.backgroundGradient}
+      style={GlobalStyles.container}
+    >
+      <Brand />
 
       <View style={styles.features}>
-        <View style={styles.feature}>
-          <Users color={Colors.pink} size={32} />
-          <Text style={styles.featureTitle}>Verified Profiles</Text>
-          <Text style={styles.featureText}>
-            Connect with genuine people looking for marriage
-          </Text>
-        </View>
+        <Info
+          title="Verified Profiles"
+          text="Connect with genuine people looking for marriage"
+          icon={<Users color={Colors.pink} size={32} />}
+        />
 
-        <View style={styles.feature}>
-          <MessageCircle color={Colors.purple} size={32} />
-          <Text style={styles.featureTitle}>Secure Messaging</Text>
-          <Text style={styles.featureText}>Chat safely with your matches</Text>
-        </View>
+        <Info
+          title="Secure Messaging"
+          text="Chat safely with your matches"
+          icon={<MessageCircle color={Colors.purple} size={32} />}
+        />
 
-        <View style={styles.feature}>
-          <Shield color={Colors.green} size={32} />
-          <Text style={styles.featureTitle}>Privacy First</Text>
-          <Text style={styles.featureText}>
-            Your data is secure and private
-          </Text>
-        </View>
+        <Info
+          title="Privacy First"
+          text="Your data is secure and private"
+          icon={<Shield color={Colors.green} size={32} />}
+        />
       </View>
 
       <View style={styles.buttons}>
@@ -63,61 +46,29 @@ export default function Welcome() {
           onPress={() => router.push('/(onboarding)/register')}
         />
 
-        <SecondaryButton
-          title="I already have an account"
-          onPress={() => router.push('/(onboarding)/login')}
-        />
+        <View style={styles.secondaryButtonContainer}>
+          <SecondaryButton
+            title="I already have an account"
+            onPress={() => router.push('/(onboarding)/login')}
+          />
+        </View>
       </View>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'space-between',
-  },
-  header: {
-    alignItems: 'center',
-    marginTop: 80,
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: '#E11D48',
-    marginTop: 16,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#6B7280',
-    marginTop: 8,
-    textAlign: 'center',
-  },
   features: {
     flex: 1,
     justifyContent: 'center',
     gap: 32,
   },
-  feature: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  featureTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginTop: 12,
-  },
-  featureText: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 24,
-  },
   buttons: {
     gap: 16,
     marginBottom: 32,
+  },
+  secondaryButtonContainer: {
+    alignItems: 'center',
+    width: '100%'
   },
 });

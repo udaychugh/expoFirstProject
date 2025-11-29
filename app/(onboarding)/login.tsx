@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Heart, Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
@@ -17,6 +10,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import OutlineButton from '@/components/OutlineButton';
 import ErrorBox from '@/components/ErrorBox';
 import InputBox from '@/components/InputBox';
+import SecondaryButton from '@/components/SecondaryButton';
 
 export default function Login() {
   const router = useRouter();
@@ -25,7 +19,6 @@ export default function Login() {
     email: '',
     password: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   const handleInputChange = (field: string, value: string) => {
@@ -62,7 +55,6 @@ export default function Login() {
   return (
     <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        
         <View style={styles.header}>
           <Heart color={Colors.primary} size={48} />
           <Text style={styles.title}>Welcome Back</Text>
@@ -90,11 +82,12 @@ export default function Login() {
             isPassword={true}
           />
 
-          <TouchableOpacity
-            onPress={() => router.push('/(onboarding)/forgot-password')}
-          >
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </TouchableOpacity>
+          <View style={{ alignItems: 'flex-end' }}>
+            <SecondaryButton
+              title="Forget Password?"
+              onPress={() => router.push('/(onboarding)/forgot-password')}
+            />
+          </View>
 
           {error ? <ErrorBox error={error} /> : null}
 
@@ -115,7 +108,6 @@ export default function Login() {
             onPress={() => router.push('/(onboarding)/register')}
           />
         </View>
-        
       </SafeAreaView>
     </LinearGradient>
   );
@@ -180,13 +172,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#1F2937',
-  },
-  forgotPassword: {
-    fontSize: 14,
-    color: Colors.primary,
-    textAlign: 'right',
-    marginBottom: 32,
-    fontWeight: '500',
   },
   divider: {
     flexDirection: 'row',

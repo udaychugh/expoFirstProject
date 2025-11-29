@@ -1,6 +1,6 @@
 import { Colors } from '@/assets/colors/colors';
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, Pressable } from 'react-native';
 
 export default function PrimaryButton({
   title,
@@ -12,13 +12,17 @@ export default function PrimaryButton({
   onPress: () => void;
 }) {
   return (
-    <TouchableOpacity
-      style={[styles.primaryButton, !enabled && styles.buttonDisabled]}
+    <Pressable
+      style={({ pressed }) => [
+        styles.primaryButton,
+        !enabled && styles.buttonDisabled,
+        pressed && styles.buttonPressed,
+      ]}
       onPress={onPress}
       disabled={!enabled}
     >
       <Text style={styles.primaryButtonText}>{title}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -44,5 +48,9 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.7,
+  },
+  buttonPressed: {
+    backgroundColor: Colors.primaryPressed,
+    transform: [{ scale: 0.99 }],
   },
 });
