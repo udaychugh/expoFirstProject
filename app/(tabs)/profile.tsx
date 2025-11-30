@@ -27,7 +27,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserInfo } from '@/services/db/dataManager';
-import { UserProfile } from '@/services/model/postauth/userProfile';
+import { UserProfile } from '@/contexts/model/userProfile';
 import ApiService from '@/services/api';
 
 export default function Profile() {

@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserProfile } from '../model/postauth/userProfile';
 import { DBKeys } from './model/keys';
+import { User } from '@/contexts/model/user';
 
-export const storeUserInfo = async (info: UserProfile) => {
+export const storeUserInfo = async (info: User) => {
     try {
         await AsyncStorage.setItem(DBKeys.USER, JSON.stringify(info));
     } catch (error) {
@@ -10,11 +10,11 @@ export const storeUserInfo = async (info: UserProfile) => {
     }
 }
 
-export const getUserInfo = async (): Promise<UserProfile | null> =>  {
+export const getUserInfo = async (): Promise<User | null> =>  {
     try {
         const userInfo = await AsyncStorage.getItem(DBKeys.USER);
         if (userInfo) {
-            return JSON.parse(userInfo) as UserProfile;
+            return JSON.parse(userInfo) as User;
         } else {
             return null;
         }

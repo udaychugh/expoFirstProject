@@ -1,4 +1,4 @@
-import { UserProfile } from "./userProfile";
+import { UserProfile } from '../../../contexts/model/userProfile';
 
 export interface SwipeAction {
   profileId: string;

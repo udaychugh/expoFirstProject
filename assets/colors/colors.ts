@@ -9,10 +9,12 @@ export const Colors = {
     green: '#10B981',
     placeholderGray: '#9CA3AF',
     labelGray: '#374151',
+    success: '#019320ff',
 
     // Neutral colors
     white: '#FFFFFF',
     black: '#000000',
+    pressedWhite: '#F3F3F3',
 
     // Gradient for backgrounds
     backgroundGradient: ['#FDF2F8', '#FCE7F3', '#FAE8FF'],

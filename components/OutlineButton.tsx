@@ -1,6 +1,6 @@
 import { Colors } from '@/assets/colors/colors';
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, Pressable } from 'react-native';
 
 export default function OutlineButton({
   title,
@@ -12,13 +12,17 @@ export default function OutlineButton({
   onPress: () => void;
 }) {
   return (
-    <TouchableOpacity
-      style={[styles.outlineButton, !enabled && styles.buttonDisabled]}
+    <Pressable
+      style={({ pressed }) => [
+        styles.outlineButton,
+        !enabled && styles.buttonDisabled,
+        pressed && styles.buttonPressed,
+      ]}
       onPress={onPress}
       disabled={!enabled}
     >
       <Text style={styles.outlineButtonText}>{title}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -38,5 +42,9 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.7,
+  },
+  buttonPressed: {
+    backgroundColor: Colors.pressedWhite,
+    transform: [{ scale: 0.99 }],
   },
 });

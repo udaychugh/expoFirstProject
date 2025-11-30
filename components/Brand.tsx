@@ -13,9 +13,13 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function Brand({
+  title = "LifeMatch",
+  message = "Find your perfect life partner",
   isAnimating = false,
   isLoading = false
 }: {
+  title?: string;
+  message?: string;
   isAnimating?: boolean;
   isLoading?: boolean;
 }) {
@@ -53,9 +57,9 @@ export default function Brand({
           fill={isAnimating ? Colors.primary : 'transparent'}
         />
       </Animated.View>
-      <Text style={styles.title}>LifeMatch</Text>
+      <Text style={styles.title}>{title}</Text>
       {!isLoading && (
-        <Text style={styles.subtitle}>Find your perfect life partner</Text>
+        <Text style={styles.subtitle}>{message}</Text>
       )}
     </View>
   );

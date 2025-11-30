@@ -3,7 +3,7 @@ import { storeUserInfo } from './db/dataManager';
 import { ApiResponse } from './model/apiResponse';
 import { API_BASE_URL } from './model/constants';
 import { MatchResult, SwipeAction } from './model/postauth/actions';
-import { UserProfile } from './model/postauth/userProfile';
+import { UserProfile } from '../contexts/model/userProfile';
 
 class ApiService {
   private static instance: ApiService;
@@ -33,7 +33,7 @@ class ApiService {
         defaultHeaders.Authorization = `Bearer ${token}`;
       }
 
-      console.debug("Making API request to: ", API_BASE_URL + endpoint);
+      console.debug('Making API request to: ', API_BASE_URL + endpoint);
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers: {
@@ -42,8 +42,8 @@ class ApiService {
         },
       });
 
-      console.debug("API response status: ", response.status);
-      console.debug("API response headers: ", JSON.stringify(response.json()));
+      console.debug('API response status: ', response.status);
+      console.debug('API response headers: ', JSON.stringify(response.json()));
 
       // Handle token expiration
       if (response.status === 401) {
@@ -77,6 +77,27 @@ class ApiService {
     }
   }
 
+  async getMe(): Promise<ApiResponse<UserProfile>> {
+    try {
+      const response = await this.makeRequest<UserProfile>('/auth/me');
+      if (response.success && response.data) {
+        return response;
+      } else {
+        console.error('Get me failed:', response.error);
+        return {
+          success: false,
+          error: response.error || 'Get me failed',
+        };
+      }
+    } catch (error) {
+      console.error('Get me error:', error);
+      return {
+        success: false,
+        error: 'Network error. Please check your connection.',
+      };
+    }
+  }
+
   // User Profile APIs
   async getCurrentUserProfile(): Promise<ApiResponse<UserProfile>> {
     const response = await this.makeRequest<UserProfile>('/profile');
@@ -86,7 +107,9 @@ class ApiService {
     return response;
   }
 
-  async updateUserProfile(profileData: Partial<UserProfile>): Promise<ApiResponse<UserProfile>> {
+  async updateUserProfile(
+    profileData: Partial<UserProfile>
+  ): Promise<ApiResponse<UserProfile>> {
     return this.makeRequest('/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
@@ -258,7 +281,10 @@ class ApiService {
     const queryParams = filters
       ? `?${new URLSearchParams(
           Object.fromEntries(
-            Object.entries(filters).map(([key, value]) => [key, value !== undefined ? String(value) : ''])
+            Object.entries(filters).map(([key, value]) => [
+              key,
+              value !== undefined ? String(value) : '',
+            ])
           )
         ).toString()}`
       : '';
@@ -307,7 +333,10 @@ class ApiService {
   }
 
   // Search APIs
-  async searchProfiles(query: string, filters?: any): Promise<ApiResponse<UserProfile[]>> {
+  async searchProfiles(
+    query: string,
+    filters?: any
+  ): Promise<ApiResponse<UserProfile[]>> {
     const params = new URLSearchParams({ q: query, ...filters });
     return this.makeRequest(`/search/profiles?${params.toString()}`);
   }
@@ -354,7 +383,10 @@ class ApiService {
     return this.makeRequest(`/chat/conversations/${conversationId}/messages`);
   }
 
-  async sendMessage(conversationId: string, message: string): Promise<ApiResponse> {
+  async sendMessage(
+    conversationId: string,
+    message: string
+  ): Promise<ApiResponse> {
     return this.makeRequest(`/chat/conversations/${conversationId}/messages`, {
       method: 'POST',
       body: JSON.stringify({ message }),
@@ -382,7 +414,10 @@ class ApiService {
     });
   }
 
-  async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse> {
+  async changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<ApiResponse> {
     return this.makeRequest('/account/change-password', {
       method: 'PUT',
       body: JSON.stringify({ currentPassword, newPassword }),

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Heart, Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
+import { Mail, Lock } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { Colors } from '@/assets/colors/colors';
@@ -11,6 +11,8 @@ import OutlineButton from '@/components/OutlineButton';
 import ErrorBox from '@/components/ErrorBox';
 import InputBox from '@/components/InputBox';
 import SecondaryButton from '@/components/SecondaryButton';
+import { ShowAlert } from '@/components/Alert';
+import Brand from '@/components/Brand';
 
 export default function Login() {
   const router = useRouter();
@@ -28,14 +30,22 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!formData.email || !formData.password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Please fill in all fields',
+      });
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Please enter a valid email address',
+      });
       return;
     }
 
@@ -45,23 +55,20 @@ export default function Login() {
       router.push('/(tabs)');
     } else {
       setError(result.error || 'Login failed');
-      Alert.alert(
-        'Login Failed',
-        result.error || 'Please check your credentials and try again'
-      );
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: result.error || 'Please check your credentials and try again'
+      })
     }
   };
 
   return (
     <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <Heart color={Colors.primary} size={48} />
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>
-            Sign in to find your perfect match
-          </Text>
-        </View>
+        <Brand 
+          title={"Welcome Back"} 
+          message={"Sign in to find your perfect match"} />
 
         <View style={styles.formContainer}>
           <InputBox

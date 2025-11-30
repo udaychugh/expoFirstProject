@@ -1,7 +1,8 @@
-import { clearAllData, storeToken } from "./db/dataManager";
+import { clearAllData, storeToken, storeUserInfo } from "./db/dataManager";
 import { API_BASE_URL } from "./model/constants";
 import { LoginRequest, RegisterRequest } from "./model/preauth/preauthRequest";
 import { AuthResponse } from "./model/preauth/preauthResponse";
+import { UserProfile, UserResponse } from "../contexts/model/userProfile";
 
 class AuthService {
   private static instance: AuthService;
@@ -37,11 +38,8 @@ class AuthService {
         this.token = data.data.token;
         this.refreshToken = data.data.refreshToken;
 
-        // Store tokens securely (you might want to use secure storage)
-        // await SecureStore.setItemAsync('auth_token', this.token);
-        // await SecureStore.setItemAsync('refresh_token', this.refreshToken);
-
         storeToken(this.token, this.refreshToken)
+        storeUserInfo(data.data.user)
 
         return data;
       } else {
@@ -140,6 +138,8 @@ class AuthService {
 
       if (response.ok && data.success) {
         this.token = data.data.token;
+        this.refreshToken = data.data.refreshToken;
+        storeToken(this.token, this.refreshToken)
         return true;
       }
       return false;

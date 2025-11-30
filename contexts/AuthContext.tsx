@@ -1,33 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import AuthService from '@/services/auth';
-import { clearAllData } from '@/services/db/dataManager';
-
-interface User {
-  id: string;
-  email: string;
-  fullName: string;
-  phone: string;
-  isVerified: boolean;
-  profileComplete: boolean;
-}
-
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (userData: {
-    fullName: string;
-    email: string;
-    phone: string;
-    password: string;
-  }) => Promise<{ success: boolean; error?: string }>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
-  verifyResetOTP: (email: string, otp: string) => Promise<{ success: boolean; error?: string }>;
-  resetPassword: (email: string, otp: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => void;
-}
+import {
+  clearAllData,
+  getStoreToken,
+  getUserInfo,
+} from '@/services/db/dataManager';
+import { User } from '@/contexts/model/user';
+import { AuthContextType } from '@/contexts/model/authContextType';
+import { UserProfile } from '@/contexts/model/userProfile';
+import ApiService from '@/services/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -37,20 +18,29 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check if user is already authenticated on app start
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = async (): Promise<string> => {
     try {
-      // In a real app, you would check stored tokens and validate them
-      // For now, we'll just set loading to false
-      setIsLoading(false);
+      const tokenData = await getStoreToken();
+      const userData = await getUserInfo();
+
+      if (!tokenData?.token || !userData) {
+        return '/(onboarding)/welcome';
+      } else {
+        console.log('User authenticated, waiting for next steps');
+        const response = await ApiService.getMe();
+        if (response.success && response.data) {
+          setProfile(response.data);
+          return '/(tabs)';
+        }
+        return '/(onboarding)/welcome';
+      }
     } catch (error) {
-      console.error('Auth check error:', error);
+      console.error('Error checking auth:', error);
+      return '/(onboarding)/welcome';
+    } finally {
       setIsLoading(false);
     }
   };
@@ -59,11 +49,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       const response = await AuthService.login({ email, password });
-      
+
       if (response.success && response.data) {
-        console.log("Login successful, user data:", response.data.user);
+        console.log('Login successful, user data:', response.data.user);
         setUser(response.data.user);
-        
+
         return { success: true };
       } else {
         return { success: false, error: response.error || 'Login failed' };
@@ -84,11 +74,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       const response = await AuthService.register(userData);
-      
+
       if (response.success) {
         return { success: true };
       } else {
-        return { success: false, error: response.error || 'Registration failed' };
+        return {
+          success: false,
+          error: response.error || 'Registration failed',
+        };
       }
     } catch (error) {
       return { success: false, error: 'An unexpected error occurred' };
@@ -140,7 +133,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const resetPassword = async (email: string, otp: string, newPassword: string) => {
+  const resetPassword = async (
+    email: string,
+    otp: string,
+    newPassword: string
+  ) => {
     setIsLoading(true);
     try {
       const response = await AuthService.resetPassword(email, otp, newPassword);
@@ -154,6 +151,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
+    profile,
     isLoading,
     isAuthenticated: !!user,
     login,
@@ -163,13 +161,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     resetPassword,
     logout,
     updateUser,
+    checkAuthStatus,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

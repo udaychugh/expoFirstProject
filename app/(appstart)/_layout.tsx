@@ -5,33 +5,22 @@ import { GlobalStyles } from '@/styles/globalStyle';
 import Brand from '@/components/Brand';
 import { useRouter } from 'expo-router';
 import { getStoreToken, getUserInfo } from '@/services/db/dataManager';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AppStartLayout() {
   const router = useRouter();
+  const auth = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const tokenData = await getStoreToken();
-        const userData = await getUserInfo();
-
-        if (!tokenData?.token || !userData) {
-          // No token or user data found, navigate to welcome screen
-          router.replace('/(onboarding)/welcome');
-        } else {
-          // User data and token exist
-          // TODO: Decide what to do here (e.g., navigate to tabs or verify token)
-          console.log('User authenticated, waiting for next steps');
-        }
-      } catch (error) {
-        console.error('Error checking auth:', error);
+    const init = async () => {
+      const route = await auth.checkAuthStatus();
+      if (route) {
+        router.replace(route as any);
+      } else {
         router.replace('/(onboarding)/welcome');
       }
     };
-
-    // Add a small delay to let the animation play a bit or just run immediately
-    // Running immediately for now as per instructions
-    checkAuth();
+    init();
   }, []);
 
   return (
