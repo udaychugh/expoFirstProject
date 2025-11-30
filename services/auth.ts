@@ -1,8 +1,7 @@
-import { clearAllData, storeToken, storeUserInfo } from "./db/dataManager";
-import { API_BASE_URL } from "./model/constants";
-import { LoginRequest, RegisterRequest } from "./model/preauth/preauthRequest";
-import { AuthResponse } from "./model/preauth/preauthResponse";
-import { UserProfile, UserResponse } from "../contexts/model/userProfile";
+import { clearAllData, storeToken, storeUserInfo } from './db/dataManager';
+import { API_BASE_URL } from './model/constants';
+import { LoginRequest, RegisterRequest } from './model/preauth/preauthRequest';
+import { AuthResponse } from './model/preauth/preauthResponse';
 
 class AuthService {
   private static instance: AuthService;
@@ -28,25 +27,27 @@ class AuthService {
         body: JSON.stringify(credentials),
       });
 
+      console.log("response with actual calling = ", response);
       const data = await response.json();
 
-      console.debug("login request at = ", API_BASE_URL + "/auth/login");
-      console.debug("login credentials = ",  JSON.stringify(credentials));
-      console.debug("login response = ", data);
+      console.debug('login request at = ', API_BASE_URL + '/auth/login');
+      console.debug('login credentials = ', JSON.stringify(credentials));
+      console.debug('login response = ', data);
 
       if (response.ok && data.success) {
         this.token = data.data.token;
         this.refreshToken = data.data.refreshToken;
 
-        storeToken(this.token, this.refreshToken)
-        storeUserInfo(data.data.user)
+        storeToken(this.token, this.refreshToken);
+        storeUserInfo(data.data.user);
 
         return data;
       } else {
-        console.error('Login failed:', data.message);
+        const errorMessage = data.error || data.message || 'Login failed';
+        console.error('Login failed:', errorMessage);
         return {
           success: false,
-          error: data.message || 'Login failed',
+          error: errorMessage,
         };
       }
     } catch (error) {
@@ -75,7 +76,7 @@ class AuthService {
       } else {
         return {
           success: false,
-          error: data.message || 'Registration failed',
+          error: data.error || data.message || 'Registration failed',
         };
       }
     } catch (error) {
@@ -93,7 +94,7 @@ class AuthService {
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${this.token}`,
+            Authorization: `Bearer ${this.token}`,
             'Content-Type': 'application/json',
           },
         });
@@ -139,7 +140,7 @@ class AuthService {
       if (response.ok && data.success) {
         this.token = data.data.token;
         this.refreshToken = data.data.refreshToken;
-        storeToken(this.token, this.refreshToken)
+        storeToken(this.token, this.refreshToken);
         return true;
       }
       return false;
@@ -157,7 +158,11 @@ class AuthService {
     return verifyResetOTP(email, otp);
   }
 
-  async resetPassword(email: string, otp: string, newPassword: string): Promise<AuthResponse> {
+  async resetPassword(
+    email: string,
+    otp: string,
+    newPassword: string
+  ): Promise<AuthResponse> {
     return resetPassword(email, otp, newPassword);
   }
 }
@@ -193,7 +198,10 @@ const forgotPassword = async (email: string): Promise<AuthResponse> => {
 };
 
 // Verify OTP for password reset
-const verifyResetOTP = async (email: string, otp: string): Promise<AuthResponse> => {
+const verifyResetOTP = async (
+  email: string,
+  otp: string
+): Promise<AuthResponse> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/verify-reset-otp`, {
       method: 'POST',
@@ -223,7 +231,11 @@ const verifyResetOTP = async (email: string, otp: string): Promise<AuthResponse>
 };
 
 // Reset password with new password
-const resetPassword = async (email: string, otp: string, newPassword: string): Promise<AuthResponse> => {
+const resetPassword = async (
+  email: string,
+  otp: string,
+  newPassword: string
+): Promise<AuthResponse> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
       method: 'POST',

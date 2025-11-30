@@ -52,7 +52,7 @@ export default function Login() {
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      router.push('/(tabs)');
+      router.replace('../(appstart)');
     } else {
       setError(result.error || 'Login failed');
       ShowAlert({

@@ -19,10 +19,11 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const checkAuthStatus = async (): Promise<string> => {
     try {
+      setIsLoading(true);
       const tokenData = await getStoreToken();
       const userData = await getUserInfo();
 
@@ -32,7 +33,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('User authenticated, waiting for next steps');
         const response = await ApiService.getMe();
         if (response.success && response.data) {
-          setProfile(response.data);
+          setProfile(response.data.user);
           return '/(tabs)';
         }
         return '/(onboarding)/welcome';
@@ -49,14 +50,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       const response = await AuthService.login({ email, password });
-
+      console.debug("response = %s", JSON.stringify(response))
       if (response.success && response.data) {
         console.log('Login successful, user data:', response.data.user);
         setUser(response.data.user);
 
         return { success: true };
       } else {
-        return { success: false, error: response.error || 'Login failed' };
+        return { success: false, error: response.error || response.message || 'Login failed' };
       }
     } catch (error) {
       return { success: false, error: 'An unexpected error occurred' };

@@ -77,9 +77,11 @@ class ApiService {
     }
   }
 
-  async getMe(): Promise<ApiResponse<UserProfile>> {
+  async getMe(): Promise<ApiResponse<{ user: UserProfile }>> {
     try {
-      const response = await this.makeRequest<UserProfile>('/auth/me');
+      const response = await this.makeRequest<{ user: UserProfile }>(
+        '/auth/me'
+      );
       if (response.success && response.data) {
         return response;
       } else {
