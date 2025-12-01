@@ -29,6 +29,7 @@ class ApiService {
         'Content-Type': 'application/json',
       };
 
+      console.log("token = ", token);
       if (token) {
         defaultHeaders.Authorization = `Bearer ${token}`;
       }
@@ -43,7 +44,7 @@ class ApiService {
       });
 
       console.debug('API response status: ', response.status);
-      console.debug('API response headers: ', JSON.stringify(response.json()));
+      console.debug('API response headers: ', JSON.stringify(response));
 
       // Handle token expiration
       if (response.status === 401) {

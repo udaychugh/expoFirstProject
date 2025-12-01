@@ -31,6 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return '/(onboarding)/welcome';
       } else {
         console.log('User authenticated, waiting for next steps');
+        AuthService.setToken(tokenData.token, tokenData.refreshToken);
         const response = await ApiService.getMe();
         if (response.success && response.data) {
           setProfile(response.data.user);

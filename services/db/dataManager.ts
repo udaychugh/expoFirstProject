@@ -30,6 +30,7 @@ export const storeToken = async (token: string | null, refreshToken: string | nu
             token: token ?? "",
             refreshToken: refreshToken ?? ""
         }));
+        console.log("Token stored = ", token);
     } catch (error) {
         console.error("Error in storing token: ", error);
     }

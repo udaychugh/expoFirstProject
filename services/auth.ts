@@ -115,6 +115,11 @@ class AuthService {
     this.refreshToken = null;
   }
 
+  setToken(token: string, refrehsToken: string) {
+    this.token = token;
+    this.refreshToken = refrehsToken;
+  }
+
   getToken(): string | null {
     return this.token;
   }
