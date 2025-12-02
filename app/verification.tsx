@@ -109,46 +109,12 @@ export default function Verification() {
           </TouchableOpacity>
         </View>
 
-        {/* Selfie Upload */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>2. Take Selfie</Text>
-          <Text style={styles.sectionSubtitle}>
-            Take a clear selfie holding your ID card next to your face for verification
-          </Text>
-          
-          <TouchableOpacity style={styles.uploadCard} onPress={takeSelfie}>
-            {verificationData.selfie ? (
-              <View style={styles.uploadedContainer}>
-                <Image source={{ uri: verificationData.selfie }} style={styles.uploadedImage} />
-                <View style={styles.uploadedOverlay}>
-                  <CheckCircle color="#10B981" size={32} />
-                  <Text style={styles.uploadedText}>Selfie Captured</Text>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.uploadPlaceholder}>
-                <Camera color="#9CA3AF" size={32} />
-                <Text style={styles.uploadText}>Tap to take selfie</Text>
-                <Text style={styles.uploadSubtext}>Hold ID card next to your face</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-
         {/* Guidelines */}
         <View style={styles.guidelines}>
           <Text style={styles.guidelinesTitle}>Verification Guidelines</Text>
           <View style={styles.guideline}>
             <Text style={styles.bulletPoint}>•</Text>
             <Text style={styles.guidelineText}>Ensure your ID card is clearly visible and readable</Text>
-          </View>
-          <View style={styles.guideline}>
-            <Text style={styles.bulletPoint}>•</Text>
-            <Text style={styles.guidelineText}>Take selfie in good lighting conditions</Text>
-          </View>
-          <View style={styles.guideline}>
-            <Text style={styles.bulletPoint}>•</Text>
-            <Text style={styles.guidelineText}>Your face should be clearly visible in the selfie</Text>
           </View>
           <View style={styles.guideline}>
             <Text style={styles.bulletPoint}>•</Text>

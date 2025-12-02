@@ -26,15 +26,14 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { getUserInfo } from '@/services/db/dataManager';
-import { UserProfile } from '@/contexts/model/userProfile';
-import ApiService from '@/services/api';
-import { User } from '@/contexts/model/user';
+import AppImage from '@/components/AppImage';
+import { Colors } from '@/assets/colors/colors';
 
 export default function Profile() {
   const router = useRouter();
 
   const { logout, user, profile } = useAuth();
+  const stats = 0;
 
   const handleEditProfile = () => {
     router.push('/edit-profile');
@@ -112,6 +111,7 @@ export default function Profile() {
         <View style={styles.imagesContainer}>
           <View style={styles.mainImageContainer}>
             {/* <Image source={{ uri: user?.images[0] }} style={styles.mainImage} /> */}
+            <AppImage src={profile?.images[0].url} style={styles.mainImage} />
             <TouchableOpacity style={styles.cameraButton}>
               <Camera color="#FFFFFF" size={20} />
             </TouchableOpacity>
@@ -119,10 +119,7 @@ export default function Profile() {
 
           {profile?.images[1] && (
             <View style={styles.secondaryImageContainer}>
-              {/* <Image
-                source={{ uri: user?.images[1] }}
-                style={styles.secondaryImage}
-              /> */}
+              <AppImage src={profile?.images[1].url} style={styles.secondaryImage} />
             </View>
           )}
         </View>
@@ -144,7 +141,7 @@ export default function Profile() {
           <View style={styles.infoRow}>
             <MapPin color="#6B7280" size={16} />
             <Text style={styles.infoText}>
-              {JSON.stringify(profile?.location)}
+              {profile?.location?.city}, {profile?.location?.state}, {profile?.location?.country}
             </Text>
           </View>
 
@@ -161,23 +158,29 @@ export default function Profile() {
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Heart color="#E11D48" size={24} />
+          {stats > 0 && (
+            <View style={styles.statItem}>
+            <Heart color={Colors.primary} size={24} />
             <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Likes</Text>
           </View>
+          )}
 
-          <View style={styles.statItem}>
-            <Users color="#EC4899" size={24} />
+          {stats > 0 && (
+            <View style={styles.statItem}>
+            <Users color={Colors.pink} size={24} />
             <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Matches</Text>
           </View>
+          )}
 
-          <View style={styles.statItem}>
-            <MessageCircle color="#8B5CF6" size={24} />
+          {stats > 0 && (
+            <View style={styles.statItem}>
+            <MessageCircle color={Colors.purple} size={24} />
             <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Messages</Text>
           </View>
+          )}
         </View>
 
         {/* About Me */}
@@ -377,7 +380,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {

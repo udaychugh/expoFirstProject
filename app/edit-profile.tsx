@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,26 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { ArrowLeft, Save, ChevronDown, ChevronUp, Camera, Plus, X } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Save,
+  ChevronDown,
+  ChevronUp,
+  Camera,
+  Plus,
+  X,
+} from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import ApiService from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
+import ProfileInput from './profile-details/component/ProfileInput';
+import RenderSection from './profile-details/component/renderSection';
 
 interface ProfileData {
   name: string;
-  location: string;
+  city: string;
+  state: string;
+  country: string;
   occupation: string;
   gender: string;
   phoneNumber: string;
@@ -47,11 +60,11 @@ interface ProfileData {
   images: string[];
 }
 
-const MultiSelectField = ({ 
-  label, 
-  options, 
-  selectedValues, 
-  onSelectionChange 
+const MultiSelectField = ({
+  label,
+  options,
+  selectedValues,
+  onSelectionChange,
 }: {
   label: string;
   options: string[];
@@ -62,7 +75,7 @@ const MultiSelectField = ({
 
   const toggleOption = (option: string) => {
     const newSelection = selectedValues.includes(option)
-      ? selectedValues.filter(item => item !== option)
+      ? selectedValues.filter((item) => item !== option)
       : [...selectedValues, option];
     onSelectionChange(newSelection);
   };
@@ -75,8 +88,8 @@ const MultiSelectField = ({
         onPress={() => setIsExpanded(!isExpanded)}
       >
         <Text style={styles.multiSelectText}>
-          {selectedValues.length > 0 
-            ? `${selectedValues.length} selected` 
+          {selectedValues.length > 0
+            ? `${selectedValues.length} selected`
             : 'Select options'}
         </Text>
         {isExpanded ? (
@@ -85,7 +98,7 @@ const MultiSelectField = ({
           <ChevronDown size={20} color="#6B7280" />
         )}
       </TouchableOpacity>
-      
+
       {isExpanded && (
         <View style={styles.multiSelectOptions}>
           {options.map((option) => (
@@ -94,10 +107,12 @@ const MultiSelectField = ({
               style={styles.optionRow}
               onPress={() => toggleOption(option)}
             >
-              <View style={[
-                styles.checkbox,
-                selectedValues.includes(option) && styles.checkboxSelected
-              ]}>
+              <View
+                style={[
+                  styles.checkbox,
+                  selectedValues.includes(option) && styles.checkboxSelected,
+                ]}
+              >
                 {selectedValues.includes(option) && (
                   <Text style={styles.checkmark}>✓</Text>
                 )}
@@ -111,11 +126,11 @@ const MultiSelectField = ({
   );
 };
 
-const SelectField = ({ 
-  label, 
-  options, 
-  selectedValue, 
-  onSelectionChange 
+const SelectField = ({
+  label,
+  options,
+  selectedValue,
+  onSelectionChange,
 }: {
   label: string;
   options: string[];
@@ -140,7 +155,7 @@ const SelectField = ({
           <ChevronDown size={20} color="#6B7280" />
         )}
       </TouchableOpacity>
-      
+
       {isExpanded && (
         <View style={styles.selectOptions}>
           {options.map((option) => (
@@ -148,17 +163,19 @@ const SelectField = ({
               key={option}
               style={[
                 styles.selectOption,
-                selectedValue === option && styles.selectedOption
+                selectedValue === option && styles.selectedOption,
               ]}
               onPress={() => {
                 onSelectionChange(option);
                 setIsExpanded(false);
               }}
             >
-              <Text style={[
-                styles.selectOptionText,
-                selectedValue === option && styles.selectedOptionText
-              ]}>
+              <Text
+                style={[
+                  styles.selectOptionText,
+                  selectedValue === option && styles.selectedOptionText,
+                ]}
+              >
                 {option}
               </Text>
             </TouchableOpacity>
@@ -170,11 +187,15 @@ const SelectField = ({
 };
 
 export default function EditProfile() {
+  const { user, profile } = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({
     name: '',
-    location: '',
+    city: '',
+    state: '',
+    country: '',
     occupation: '',
     gender: '',
     phoneNumber: '',
@@ -203,84 +224,55 @@ export default function EditProfile() {
     images: [],
   });
 
-  const [expandedSections, setExpandedSections] = useState({
-    images: true,
-    basic: true,
-    physical: false,
-    lifestyle: false,
-    interests: false,
-    favorites: false,
-    family: false,
-  });
-
-  // Load current user profile on mount
-  useEffect(() => {
-    loadUserProfile();
-  }, []);
-
-  const loadUserProfile = async () => {
-    setLoading(true);
-    try {
-      const response = await ApiService.getCurrentUserProfile();
-      if (response.success && response.data) {
-        const userData = response.data;
-        setProfileData({
-          name: userData.name || '',
-          location: userData.location || '',
-          occupation: userData.occupation || '',
-          gender: userData.gender || '',
-          phoneNumber: userData.phoneNumber || '',
-          email: userData.email || '',
-          education: userData.education || '',
-          maritalStatus: userData.maritalStatus || '',
-          height: userData.height || '',
-          weight: userData.weight || '',
-          bloodGroup: userData.bloodGroup || '',
-          languagesSpoken: userData.languagesSpoken || [],
-          dressStyle: userData.dressStyle || '',
-          favoriteBooks: userData.favoriteBooks || '',
-          favoriteSongs: userData.favoriteSongs || '',
-          favoriteMovies: userData.favoriteMovies || '',
-          vacationDestination: userData.vacationDestination || '',
-          bodyType: userData.bodyType || '',
-          complexion: userData.complexion || '',
-          hasDisability: userData.hasDisability || false,
-          description: userData.bio || '',
-          diet: userData.lifestyle?.diet || '',
-          drinkingHabit: userData.lifestyle?.drinking || '',
-          smokingHabit: userData.lifestyle?.smoking || '',
-          hobbies: userData.hobbies || [],
-          sportsAndFitness: userData.sportsAndFitness || [],
-          hasChildren: userData.hasChildren || '',
-          images: userData.images || [],
-        });
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      Alert.alert('Error', 'Failed to load profile data');
-    } finally {
-      setLoading(false);
-    }
-  };
   const languages = [
-    'Bengali', 'Hindi', 'English', 'Marathi', 'Tamil', 'Telugu', 'Gujarati',
-    'Kannada', 'Malayalam', 'Punjabi', 'Urdu', 'Odia', 'Assamese'
+    'Bengali',
+    'Hindi',
+    'English',
+    'Marathi',
+    'Tamil',
+    'Telugu',
+    'Gujarati',
+    'Kannada',
+    'Malayalam',
+    'Punjabi',
+    'Urdu',
+    'Odia',
+    'Assamese',
   ];
 
   const hobbiesOptions = [
-    'Movies', 'Books', 'Travel', 'Biking', 'Hiking', 'Soccer', 'Cricket',
-    'Foods', 'Blogging', 'Dance', 'Theater', 'Photography', 'Music'
+    'Movies',
+    'Books',
+    'Travel',
+    'Biking',
+    'Hiking',
+    'Soccer',
+    'Cricket',
+    'Foods',
+    'Blogging',
+    'Dance',
+    'Theater',
+    'Photography',
+    'Music',
   ];
 
   const sportsOptions = [
-    'Badminton', 'Swimming', 'Reading', 'Yoga', 'Gym', 'Running',
-    'Cycling', 'Tennis', 'Basketball', 'Football'
+    'Badminton',
+    'Swimming',
+    'Reading',
+    'Yoga',
+    'Gym',
+    'Running',
+    'Cycling',
+    'Tennis',
+    'Basketball',
+    'Football',
   ];
 
   const handleInputChange = (field: keyof ProfileData, value: any) => {
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -310,9 +302,12 @@ export default function EditProfile() {
     }
 
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    
+
     if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Camera permission is required to take photos');
+      Alert.alert(
+        'Permission Required',
+        'Camera permission is required to take photos'
+      );
       return;
     }
 
@@ -333,20 +328,13 @@ export default function EditProfile() {
     handleInputChange('images', newImages);
   };
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
-
   const handleSave = async () => {
     setSaveLoading(true);
     try {
       // Update basic info
       await ApiService.updateBasicInfo({
         name: profileData.name,
-        location: profileData.location,
+        location: profileData.city,
         occupation: profileData.occupation,
         education: profileData.education,
         bio: profileData.description,
@@ -362,7 +350,7 @@ export default function EditProfile() {
         complexion: profileData.complexion,
         hasDisability: profileData.hasDisability,
       });
-      
+
       // Update lifestyle
       await ApiService.updateLifestyle({
         diet: profileData.diet,
@@ -402,31 +390,6 @@ export default function EditProfile() {
     }
   };
 
-  const renderSection = (
-    title: string,
-    sectionKey: keyof typeof expandedSections,
-    children: React.ReactNode
-  ) => (
-    <View style={styles.section}>
-      <TouchableOpacity
-        style={styles.sectionHeader}
-        onPress={() => toggleSection(sectionKey)}
-      >
-        <Text style={styles.sectionTitle}>{title}</Text>
-        {expandedSections[sectionKey] ? (
-          <ChevronUp size={24} color="#E11D48" />
-        ) : (
-          <ChevronDown size={24} color="#E11D48" />
-        )}
-      </TouchableOpacity>
-      {expandedSections[sectionKey] && (
-        <View style={styles.sectionContent}>
-          {children}
-        </View>
-      )}
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -434,8 +397,8 @@ export default function EditProfile() {
           <ArrowLeft size={24} color="#1F2937" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Profile</Text>
-        <TouchableOpacity 
-          onPress={handleSave} 
+        <TouchableOpacity
+          onPress={handleSave}
           style={[styles.saveButton, saveLoading && styles.saveButtonDisabled]}
           disabled={saveLoading}
         >
@@ -452,17 +415,20 @@ export default function EditProfile() {
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
       ) : (
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {renderSection('Profile Photos', 'images', (
-          <>
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <RenderSection title="Profile Photos" isExpanded={true}>
             <Text style={styles.sectionDescription}>
-              Add up to 6 photos to showcase yourself. First photo will be your main profile picture.
+              Add up to 6 photos to showcase yourself. First photo will be your
+              main profile picture.
             </Text>
-            
+
             <View style={styles.imagesGrid}>
-              {profileData.images.map((image, index) => (
+              {profile?.images?.map((image, index) => (
                 <View key={index} style={styles.imageContainer}>
-                  <Image source={{ uri: image }} style={styles.profileImage} />
+                  <Image
+                    source={{ uri: image.url }}
+                    style={styles.profileImage}
+                  />
                   <TouchableOpacity
                     style={styles.removeImageButton}
                     onPress={() => handleRemoveImage(index)}
@@ -476,8 +442,8 @@ export default function EditProfile() {
                   )}
                 </View>
               ))}
-              
-              {profileData.images.length < 6 && (
+
+              {(profile?.images?.length || 0) < 6 && (
                 <View style={styles.addImageContainer}>
                   <TouchableOpacity
                     style={styles.addImageButton}
@@ -486,7 +452,7 @@ export default function EditProfile() {
                     <Plus color="#9CA3AF" size={24} />
                     <Text style={styles.addImageText}>Add Photo</Text>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     style={styles.cameraButton}
                     onPress={handleTakePhoto}
@@ -496,291 +462,330 @@ export default function EditProfile() {
                 </View>
               )}
             </View>
-          </>
-        ))}
+          </RenderSection>
 
-        {renderSection('Basic Information', 'basic', (
-          <>
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.name}
-                onChangeText={(value) => handleInputChange('name', value)}
+          <RenderSection title="Basic Information" isExpanded={true}>
+            <>
+              <ProfileInput
+                label="Full Name"
                 placeholder="Enter your full name"
-                placeholderTextColor="#9CA3AF"
+                presetValue={profile?.fullName}
+                onChange={(value) => handleInputChange('name', value)}
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Location</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.location}
-                onChangeText={(value) => handleInputChange('location', value)}
-                placeholder="City, State, Country"
-                placeholderTextColor="#9CA3AF"
+              <ProfileInput
+                label="City"
+                placeholder="Enter your city"
+                presetValue={profile?.location?.city}
+                onChange={(value) => handleInputChange('city', value)}
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Occupation</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.occupation}
-                onChangeText={(value) => handleInputChange('occupation', value)}
-                placeholder="Your job title or profession"
-                placeholderTextColor="#9CA3AF"
+              <ProfileInput
+                label="State"
+                placeholder="Enter your state"
+                presetValue={profile?.location?.state}
+                onChange={(value) => handleInputChange('state', value)}
               />
-            </View>
 
-            <SelectField
-              label="Gender"
-              options={['Male', 'Female', 'Prefer Not To Say']}
-              selectedValue={profileData.gender}
-              onSelectionChange={(value) => handleInputChange('gender', value)}
-            />
-
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Phone Number</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.phoneNumber}
-                onChangeText={(value) => handleInputChange('phoneNumber', value)}
-                placeholder="Enter phone number"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="phone-pad"
+              <ProfileInput
+                label="Country"
+                placeholder="Enter your country"
+                presetValue={profile?.location?.country}
+                onChange={(value) => handleInputChange('country', value)}
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                placeholder="Enter email address"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="email-address"
-                autoCapitalize="none"
+              <ProfileInput
+                label="Occupation"
+                placeholder="Enter your occupation"
+                presetValue={profile?.occupation}
+                onChange={(value) => handleInputChange('occupation', value)}
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Education</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.education}
-                onChangeText={(value) => handleInputChange('education', value)}
-                placeholder="Enter education details"
-                placeholderTextColor="#9CA3AF"
+              <SelectField
+                label="Gender"
+                options={['Male', 'Female', 'Prefer Not To Say']}
+                selectedValue={profileData.gender}
+                onSelectionChange={(value) =>
+                  handleInputChange('gender', value)
+                }
               />
-            </View>
 
-            <SelectField
-              label="Marital Status"
-              options={['Single', 'Widowed', 'Married', 'Divorced', 'Separated']}
-              selectedValue={profileData.maritalStatus}
-              onSelectionChange={(value) => handleInputChange('maritalStatus', value)}
-            />
-
-            <MultiSelectField
-              label="Languages Spoken"
-              options={languages}
-              selectedValues={profileData.languagesSpoken}
-              onSelectionChange={(values) => handleInputChange('languagesSpoken', values)}
-            />
-          </>
-        ))}
-
-        {renderSection('Physical Attributes', 'physical', (
-          <>
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Height</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.height}
-                onChangeText={(value) => handleInputChange('height', value)}
-                placeholder="e.g., 5'6"
-                placeholderTextColor="#9CA3AF"
+              <ProfileInput
+                label="Phone Number"
+                placeholder="Enter your phone number"
+                presetValue={profile?.phone}
+                onChange={(value) => handleInputChange('phoneNumber', value)}
+                keyboard="phone-pad"
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Weight</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.weight}
-                onChangeText={(value) => handleInputChange('weight', value)}
-                placeholder="e.g., 65 kg"
-                placeholderTextColor="#9CA3AF"
+              <ProfileInput
+                label="Email"
+                placeholder="Enter your email"
+                presetValue={profile?.email}
+                onChange={(value) => handleInputChange('email', value)}
+                keyboard="email-address"
               />
-            </View>
 
-            <SelectField
-              label="Blood Group"
-              options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
-              selectedValue={profileData.bloodGroup}
-              onSelectionChange={(value) => handleInputChange('bloodGroup', value)}
-            />
+              <ProfileInput
+                label="Education"
+                placeholder="Enter your education"
+                presetValue={profile?.education}
+                onChange={(value) => handleInputChange('education', value)}
+              />
 
-            <SelectField
-              label="Body Type"
-              options={['Slim', 'Athletic', 'Average', 'Chubby']}
-              selectedValue={profileData.bodyType}
-              onSelectionChange={(value) => handleInputChange('bodyType', value)}
-            />
+              <SelectField
+                label="Marital Status"
+                options={[
+                  'Single',
+                  'Widowed',
+                  'Married',
+                  'Divorced',
+                  'Separated',
+                ]}
+                selectedValue={profileData.maritalStatus}
+                onSelectionChange={(value) =>
+                  handleInputChange('maritalStatus', value)
+                }
+              />
 
-            <SelectField
-              label="Complexion"
-              options={['Very Fair', 'Fair', 'Wheatish', 'Dark']}
-              selectedValue={profileData.complexion}
-              onSelectionChange={(value) => handleInputChange('complexion', value)}
-            />
+              <MultiSelectField
+                label="Languages Spoken"
+                options={languages}
+                selectedValues={profileData.languagesSpoken}
+                onSelectionChange={(values) =>
+                  handleInputChange('languagesSpoken', values)
+                }
+              />
+            </>
+          </RenderSection>
 
-            <View style={styles.fieldContainer}>
-              <View style={styles.switchRow}>
-                <Text style={styles.label}>Any Disability</Text>
-                <Switch
-                  value={profileData.hasDisability}
-                  onValueChange={(value) => handleInputChange('hasDisability', value)}
-                  trackColor={{ false: '#E5E7EB', true: '#FDE2E7' }}
-                  thumbColor={profileData.hasDisability ? '#E11D48' : '#9CA3AF'}
+          <RenderSection title="Physical Attributes" isExpanded={false}>
+            <>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Height</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.height}
+                  onChangeText={(value) => handleInputChange('height', value)}
+                  placeholder="e.g., 5'6"
+                  placeholderTextColor="#9CA3AF"
                 />
               </View>
-            </View>
-          </>
-        ))}
 
-        {renderSection('Lifestyle', 'lifestyle', (
-          <>
-            <SelectField
-              label="Diet"
-              options={['Vegetarian', 'Eggetarian', 'Both', 'Non-vegetarian', 'Jain', 'Vegan']}
-              selectedValue={profileData.diet}
-              onSelectionChange={(value) => handleInputChange('diet', value)}
-            />
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Weight</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.weight}
+                  onChangeText={(value) => handleInputChange('weight', value)}
+                  placeholder="e.g., 65 kg"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
 
-            <SelectField
-              label="Drinking Habit"
-              options={['No', 'Regular', 'Occasional']}
-              selectedValue={profileData.drinkingHabit}
-              onSelectionChange={(value) => handleInputChange('drinkingHabit', value)}
-            />
-
-            <SelectField
-              label="Smoking Habit"
-              options={['No', 'Regular', 'Occasional']}
-              selectedValue={profileData.smokingHabit}
-              onSelectionChange={(value) => handleInputChange('smokingHabit', value)}
-            />
-
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Dress Style</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.dressStyle}
-                onChangeText={(value) => handleInputChange('dressStyle', value)}
-                placeholder="Describe your dress style"
-                placeholderTextColor="#9CA3AF"
+              <SelectField
+                label="Blood Group"
+                options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
+                selectedValue={profileData.bloodGroup}
+                onSelectionChange={(value) =>
+                  handleInputChange('bloodGroup', value)
+                }
               />
-            </View>
-          </>
-        ))}
 
-        {renderSection('Interests & Hobbies', 'interests', (
-          <>
-            <MultiSelectField
-              label="Hobbies"
-              options={hobbiesOptions}
-              selectedValues={profileData.hobbies}
-              onSelectionChange={(values) => handleInputChange('hobbies', values)}
-            />
-
-            <MultiSelectField
-              label="Sports & Fitness"
-              options={sportsOptions}
-              selectedValues={profileData.sportsAndFitness}
-              onSelectionChange={(values) => handleInputChange('sportsAndFitness', values)}
-            />
-          </>
-        ))}
-
-        {renderSection('Favorites', 'favorites', (
-          <>
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Favorite Books</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.favoriteBooks}
-                onChangeText={(value) => handleInputChange('favoriteBooks', value)}
-                placeholder="Enter favorite books"
-                placeholderTextColor="#9CA3AF"
+              <SelectField
+                label="Body Type"
+                options={['Slim', 'Athletic', 'Average', 'Chubby']}
+                selectedValue={profileData.bodyType}
+                onSelectionChange={(value) =>
+                  handleInputChange('bodyType', value)
+                }
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Favorite Songs</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.favoriteSongs}
-                onChangeText={(value) => handleInputChange('favoriteSongs', value)}
-                placeholder="Enter favorite songs"
-                placeholderTextColor="#9CA3AF"
+              <SelectField
+                label="Complexion"
+                options={['Very Fair', 'Fair', 'Wheatish', 'Dark']}
+                selectedValue={profileData.complexion}
+                onSelectionChange={(value) =>
+                  handleInputChange('complexion', value)
+                }
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Favorite Movies</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.favoriteMovies}
-                onChangeText={(value) => handleInputChange('favoriteMovies', value)}
-                placeholder="Enter favorite movies"
-                placeholderTextColor="#9CA3AF"
+              <View style={styles.fieldContainer}>
+                <View style={styles.switchRow}>
+                  <Text style={styles.label}>Any Disability</Text>
+                  <Switch
+                    value={profileData.hasDisability}
+                    onValueChange={(value) =>
+                      handleInputChange('hasDisability', value)
+                    }
+                    trackColor={{ false: '#E5E7EB', true: '#FDE2E7' }}
+                    thumbColor={
+                      profileData.hasDisability ? '#E11D48' : '#9CA3AF'
+                    }
+                  />
+                </View>
+              </View>
+            </>
+          </RenderSection>
+
+          <RenderSection title="Lifestyle" isExpanded={false}>
+            <>
+              <SelectField
+                label="Diet"
+                options={[
+                  'Vegetarian',
+                  'Eggetarian',
+                  'Both',
+                  'Non-vegetarian',
+                  'Jain',
+                  'Vegan',
+                ]}
+                selectedValue={profileData.diet}
+                onSelectionChange={(value) => handleInputChange('diet', value)}
               />
-            </View>
 
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>Vacation Destination</Text>
-              <TextInput
-                style={styles.input}
-                value={profileData.vacationDestination}
-                onChangeText={(value) => handleInputChange('vacationDestination', value)}
-                placeholder="Enter dream vacation destination"
-                placeholderTextColor="#9CA3AF"
+              <SelectField
+                label="Drinking Habit"
+                options={['No', 'Regular', 'Occasional']}
+                selectedValue={profileData.drinkingHabit}
+                onSelectionChange={(value) =>
+                  handleInputChange('drinkingHabit', value)
+                }
               />
-            </View>
-          </>
-        ))}
 
-        {renderSection('Family & Personal', 'family', (
-          <>
-            <SelectField
-              label="Do you have children?"
-              options={['No', 'Yes', 'Prefer not to say']}
-              selectedValue={profileData.hasChildren}
-              onSelectionChange={(value) => handleInputChange('hasChildren', value)}
-            />
-
-            <View style={styles.fieldContainer}>
-              <Text style={styles.label}>About Me</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={profileData.description}
-                onChangeText={(value) => handleInputChange('description', value)}
-                placeholder="Tell us about yourself..."
-                placeholderTextColor="#9CA3AF"
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
+              <SelectField
+                label="Smoking Habit"
+                options={['No', 'Regular', 'Occasional']}
+                selectedValue={profileData.smokingHabit}
+                onSelectionChange={(value) =>
+                  handleInputChange('smokingHabit', value)
+                }
               />
-            </View>
-          </>
-        ))}
 
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Dress Style</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.dressStyle}
+                  onChangeText={(value) =>
+                    handleInputChange('dressStyle', value)
+                  }
+                  placeholder="Describe your dress style"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+            </>
+          </RenderSection>
+
+          <RenderSection title="Interests & Hobbies" isExpanded={false}>
+            <>
+              <MultiSelectField
+                label="Hobbies"
+                options={hobbiesOptions}
+                selectedValues={profileData.hobbies}
+                onSelectionChange={(values) =>
+                  handleInputChange('hobbies', values)
+                }
+              />
+
+              <MultiSelectField
+                label="Sports & Fitness"
+                options={sportsOptions}
+                selectedValues={profileData.sportsAndFitness}
+                onSelectionChange={(values) =>
+                  handleInputChange('sportsAndFitness', values)
+                }
+              />
+            </>
+          </RenderSection>
+
+          <RenderSection title="Favorites" isExpanded={false}>
+            <>
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Favorite Books</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.favoriteBooks}
+                  onChangeText={(value) =>
+                    handleInputChange('favoriteBooks', value)
+                  }
+                  placeholder="Enter favorite books"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Favorite Songs</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.favoriteSongs}
+                  onChangeText={(value) =>
+                    handleInputChange('favoriteSongs', value)
+                  }
+                  placeholder="Enter favorite songs"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Favorite Movies</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.favoriteMovies}
+                  onChangeText={(value) =>
+                    handleInputChange('favoriteMovies', value)
+                  }
+                  placeholder="Enter favorite movies"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>Vacation Destination</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.vacationDestination}
+                  onChangeText={(value) =>
+                    handleInputChange('vacationDestination', value)
+                  }
+                  placeholder="Enter dream vacation destination"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
+            </>
+          </RenderSection>
+
+          <RenderSection title="Family & Personal" isExpanded={false}>
+            <>
+              <SelectField
+                label="Do you have children?"
+                options={['No', 'Yes', 'Prefer not to say']}
+                selectedValue={profileData.hasChildren}
+                onSelectionChange={(value) =>
+                  handleInputChange('hasChildren', value)
+                }
+              />
+
+              <View style={styles.fieldContainer}>
+                <Text style={styles.label}>About Me</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={profileData.description}
+                  onChangeText={(value) =>
+                    handleInputChange('description', value)
+                  }
+                  placeholder="Tell us about yourself..."
+                  placeholderTextColor="#9CA3AF"
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+              </View>
+            </>
+          </RenderSection>
+
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -831,30 +836,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  section: {
-    marginTop: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    overflow: 'hidden',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: '#F9FAFB',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  sectionContent: {
-    padding: 16,
   },
   fieldContainer: {
     marginBottom: 20,
