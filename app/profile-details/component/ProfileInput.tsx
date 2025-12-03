@@ -6,6 +6,7 @@ export default function ProfileInput({
   placeholder,
   presetValue = '',
   keyboard = 'default',
+  isMutliLine = false,
   onChange,
 }: {
   label: string;
@@ -19,6 +20,7 @@ export default function ProfileInput({
     | 'email-address'
     | 'phone-pad'
     | 'url';
+  isMutliLine?: boolean;
   onChange: (change: string) => void;
 }) {
   const [value, setValue] = useState<string>(presetValue);
@@ -38,6 +40,9 @@ export default function ProfileInput({
         placeholder={placeholder}
         placeholderTextColor="#9CA3AF"
         keyboardType={keyboard}
+        multiline={isMutliLine}
+        numberOfLines={isMutliLine ? 4 : undefined}
+        textAlignVertical="top"
       />
     </View>
   );

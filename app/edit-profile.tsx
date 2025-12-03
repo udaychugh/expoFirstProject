@@ -4,7 +4,8 @@ import {
   Text,
   ScrollView,
   TextInput,
-  TouchableOpacity,
+  Pressable,
+  Platform,
   StyleSheet,
   Alert,
   Switch,
@@ -26,8 +27,14 @@ import ApiService from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import ProfileInput from './profile-details/component/ProfileInput';
 import RenderSection from './profile-details/component/renderSection';
+import BasicInfo from './profile-details/component/basicInfo';
+import PhysicalAttr from './profile-details/component/physicalAttr';
+import LifeStyle from './profile-details/component/lifestyle';
+import InterestsAndHobbies from './profile-details/component/interestNHobbies';
+import Favorites from './profile-details/component/favorites';
+import FamilyAndPersonal from './profile-details/component/familyNPersonal';
 
-interface ProfileData {
+export interface ProfileData {
   name: string;
   city: string;
   state: string;
@@ -60,7 +67,7 @@ interface ProfileData {
   images: string[];
 }
 
-const MultiSelectField = ({
+export const MultiSelectField = ({
   label,
   options,
   selectedValues,
@@ -83,9 +90,13 @@ const MultiSelectField = ({
   return (
     <View style={styles.fieldContainer}>
       <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity
-        style={styles.multiSelectHeader}
+      <Pressable
+        style={({ pressed }) => [
+          styles.multiSelectHeader,
+          Platform.OS === 'ios' && pressed && { opacity: 0.7 },
+        ]}
         onPress={() => setIsExpanded(!isExpanded)}
+        android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
       >
         <Text style={styles.multiSelectText}>
           {selectedValues.length > 0
@@ -97,15 +108,19 @@ const MultiSelectField = ({
         ) : (
           <ChevronDown size={20} color="#6B7280" />
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {isExpanded && (
         <View style={styles.multiSelectOptions}>
           {options.map((option) => (
-            <TouchableOpacity
+            <Pressable
               key={option}
-              style={styles.optionRow}
+              style={({ pressed }) => [
+                styles.optionRow,
+                Platform.OS === 'ios' && pressed && { opacity: 0.7 },
+              ]}
               onPress={() => toggleOption(option)}
+              android_ripple={{ color: 'rgba(0, 0, 0, 0.05)' }}
             >
               <View
                 style={[
@@ -118,7 +133,7 @@ const MultiSelectField = ({
                 )}
               </View>
               <Text style={styles.optionText}>{option}</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
@@ -126,7 +141,7 @@ const MultiSelectField = ({
   );
 };
 
-const SelectField = ({
+export const SelectField = ({
   label,
   options,
   selectedValue,
@@ -142,9 +157,13 @@ const SelectField = ({
   return (
     <View style={styles.fieldContainer}>
       <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity
-        style={styles.selectHeader}
+      <Pressable
+        style={({ pressed }) => [
+          styles.selectHeader,
+          Platform.OS === 'ios' && pressed && { opacity: 0.7 },
+        ]}
         onPress={() => setIsExpanded(!isExpanded)}
+        android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
       >
         <Text style={[styles.selectText, !selectedValue && styles.placeholder]}>
           {selectedValue || 'Select option'}
@@ -154,21 +173,23 @@ const SelectField = ({
         ) : (
           <ChevronDown size={20} color="#6B7280" />
         )}
-      </TouchableOpacity>
+      </Pressable>
 
       {isExpanded && (
         <View style={styles.selectOptions}>
           {options.map((option) => (
-            <TouchableOpacity
+            <Pressable
               key={option}
-              style={[
+              style={({ pressed }) => [
                 styles.selectOption,
                 selectedValue === option && styles.selectedOption,
+                Platform.OS === 'ios' && pressed && { opacity: 0.7 },
               ]}
               onPress={() => {
                 onSelectionChange(option);
                 setIsExpanded(false);
               }}
+              android_ripple={{ color: 'rgba(225, 29, 72, 0.1)' }}
             >
               <Text
                 style={[
@@ -178,7 +199,7 @@ const SelectField = ({
               >
                 {option}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
@@ -223,51 +244,6 @@ export default function EditProfile() {
     hasChildren: '',
     images: [],
   });
-
-  const languages = [
-    'Bengali',
-    'Hindi',
-    'English',
-    'Marathi',
-    'Tamil',
-    'Telugu',
-    'Gujarati',
-    'Kannada',
-    'Malayalam',
-    'Punjabi',
-    'Urdu',
-    'Odia',
-    'Assamese',
-  ];
-
-  const hobbiesOptions = [
-    'Movies',
-    'Books',
-    'Travel',
-    'Biking',
-    'Hiking',
-    'Soccer',
-    'Cricket',
-    'Foods',
-    'Blogging',
-    'Dance',
-    'Theater',
-    'Photography',
-    'Music',
-  ];
-
-  const sportsOptions = [
-    'Badminton',
-    'Swimming',
-    'Reading',
-    'Yoga',
-    'Gym',
-    'Running',
-    'Cycling',
-    'Tennis',
-    'Basketball',
-    'Football',
-  ];
 
   const handleInputChange = (field: keyof ProfileData, value: any) => {
     setProfileData((prev) => ({
@@ -393,21 +369,38 @@ export default function EditProfile() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <Pressable
+          onPress={() => router.back()}
+          android_ripple={{
+            color: 'rgba(0, 0, 0, 0.1)',
+            borderless: true,
+            radius: 24,
+          }}
+          style={({ pressed }) => [
+            Platform.OS === 'ios' && pressed && { opacity: 0.6 },
+          ]}
+        >
           <ArrowLeft size={24} color="#1F2937" />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.headerTitle}>Edit Profile</Text>
-        <TouchableOpacity
+        <Pressable
           onPress={handleSave}
-          style={[styles.saveButton, saveLoading && styles.saveButtonDisabled]}
+          style={({ pressed }) => [
+            styles.saveButton,
+            saveLoading && styles.saveButtonDisabled,
+            Platform.OS === 'ios' &&
+              pressed &&
+              !saveLoading && { opacity: 0.8 },
+          ]}
           disabled={saveLoading}
+          android_ripple={{ color: 'rgba(255, 255, 255, 0.3)' }}
         >
           {saveLoading ? (
             <Text style={styles.saveButtonText}>Saving...</Text>
           ) : (
             <Save size={20} color="#FFFFFF" />
           )}
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {loading ? (
@@ -429,12 +422,20 @@ export default function EditProfile() {
                     source={{ uri: image.url }}
                     style={styles.profileImage}
                   />
-                  <TouchableOpacity
-                    style={styles.removeImageButton}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.removeImageButton,
+                      Platform.OS === 'ios' && pressed && { opacity: 0.7 },
+                    ]}
                     onPress={() => handleRemoveImage(index)}
+                    android_ripple={{
+                      color: 'rgba(255, 255, 255, 0.3)',
+                      borderless: true,
+                      radius: 16,
+                    }}
                   >
                     <X color="#FFFFFF" size={16} />
-                  </TouchableOpacity>
+                  </Pressable>
                   {index === 0 && (
                     <View style={styles.mainImageBadge}>
                       <Text style={styles.mainImageText}>Main</Text>
@@ -445,344 +446,57 @@ export default function EditProfile() {
 
               {(profile?.images?.length || 0) < 6 && (
                 <View style={styles.addImageContainer}>
-                  <TouchableOpacity
-                    style={styles.addImageButton}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.addImageButton,
+                      Platform.OS === 'ios' && pressed && { opacity: 0.7 },
+                    ]}
                     onPress={handleImagePicker}
+                    android_ripple={{ color: 'rgba(0, 0, 0, 0.05)' }}
                   >
                     <Plus color="#9CA3AF" size={24} />
                     <Text style={styles.addImageText}>Add Photo</Text>
-                  </TouchableOpacity>
+                  </Pressable>
 
-                  <TouchableOpacity
-                    style={styles.cameraButton}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.cameraButton,
+                      Platform.OS === 'ios' && pressed && { opacity: 0.7 },
+                    ]}
                     onPress={handleTakePhoto}
+                    android_ripple={{
+                      color: 'rgba(225, 29, 72, 0.2)',
+                      borderless: true,
+                      radius: 20,
+                    }}
                   >
                     <Camera color="#E11D48" size={20} />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
             </View>
           </RenderSection>
 
-          <RenderSection title="Basic Information" isExpanded={true}>
-            <>
-              <ProfileInput
-                label="Full Name"
-                placeholder="Enter your full name"
-                presetValue={profile?.fullName}
-                onChange={(value) => handleInputChange('name', value)}
-              />
+          <BasicInfo profile={profile} handleInputChange={handleInputChange} />
 
-              <ProfileInput
-                label="City"
-                placeholder="Enter your city"
-                presetValue={profile?.location?.city}
-                onChange={(value) => handleInputChange('city', value)}
-              />
+          <PhysicalAttr
+            profile={profile}
+            handleInputChange={handleInputChange}
+          />
 
-              <ProfileInput
-                label="State"
-                placeholder="Enter your state"
-                presetValue={profile?.location?.state}
-                onChange={(value) => handleInputChange('state', value)}
-              />
+          <LifeStyle profile={profile} handleInputChange={handleInputChange} />
 
-              <ProfileInput
-                label="Country"
-                placeholder="Enter your country"
-                presetValue={profile?.location?.country}
-                onChange={(value) => handleInputChange('country', value)}
-              />
+          <InterestsAndHobbies
+            profile={profile}
+            handleInputChange={handleInputChange}
+          />
 
-              <ProfileInput
-                label="Occupation"
-                placeholder="Enter your occupation"
-                presetValue={profile?.occupation}
-                onChange={(value) => handleInputChange('occupation', value)}
-              />
+          <Favorites profile={profile} handleInputChange={handleInputChange} />
 
-              <SelectField
-                label="Gender"
-                options={['Male', 'Female', 'Prefer Not To Say']}
-                selectedValue={profileData.gender}
-                onSelectionChange={(value) =>
-                  handleInputChange('gender', value)
-                }
-              />
-
-              <ProfileInput
-                label="Phone Number"
-                placeholder="Enter your phone number"
-                presetValue={profile?.phone}
-                onChange={(value) => handleInputChange('phoneNumber', value)}
-                keyboard="phone-pad"
-              />
-
-              <ProfileInput
-                label="Email"
-                placeholder="Enter your email"
-                presetValue={profile?.email}
-                onChange={(value) => handleInputChange('email', value)}
-                keyboard="email-address"
-              />
-
-              <ProfileInput
-                label="Education"
-                placeholder="Enter your education"
-                presetValue={profile?.education}
-                onChange={(value) => handleInputChange('education', value)}
-              />
-
-              <SelectField
-                label="Marital Status"
-                options={[
-                  'Single',
-                  'Widowed',
-                  'Married',
-                  'Divorced',
-                  'Separated',
-                ]}
-                selectedValue={profileData.maritalStatus}
-                onSelectionChange={(value) =>
-                  handleInputChange('maritalStatus', value)
-                }
-              />
-
-              <MultiSelectField
-                label="Languages Spoken"
-                options={languages}
-                selectedValues={profileData.languagesSpoken}
-                onSelectionChange={(values) =>
-                  handleInputChange('languagesSpoken', values)
-                }
-              />
-            </>
-          </RenderSection>
-
-          <RenderSection title="Physical Attributes" isExpanded={false}>
-            <>
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Height</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.height}
-                  onChangeText={(value) => handleInputChange('height', value)}
-                  placeholder="e.g., 5'6"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Weight</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.weight}
-                  onChangeText={(value) => handleInputChange('weight', value)}
-                  placeholder="e.g., 65 kg"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <SelectField
-                label="Blood Group"
-                options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
-                selectedValue={profileData.bloodGroup}
-                onSelectionChange={(value) =>
-                  handleInputChange('bloodGroup', value)
-                }
-              />
-
-              <SelectField
-                label="Body Type"
-                options={['Slim', 'Athletic', 'Average', 'Chubby']}
-                selectedValue={profileData.bodyType}
-                onSelectionChange={(value) =>
-                  handleInputChange('bodyType', value)
-                }
-              />
-
-              <SelectField
-                label="Complexion"
-                options={['Very Fair', 'Fair', 'Wheatish', 'Dark']}
-                selectedValue={profileData.complexion}
-                onSelectionChange={(value) =>
-                  handleInputChange('complexion', value)
-                }
-              />
-
-              <View style={styles.fieldContainer}>
-                <View style={styles.switchRow}>
-                  <Text style={styles.label}>Any Disability</Text>
-                  <Switch
-                    value={profileData.hasDisability}
-                    onValueChange={(value) =>
-                      handleInputChange('hasDisability', value)
-                    }
-                    trackColor={{ false: '#E5E7EB', true: '#FDE2E7' }}
-                    thumbColor={
-                      profileData.hasDisability ? '#E11D48' : '#9CA3AF'
-                    }
-                  />
-                </View>
-              </View>
-            </>
-          </RenderSection>
-
-          <RenderSection title="Lifestyle" isExpanded={false}>
-            <>
-              <SelectField
-                label="Diet"
-                options={[
-                  'Vegetarian',
-                  'Eggetarian',
-                  'Both',
-                  'Non-vegetarian',
-                  'Jain',
-                  'Vegan',
-                ]}
-                selectedValue={profileData.diet}
-                onSelectionChange={(value) => handleInputChange('diet', value)}
-              />
-
-              <SelectField
-                label="Drinking Habit"
-                options={['No', 'Regular', 'Occasional']}
-                selectedValue={profileData.drinkingHabit}
-                onSelectionChange={(value) =>
-                  handleInputChange('drinkingHabit', value)
-                }
-              />
-
-              <SelectField
-                label="Smoking Habit"
-                options={['No', 'Regular', 'Occasional']}
-                selectedValue={profileData.smokingHabit}
-                onSelectionChange={(value) =>
-                  handleInputChange('smokingHabit', value)
-                }
-              />
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Dress Style</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.dressStyle}
-                  onChangeText={(value) =>
-                    handleInputChange('dressStyle', value)
-                  }
-                  placeholder="Describe your dress style"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </>
-          </RenderSection>
-
-          <RenderSection title="Interests & Hobbies" isExpanded={false}>
-            <>
-              <MultiSelectField
-                label="Hobbies"
-                options={hobbiesOptions}
-                selectedValues={profileData.hobbies}
-                onSelectionChange={(values) =>
-                  handleInputChange('hobbies', values)
-                }
-              />
-
-              <MultiSelectField
-                label="Sports & Fitness"
-                options={sportsOptions}
-                selectedValues={profileData.sportsAndFitness}
-                onSelectionChange={(values) =>
-                  handleInputChange('sportsAndFitness', values)
-                }
-              />
-            </>
-          </RenderSection>
-
-          <RenderSection title="Favorites" isExpanded={false}>
-            <>
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Favorite Books</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.favoriteBooks}
-                  onChangeText={(value) =>
-                    handleInputChange('favoriteBooks', value)
-                  }
-                  placeholder="Enter favorite books"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Favorite Songs</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.favoriteSongs}
-                  onChangeText={(value) =>
-                    handleInputChange('favoriteSongs', value)
-                  }
-                  placeholder="Enter favorite songs"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Favorite Movies</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.favoriteMovies}
-                  onChangeText={(value) =>
-                    handleInputChange('favoriteMovies', value)
-                  }
-                  placeholder="Enter favorite movies"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Vacation Destination</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.vacationDestination}
-                  onChangeText={(value) =>
-                    handleInputChange('vacationDestination', value)
-                  }
-                  placeholder="Enter dream vacation destination"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </>
-          </RenderSection>
-
-          <RenderSection title="Family & Personal" isExpanded={false}>
-            <>
-              <SelectField
-                label="Do you have children?"
-                options={['No', 'Yes', 'Prefer not to say']}
-                selectedValue={profileData.hasChildren}
-                onSelectionChange={(value) =>
-                  handleInputChange('hasChildren', value)
-                }
-              />
-
-              <View style={styles.fieldContainer}>
-                <Text style={styles.label}>About Me</Text>
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  value={profileData.description}
-                  onChangeText={(value) =>
-                    handleInputChange('description', value)
-                  }
-                  placeholder="Tell us about yourself..."
-                  placeholderTextColor="#9CA3AF"
-                  multiline
-                  numberOfLines={4}
-                  textAlignVertical="top"
-                />
-              </View>
-            </>
-          </RenderSection>
+          <FamilyAndPersonal
+            profile={profile}
+            handleInputChange={handleInputChange}
+          />
 
           <View style={styles.bottomSpacing} />
         </ScrollView>

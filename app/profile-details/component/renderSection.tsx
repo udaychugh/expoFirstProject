@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 
 interface RenderSectionProps {
@@ -17,9 +17,13 @@ export default function RenderSection({
 
   return (
     <View style={styles.section}>
-      <TouchableOpacity
-        style={styles.sectionHeader}
+      <Pressable
+        style={({ pressed }) => [
+          styles.sectionHeader,
+          Platform.OS === 'ios' && pressed && { opacity: 0.7 },
+        ]}
         onPress={() => setToggle(!toggle)}
+        android_ripple={{ color: 'rgba(225, 29, 72, 0.1)' }}
       >
         <Text style={styles.sectionTitle}>{title}</Text>
         {toggle ? (
@@ -27,7 +31,7 @@ export default function RenderSection({
         ) : (
           <ChevronDown size={24} color="#E11D48" />
         )}
-      </TouchableOpacity>
+      </Pressable>
       {toggle && <View style={styles.sectionContent}>{children}</View>}
     </View>
   );
