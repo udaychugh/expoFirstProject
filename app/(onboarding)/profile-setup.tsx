@@ -1,12 +1,76 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Calendar, MapPin } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Colors } from '@/assets/colors/colors';
+import { Image } from 'expo-image';
+
+const RELIGIONS = [
+  {
+    id: 'Hindu',
+    name: 'Hindu',
+    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533913.png',
+  },
+  {
+    id: 'Christian',
+    name: 'Christian',
+    image: 'https://cdn-icons-png.flaticon.com/512/3004/3004024.png',
+  },
+  {
+    id: 'Sikh',
+    name: 'Sikh',
+    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533924.png',
+  },
+  {
+    id: 'Muslim',
+    name: 'Muslim',
+    image: 'https://cdn-icons-png.flaticon.com/512/4357/4357434.png',
+  },
+  {
+    id: 'Buddhist',
+    name: 'Buddhist',
+    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533908.png',
+  },
+  {
+    id: 'Jain',
+    name: 'Jain',
+    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533918.png',
+  },
+  {
+    id: 'Other',
+    name: 'Other',
+    image: 'https://cdn-icons-png.flaticon.com/512/10412/10412463.png',
+  },
+];
 
 export default function ProfileSetup() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+
+  // Calculate maximum date (18 years ago from today)
+  const getMaxDate = () => {
+    const today = new Date();
+    const maxDate = new Date(
+      today.getFullYear() - 18,
+      today.getMonth(),
+      today.getDate()
+    );
+    return maxDate;
+  };
+
   const [profileData, setProfileData] = useState({
     gender: '',
     dateOfBirth: '',
@@ -21,7 +85,31 @@ export default function ProfileSetup() {
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({ ...prev, [field]: value }));
+    setProfileData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+    }
+
+    if (date) {
+      setSelectedDate(date);
+      // Format date as DD/MM/YYYY
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      const formattedDate = `${day}/${month}/${year}`;
+      handleInputChange('dateOfBirth', formattedDate);
+    }
+
+    if (Platform.OS === 'ios' && event.type === 'dismissed') {
+      setShowDatePicker(false);
+    }
+  };
+
+  const openDatePicker = () => {
+    setShowDatePicker(true);
   };
 
   const handleNext = () => {
@@ -53,44 +141,104 @@ export default function ProfileSetup() {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Gender</Text>
                 <View style={styles.optionsRow}>
-                  <TouchableOpacity 
-                    style={[styles.option, profileData.gender === 'Male' && styles.selectedOption]}
+                  <TouchableOpacity
+                    style={[
+                      styles.option,
+                      profileData.gender === 'Male' && styles.selectedOption,
+                    ]}
                     onPress={() => handleInputChange('gender', 'Male')}
                   >
-                    <Text style={[styles.optionText, profileData.gender === 'Male' && styles.selectedOptionText]}>Male</Text>
+                    <Text
+                      style={[
+                        styles.optionText,
+                        profileData.gender === 'Male' &&
+                          styles.selectedOptionText,
+                      ]}
+                    >
+                      Male
+                    </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={[styles.option, profileData.gender === 'Female' && styles.selectedOption]}
+                  <TouchableOpacity
+                    style={[
+                      styles.option,
+                      profileData.gender === 'Female' && styles.selectedOption,
+                    ]}
                     onPress={() => handleInputChange('gender', 'Female')}
                   >
-                    <Text style={[styles.optionText, profileData.gender === 'Female' && styles.selectedOptionText]}>Female</Text>
+                    <Text
+                      style={[
+                        styles.optionText,
+                        profileData.gender === 'Female' &&
+                          styles.selectedOptionText,
+                      ]}
+                    >
+                      Female
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Date of Birth</Text>
-                <View style={styles.inputWithIcon}>
+                <TouchableOpacity
+                  style={styles.inputWithIcon}
+                  onPress={openDatePicker}
+                >
                   <Calendar color="#9CA3AF" size={20} />
-                  <TextInput
-                    style={styles.inputText}
-                    value={profileData.dateOfBirth}
-                    onChangeText={(value) => handleInputChange('dateOfBirth', value)}
-                    placeholder="DD/MM/YYYY"
-                    placeholderTextColor="#9CA3AF"
+                  <Text
+                    style={[
+                      styles.inputText,
+                      !profileData.dateOfBirth && styles.placeholderText,
+                    ]}
+                  >
+                    {profileData.dateOfBirth || 'DD/MM/YYYY'}
+                  </Text>
+                </TouchableOpacity>
+
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={selectedDate || getMaxDate()}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleDateChange}
+                    maximumDate={getMaxDate()}
+                    minimumDate={new Date(1950, 0, 1)}
+                    accentColor={Colors.primary}
+                    textColor={Colors.primary}
                   />
-                </View>
+                )}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Religion</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.religion}
-                  onChangeText={(value) => handleInputChange('religion', value)}
-                  placeholder="Enter your religion"
-                  placeholderTextColor="#9CA3AF"
-                />
+                <View style={styles.religionGrid}>
+                  {RELIGIONS.map((item) => (
+                    <TouchableOpacity
+                      key={item.id}
+                      style={[
+                        styles.religionCard,
+                        profileData.religion === item.name &&
+                          styles.selectedReligionCard,
+                      ]}
+                      onPress={() => handleInputChange('religion', item.name)}
+                    >
+                      <Image
+                        source={{ uri: item.image }}
+                        style={styles.religionIcon}
+                        contentFit="contain"
+                      />
+                      <Text
+                        style={[
+                          styles.religionText,
+                          profileData.religion === item.name &&
+                            styles.selectedReligionText,
+                        ]}
+                      >
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
 
               <View style={styles.inputGroup}>
@@ -119,7 +267,9 @@ export default function ProfileSetup() {
                 <TextInput
                   style={styles.input}
                   value={profileData.occupation}
-                  onChangeText={(value) => handleInputChange('occupation', value)}
+                  onChangeText={(value) =>
+                    handleInputChange('occupation', value)
+                  }
                   placeholder="What do you do for work?"
                   placeholderTextColor="#9CA3AF"
                 />
@@ -130,7 +280,9 @@ export default function ProfileSetup() {
                 <TextInput
                   style={styles.input}
                   value={profileData.education}
-                  onChangeText={(value) => handleInputChange('education', value)}
+                  onChangeText={(value) =>
+                    handleInputChange('education', value)
+                  }
                   placeholder="Your highest qualification"
                   placeholderTextColor="#9CA3AF"
                 />
@@ -151,12 +303,24 @@ export default function ProfileSetup() {
                 <Text style={styles.label}>Marital Status</Text>
                 <View style={styles.optionsColumn}>
                   {['Never Married', 'Divorced', 'Widowed'].map((status) => (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       key={status}
-                      style={[styles.option, profileData.maritalStatus === status && styles.selectedOption]}
+                      style={[
+                        styles.option,
+                        profileData.maritalStatus === status &&
+                          styles.selectedOption,
+                      ]}
                       onPress={() => handleInputChange('maritalStatus', status)}
                     >
-                      <Text style={[styles.optionText, profileData.maritalStatus === status && styles.selectedOptionText]}>{status}</Text>
+                      <Text
+                        style={[
+                          styles.optionText,
+                          profileData.maritalStatus === status &&
+                            styles.selectedOptionText,
+                        ]}
+                      >
+                        {status}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -169,7 +333,9 @@ export default function ProfileSetup() {
         return (
           <View style={styles.stepContent}>
             <Text style={styles.stepTitle}>Location & About</Text>
-            <Text style={styles.stepSubtitle}>Final details to complete your profile</Text>
+            <Text style={styles.stepSubtitle}>
+              Final details to complete your profile
+            </Text>
 
             <View style={styles.form}>
               <View style={styles.inputGroup}>
@@ -179,7 +345,9 @@ export default function ProfileSetup() {
                   <TextInput
                     style={styles.inputText}
                     value={profileData.location}
-                    onChangeText={(value) => handleInputChange('location', value)}
+                    onChangeText={(value) =>
+                      handleInputChange('location', value)
+                    }
                     placeholder="City, State"
                     placeholderTextColor="#9CA3AF"
                   />
@@ -219,7 +387,9 @@ export default function ProfileSetup() {
       </View>
 
       <View style={styles.progressBar}>
-        <View style={[styles.progress, { width: `${(currentStep / 3) * 100}%` }]} />
+        <View
+          style={[styles.progress, { width: `${(currentStep / 3) * 100}%` }]}
+        />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -333,6 +503,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1F2937',
   },
+  placeholderText: {
+    color: '#9CA3AF',
+  },
+  religionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  religionCard: {
+    width: '30%',
+    aspectRatio: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    gap: 8,
+  },
+  selectedReligionCard: {
+    borderColor: Colors.primary,
+    backgroundColor: '#FFF1F2',
+  },
+  religionIcon: {
+    width: 32,
+    height: 32,
+  },
+  religionText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#374151',
+    textAlign: 'center',
+  },
+  selectedReligionText: {
+    color: Colors.primary,
+    fontWeight: '600',
+  },
   optionsRow: {
     flexDirection: 'row',
     gap: 12,
@@ -393,7 +601,7 @@ const styles = StyleSheet.create({
     borderColor: '#E11D48',
     height: 58,
     flex: 1,
-    marginEnd: 10
+    marginEnd: 10,
   },
   prevButtonText: {
     color: '#E11D48',

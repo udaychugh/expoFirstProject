@@ -6,13 +6,22 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Eye, EyeOff, Mail, Lock, Phone, User } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  Phone,
+  User,
+} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { ShowAlert } from '@/components/Alert';
+import PrimaryButton from '@/components/PrimaryButton';
 
 export default function Register() {
   const router = useRouter();
@@ -35,38 +44,60 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
+    router.push('/(onboarding)/profile-setup');
+    return;
     if (
       !formData.fullName ||
       !formData.email ||
       !formData.phone ||
       !formData.password
     ) {
-      Alert.alert('Error', 'Please fill in all fields');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Please fill in all fields',
+      });
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Please enter a valid email address',
+      });
       return;
     }
 
     // Password strength validation
     if (formData.password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Password must be at least 6 characters long',
+      });
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Passwords do not match',
+      });
       return;
     }
 
     // Phone number validation (basic)
     const phoneRegex = /^[+]?[\d\s\-\(\)]{10,}$/;
     if (!phoneRegex.test(formData.phone)) {
-      Alert.alert('Error', 'Please enter a valid phone number');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Please enter a valid phone number',
+      });
       return;
     }
 
@@ -78,19 +109,20 @@ export default function Register() {
     });
 
     if (result.success) {
-      Alert.alert(
-        'Registration Successful',
-        'Your account has been created successfully. Please complete your profile.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.push('/(onboarding)/profile-setup'),
-          },
-        ]
-      );
+      ShowAlert({
+        type: 'success',
+        title: 'Registration Successful',
+        message:
+          'Your account has been created successfully. Please complete your profile.',
+      });
+      router.push('/(onboarding)/profile-setup');
     } else {
       setError(result.error || 'Registration failed');
-      Alert.alert('Registration Failed', result.error || 'Please try again');
+      ShowAlert({
+        type: 'error',
+        title: 'Registration Failed',
+        message: result.error || 'Please try again',
+      });
     }
   };
 
@@ -118,32 +150,30 @@ export default function Register() {
               <Text style={styles.label}>Full Name</Text>
               <View style={styles.inputContainer}>
                 <User color="#9CA3AF" size={20} />
-<TextInput
-                style={styles.input}
-                value={formData.fullName}
-                onChangeText={(value) => handleInputChange('fullName', value)}
-                placeholder="Enter your full name"
-                placeholderTextColor="#9CA3AF"
-              />
+                <TextInput
+                  style={styles.input}
+                  value={formData.fullName}
+                  onChangeText={(value) => handleInputChange('fullName', value)}
+                  placeholder="Enter your full name"
+                  placeholderTextColor="#9CA3AF"
+                />
               </View>
-            
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email Address</Text>
-               <View style={styles.inputContainer}>
-              <Mail color="#9CA3AF" size={20} />
-<TextInput
-                style={styles.input}
-                value={formData.email}
-                onChangeText={(value) => handleInputChange('email', value)}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                placeholderTextColor="#9CA3AF"
-              />
-               </View>
-              
+              <View style={styles.inputContainer}>
+                <Mail color="#9CA3AF" size={20} />
+                <TextInput
+                  style={styles.input}
+                  value={formData.email}
+                  onChangeText={(value) => handleInputChange('email', value)}
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor="#9CA3AF"
+                />
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
@@ -151,15 +181,14 @@ export default function Register() {
               <View style={styles.inputContainer}>
                 <Phone color="#9CA3AF" size={20} />
                 <TextInput
-                style={styles.input}
-                value={formData.phone}
-                onChangeText={(value) => handleInputChange('phone', value)}
-                placeholder="Enter your phone number"
-                keyboardType="phone-pad"
-                placeholderTextColor="#9CA3AF"
-              />
+                  style={styles.input}
+                  value={formData.phone}
+                  onChangeText={(value) => handleInputChange('phone', value)}
+                  placeholder="Enter your phone number"
+                  keyboardType="phone-pad"
+                  placeholderTextColor="#9CA3AF"
+                />
               </View>
-            
             </View>
 
             <View style={styles.inputGroup}>
@@ -219,16 +248,11 @@ export default function Register() {
             </View>
           ) : null}
 
-          <TouchableOpacity
-            style={[
-              styles.registerButton,
-              isLoading && styles.registerButtonDisabled,
-            ]}
+          <PrimaryButton
+            title="Continue"
             onPress={handleRegister}
-            disabled={isLoading}
-          >
-            <Text style={styles.registerButtonText}>Continue</Text>
-          </TouchableOpacity>
+            enabled={!isLoading}
+          />
 
           <Text style={styles.termsText}>
             By creating an account, you agree to our Terms of Service and
@@ -285,7 +309,7 @@ const styles = StyleSheet.create({
     color: '#1F2937',
   },
   inputContainer: {
-   flexDirection: 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -321,7 +345,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 32,
+    marginVertical: 32,
   },
   errorContainer: {
     backgroundColor: '#FEF2F2',

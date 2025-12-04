@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Pressable,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   MapPin,
@@ -18,6 +11,7 @@ import {
 } from 'lucide-react-native';
 import AppImage from '@/components/AppImage';
 import { useRouter } from 'expo-router';
+import { ShowAlert } from '@/components/Alert';
 
 interface ShortlistProfile {
   id: string;
@@ -95,23 +89,17 @@ export default function Shortlist() {
   const sortedProfiles = [...pinnedProfiles, ...unpinnedProfiles];
 
   const handleUnmark = (id: string) => {
-    Alert.alert(
-      'Remove from Shortlist',
-      'Are you sure you want to remove this profile from your shortlist?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            setProfiles((prev) => prev.filter((profile) => profile.id !== id));
-          },
-        },
-      ]
-    );
+    // Remove the profile immediately and show success message
+    const profileToRemove = profiles.find((p) => p.id === id);
+    setProfiles((prev) => prev.filter((profile) => profile.id !== id));
+
+    if (profileToRemove) {
+      ShowAlert({
+        type: 'success',
+        title: 'Removed from Shortlist',
+        message: `${profileToRemove.name} has been removed from your shortlist.`,
+      });
+    }
   };
 
   const handlePin = (id: string) => {
@@ -126,10 +114,12 @@ export default function Shortlist() {
         // Check if already 3 pinned
         const pinnedCount = prev.filter((p) => p.isPinned).length;
         if (pinnedCount >= 3) {
-          Alert.alert(
-            'Maximum Pins Reached',
-            'You can only pin up to 3 profiles. Please unpin another profile first.'
-          );
+          ShowAlert({
+            type: 'error',
+            title: 'Maximum Pins Reached',
+            message:
+              'You can only pin up to 3 profiles. Please unpin another profile first.',
+          });
           return prev;
         }
         // Pin
