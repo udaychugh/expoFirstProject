@@ -29,7 +29,6 @@ class ApiService {
         'Content-Type': 'application/json',
       };
 
-      console.log("token = ", token);
       if (token) {
         defaultHeaders.Authorization = `Bearer ${token}`;
       }

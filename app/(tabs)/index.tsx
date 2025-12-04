@@ -1,56 +1,79 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, PanResponder, Animated, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  PanResponder,
+  Animated,
+  TouchableOpacity,
+  Image,
+  Pressable,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Heart, X, MapPin, Briefcase, GraduationCap, Info } from 'lucide-react-native';
+import {
+  Heart,
+  X,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Info,
+  Filter,
+  Star,
+} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import ApiService from '@/services/api';
-import { DUMMY_PROFILES } from '@/assets/profile';
+import { useAuth } from '@/contexts/AuthContext';
+import FilterBottomSheet, {
+  FilterOptions,
+} from '@/components/FilterBottomSheet';
+import AppImage from '@/components/AppImage';
 
 const { width, height } = Dimensions.get('window');
-const CARD_HEIGHT = height * 0.7;
-
+const CARD_HEIGHT = height * 0.6;
 
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
   const pan = useRef(new Animated.ValueXY()).current;
 
-  // TODO: TO be removed once get working with API
-  const userGender: 'male' | 'female' = 'male';
-  const filteredProfiles = DUMMY_PROFILES.filter(
-    p => p.gender !== userGender
-  );
-
-
-  const [profiles, setProfiles] = useState<any[]>(filteredProfiles);
+  const [profiles, setProfiles] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
 
   // Load profiles on component mount
-  // React.useEffect(() => {
-  //   loadProfiles();
-  // }, []);
+  useEffect(() => {
+    loadProfiles();
+  }, []);
 
-  // const loadProfiles = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   try {
-  //     const response = await ApiService.getDiscoveryProfiles({ limit: 10 });
-  //     if (response.success && response.data) {
-  //       setProfiles(response.data);
-  //     } else {
-  //       if (response.error?.startsWith('401')) {
-  //         router.replace('/welcome');
-  //       } else {
-  //       setError(response.error || 'Failed to load profiles');
-  //       }
-  //     }
-  //   } catch (err) {
-  //     setError('Network error. Please try again.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const loadProfiles = async (filters?: FilterOptions) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiService.getDiscoveryProfiles({
+        limit: 10,
+        ...filters,
+      });
+      if (response.success && response.data) {
+        console.log('Profiles loaded:', response.data);
+        setProfiles(response.data);
+        setCurrentIndex(0); // Reset to first profile when loading new results
+      } else {
+        if (response.error?.startsWith('401')) {
+          router.replace('/welcome');
+        } else {
+          setError(response.error || 'Failed to load profiles');
+        }
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
@@ -92,7 +115,6 @@ export default function Home() {
       //   profileId: currentProfile.id,
       //   action,
       // });
-
       // if (response.success && response.data?.isMatch && direction === 'right') {
       //   // Show match notification or navigate to match screen
       //   console.log('It\'s a match!', response.data);
@@ -140,7 +162,27 @@ export default function Home() {
     });
   };
 
-  const currentProfile = profiles[currentIndex];
+  const handleShortlist = () => {
+    const currentProfile = profiles[currentIndex];
+    if (!currentProfile) return;
+
+    // TODO: Call API to add profile to shortlist
+    console.log('Shortlisted profile:', currentProfile.id);
+
+    // Move to next profile without animation
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= profiles.length) {
+      setCurrentIndex(0);
+    } else {
+      setCurrentIndex(nextIndex);
+    }
+    pan.setValue({ x: 0, y: 0 });
+  };
+
+  const handleApplyFilters = (filters: FilterOptions) => {
+    setAppliedFilters(filters);
+    loadProfiles(filters);
+  };
 
   if (loading && profiles.length === 0) {
     return (
@@ -165,7 +207,7 @@ export default function Home() {
     );
   }
 
-  if (!currentProfile) {
+  if (!profiles || profiles.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyContainer}>
@@ -181,8 +223,27 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Discover</Text>
-        <Text style={styles.headerSubtitle}>Find your perfect match</Text>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.headerTitle}>Discover</Text>
+            <Text style={styles.headerSubtitle}>
+              Find your perfect life partner
+            </Text>
+          </View>
+          <Pressable
+            style={styles.filterButton}
+            onPress={() => setFilterModalVisible(true)}
+          >
+            <Filter color="#E11D48" size={24} />
+            {Object.keys(appliedFilters).length > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>
+                  {Object.keys(appliedFilters).length}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.cardContainer}>
@@ -205,38 +266,49 @@ export default function Home() {
           ]}
           {...panResponder.panHandlers}
         >
-          <Image 
-            source={{ uri: currentProfile.images?.[0] || 'https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg?auto=compress&cs=tinysrgb&w=400' }} 
-            style={styles.profileImage} 
+          <AppImage
+            src={profiles[currentIndex].images?.[0]}
+            style={styles.profileImage}
+            disableFullScreen={true}
           />
-          
+
           <View style={styles.overlay}>
             <View style={styles.profileInfo}>
-              <Text style={styles.name}>{currentProfile.name}, {currentProfile.age}</Text>
-              
+              <Text style={styles.name}>
+                {profiles[currentIndex].fullName}, {profiles[currentIndex].age}
+              </Text>
+
               <View style={styles.infoRow}>
                 <MapPin color="#FFFFFF" size={16} />
-                <Text style={styles.infoText}>{currentProfile.location}</Text>
+                <Text style={styles.infoText}>
+                  {JSON.stringify(profiles[currentIndex].location)}
+                </Text>
               </View>
-              
+
               <View style={styles.infoRow}>
                 <Briefcase color="#FFFFFF" size={16} />
-                <Text style={styles.infoText}>{currentProfile.occupation}</Text>
+                <Text style={styles.infoText}>
+                  {JSON.stringify(profiles[currentIndex].occupation)}
+                </Text>
               </View>
-              
+
               <View style={styles.infoRow}>
                 <GraduationCap color="#FFFFFF" size={16} />
-                <Text style={styles.infoText}>{currentProfile.education}</Text>
+                <Text style={styles.infoText}>
+                  {profiles[currentIndex].education}
+                </Text>
               </View>
-              
+
               <Text style={styles.bio} numberOfLines={2}>
-                {currentProfile.bio}
+                {profiles[currentIndex].bio}
               </Text>
             </View>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               style={styles.infoButton}
-              onPress={() => router.push(`/profile-details/${currentProfile.id}`)}
+              onPress={() =>
+                router.push(`/profile-details/${profiles[currentIndex].id}`)
+              }
             >
               <Info color="#FFFFFF" size={20} />
             </TouchableOpacity>
@@ -245,14 +317,66 @@ export default function Home() {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.passButton} onPress={handlePass}>
-          <X color="#EF4444" size={28} />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.likeButton} onPress={handleLike}>
-          <Heart color="#E11D48" size={28} />
-        </TouchableOpacity>
+        <Pressable
+          style={({ pressed }) => [
+            styles.passButton,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={handlePass}
+        >
+          {({ pressed }) => (
+            <>
+              <X color="#EF4444" size={24} />
+              <Text style={styles.actionLabel}>Not Interested</Text>
+            </>
+          )}
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.shortlistButton,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={handleShortlist}
+        >
+          {({ pressed }) => (
+            <>
+              <Star
+                color="#F59E0B"
+                size={28}
+                fill={pressed ? '#F59E0B' : 'none'}
+              />
+              <Text style={styles.actionLabelShortlist}>Shortlist</Text>
+            </>
+          )}
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.likeButton,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={handleLike}
+        >
+          {({ pressed }) => (
+            <>
+              <Heart
+                color="#E11D48"
+                size={24}
+                fill={pressed ? '#E11D48' : 'none'}
+              />
+              <Text style={styles.actionLabel}>Interested</Text>
+            </>
+          )}
+        </Pressable>
       </View>
+
+      <FilterBottomSheet
+        visible={filterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        onApply={handleApplyFilters}
+        initialFilters={appliedFilters}
+      />
     </SafeAreaView>
   );
 }
@@ -265,6 +389,10 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 24,
     paddingVertical: 16,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   headerTitle: {
@@ -276,6 +404,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
     marginTop: 4,
+  },
+  filterButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#FEE2E2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#E11D48',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  filterBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
   },
   loadingContainer: {
     flex: 1,
@@ -326,6 +480,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
+    marginTop: 20,
   },
   card: {
     width: width - 40,
@@ -395,42 +550,83 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-    gap: 40,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    gap: 12,
   },
   passButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: '#EF4444',
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+    borderWidth: 1.5,
+    borderColor: '#FEE2E2',
+  },
+  shortlistButton: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#F59E0B',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: '#FEF3C7',
   },
   likeButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 16,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
+    shadowColor: '#E11D48',
     shadowOffset: {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
+    borderWidth: 1.5,
+    borderColor: '#FEE2E2',
+  },
+  buttonPressed: {
+    transform: [{ scale: 0.95 }],
+    opacity: 0.8,
+  },
+  actionLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  actionLabelShortlist: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#F59E0B',
+    marginTop: 4,
   },
 });
