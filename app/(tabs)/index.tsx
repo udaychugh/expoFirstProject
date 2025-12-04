@@ -76,7 +76,11 @@ export default function Home() {
   };
 
   const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: () => false, // Don't capture on initial touch
+    onMoveShouldSetPanResponder: (evt, gestureState) => {
+      // Only capture if there's actual movement (swipe gesture)
+      return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+    },
     onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
       useNativeDriver: false,
     }),
@@ -272,8 +276,8 @@ export default function Home() {
             disableFullScreen={true}
           />
 
-          <View style={styles.overlay}>
-            <View style={styles.profileInfo}>
+          <View style={styles.overlay} pointerEvents="box-none">
+            <View style={styles.profileInfo} pointerEvents="none">
               <Text style={styles.name}>
                 {profiles[currentIndex].fullName}, {profiles[currentIndex].age}
               </Text>
@@ -304,14 +308,21 @@ export default function Home() {
               </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.infoButton}
-              onPress={() =>
-                router.push(`/profile-details/${profiles[currentIndex].id}`)
-              }
+            <Pressable
+              style={({ pressed }) => [
+                styles.infoButton,
+                pressed && styles.infoPressedEffect,
+              ]}
+              onPress={() => {
+                console.log(
+                  'Info button clicked! Profile ID:',
+                  profiles[currentIndex]._id
+                );
+                router.push(`/profile-details/${profiles[currentIndex]._id}`);
+              }}
             >
               <Info color="#FFFFFF" size={20} />
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </Animated.View>
       </View>
@@ -547,6 +558,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 12,
+    elevation: 5,
+    zIndex: 10,
+  },
+  infoPressedEffect: {
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    transform: [{ scale: 0.9 }],
+    opacity: 0.8,
   },
   actions: {
     flexDirection: 'row',

@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Heart, X, MessageCircle, MapPin, Briefcase, GraduationCap, Users, Calendar } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Heart,
+  X,
+  MessageCircle,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Users,
+} from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
 
 const { width } = Dimensions.get('window');
-
 
 export default function ProfileDetails() {
   const router = useRouter();
@@ -47,14 +64,26 @@ export default function ProfileDetails() {
       if (response.success) {
         if (response.data?.isMatch) {
           // Show match notification
-          Alert.alert('It\'s a Match!', 'You both liked each other!');
+          ShowAlert({
+            type: 'success',
+            title: "It's a Match!",
+            message: 'You both liked each other!',
+          });
         }
         router.back();
       } else {
-        Alert.alert('Error', response.error || 'Failed to like profile');
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to like profile',
+        });
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error. Please try again.');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
     }
   };
 
@@ -64,10 +93,18 @@ export default function ProfileDetails() {
       if (response.success) {
         router.back();
       } else {
-        Alert.alert('Error', response.error || 'Failed to pass profile');
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to pass profile',
+        });
       }
     } catch (error) {
-      Alert.alert('Error', 'Network error. Please try again.');
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
     }
   };
 
@@ -119,7 +156,7 @@ export default function ProfileDetails() {
           key={index}
           style={[
             styles.indicator,
-            index === currentImageIndex && styles.activeIndicator
+            index === currentImageIndex && styles.activeIndicator,
           ]}
         />
       ))}
@@ -144,11 +181,13 @@ export default function ProfileDetails() {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={(event) => {
-              const index = Math.round(event.nativeEvent.contentOffset.x / width);
+              const index = Math.round(
+                event.nativeEvent.contentOffset.x / width
+              );
               setCurrentImageIndex(index);
             }}
           >
-            {profile.images?.map((image, index) => (
+            {profile.images?.map((image: string, index: number) => (
               <Image
                 key={index}
                 source={{ uri: image }}
@@ -156,7 +195,9 @@ export default function ProfileDetails() {
               />
             )) || (
               <Image
-                source={{ uri: 'https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg?auto=compress&cs=tinysrgb&w=400' }}
+                source={{
+                  uri: 'https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg?auto=compress&cs=tinysrgb&w=400',
+                }}
                 style={styles.profileImage}
               />
             )}
@@ -166,24 +207,26 @@ export default function ProfileDetails() {
 
         {/* Basic Information */}
         <View style={styles.section}>
-          <Text style={styles.name}>{profile.name}, {profile.age}</Text>
-          
+          <Text style={styles.name}>
+            {profile.name}, {profile.age}
+          </Text>
+
           <View style={styles.infoGrid}>
             <View style={styles.infoRow}>
               <MapPin color="#6B7280" size={16} />
               <Text style={styles.infoText}>{profile.location}</Text>
             </View>
-            
+
             <View style={styles.infoRow}>
               <Briefcase color="#6B7280" size={16} />
               <Text style={styles.infoText}>{profile.occupation}</Text>
             </View>
-            
+
             <View style={styles.infoRow}>
               <GraduationCap color="#6B7280" size={16} />
               <Text style={styles.infoText}>{profile.education}</Text>
             </View>
-            
+
             <View style={styles.infoRow}>
               <Users color="#6B7280" size={16} />
               <Text style={styles.infoText}>{profile.maritalStatus}</Text>
@@ -200,38 +243,44 @@ export default function ProfileDetails() {
         {/* Personal Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Details</Text>
-          
+
           <View style={styles.detailsGrid}>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Religion</Text>
               <Text style={styles.detailValue}>{profile.religion}</Text>
             </View>
-            
+
             {profile.caste && (
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Caste</Text>
                 <Text style={styles.detailValue}>{profile.caste}</Text>
               </View>
             )}
-            
+
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Height</Text>
               <Text style={styles.detailValue}>{profile.height}</Text>
             </View>
-            
+
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Diet</Text>
-              <Text style={styles.detailValue}>{profile.lifestyle?.diet || 'Not specified'}</Text>
+              <Text style={styles.detailValue}>
+                {profile.lifestyle?.diet || 'Not specified'}
+              </Text>
             </View>
-            
+
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Smoking</Text>
-              <Text style={styles.detailValue}>{profile.lifestyle?.smoking || 'Not specified'}</Text>
+              <Text style={styles.detailValue}>
+                {profile.lifestyle?.smoking || 'Not specified'}
+              </Text>
             </View>
-            
+
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Drinking</Text>
-              <Text style={styles.detailValue}>{profile.lifestyle?.drinking || 'Not specified'}</Text>
+              <Text style={styles.detailValue}>
+                {profile.lifestyle?.drinking || 'Not specified'}
+              </Text>
             </View>
           </View>
         </View>
@@ -256,12 +305,12 @@ export default function ProfileDetails() {
         <TouchableOpacity style={styles.passButton} onPress={handlePass}>
           <X color="#EF4444" size={24} />
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={styles.connectButton} onPress={handleConnect}>
           <MessageCircle color="#FFFFFF" size={20} />
           <Text style={styles.connectButtonText}>Connect</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={styles.likeButton} onPress={handleLike}>
           <Heart color="#E11D48" size={24} />
         </TouchableOpacity>

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MessageCircle, MapPin, Clock } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -7,7 +14,7 @@ import ApiService from '@/services/api';
 
 export default function Matches() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'new' | 'all'>('new');
+  const [activeTab, setActiveTab] = useState<'Sent' | 'Received'>('Sent');
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,25 +24,23 @@ export default function Matches() {
   }, []);
 
   const loadMatches = async () => {
-    // setLoading(true);
-    // setError(null);
-    // try {
-    //   const response = await ApiService.getMatches();
-    //   if (response.success && response.data) {
-    //     setMatches(response.data);
-    //   } else {
-    //     setError(response.error || 'Failed to load matches');
-    //   }
-    // } catch (err) {
-    //   setError('Network error. Please try again.');
-    // } finally {
-    //   setLoading(false);
-    // }
-
-    setError("No matches found")
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiService.getMatches();
+      if (response.success && response.data) {
+        setMatches(response.data);
+      } else {
+        setError(response.error || 'Failed to load matches');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const newMatches = matches.filter(match => match.unread);
+  const newMatches = matches.filter((match) => match.unread);
   const allMatches = matches;
 
   const handleChatPress = (matchId: string) => {
@@ -43,68 +48,97 @@ export default function Matches() {
   };
 
   const renderMatch = (match: any) => (
-    <TouchableOpacity
+    <Pressable
       key={match.id}
-      style={[styles.matchCard, match.unread && styles.unreadMatch]}
+      style={({ pressed }) => [
+        styles.matchCard,
+        match.unread && styles.unreadMatch,
+        pressed && { opacity: 0.7 },
+      ]}
       onPress={() => handleChatPress(match.id)}
     >
       <Image source={{ uri: match.image }} style={styles.matchImage} />
-      
+
       <View style={styles.matchInfo}>
         <View style={styles.matchHeader}>
-          <Text style={styles.matchName}>{match.name}, {match.age}</Text>
+          <Text style={styles.matchName}>
+            {match.name}, {match.age}
+          </Text>
           {match.unread && <View style={styles.unreadDot} />}
         </View>
-        
+
         <View style={styles.locationRow}>
           <MapPin color="#6B7280" size={14} />
           <Text style={styles.locationText}>{match.location}</Text>
         </View>
-        
+
         <Text style={styles.lastMessage} numberOfLines={1}>
           {match.lastMessage}
         </Text>
-        
+
         <View style={styles.timeRow}>
           <Clock color="#9CA3AF" size={12} />
           <Text style={styles.timeText}>{match.matchedAt}</Text>
         </View>
       </View>
-      
-      <TouchableOpacity 
-        style={styles.chatButton}
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.chatButton,
+          pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] },
+        ]}
         onPress={() => handleChatPress(match.id)}
       >
         <MessageCircle color="#E11D48" size={20} />
-      </TouchableOpacity>
-    </TouchableOpacity>
+      </Pressable>
+    </Pressable>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Matches</Text>
-        <Text style={styles.headerSubtitle}>People who liked you back</Text>
+        <Text style={styles.headerTitle}>Connections</Text>
+        <Text style={styles.headerSubtitle}>
+          People you have connected with
+        </Text>
       </View>
 
       <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'new' && styles.activeTab]}
-          onPress={() => setActiveTab('new')}
+        <Pressable
+          style={({ pressed }) => [
+            styles.tab,
+            activeTab === 'Sent' && styles.activeTab,
+            pressed && { opacity: 0.8 },
+          ]}
+          onPress={() => setActiveTab('Sent')}
         >
-          <Text style={[styles.tabText, activeTab === 'new' && styles.activeTabText]}>
-            New ({newMatches.length})
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'Sent' && styles.activeTabText,
+            ]}
+          >
+            Sent ({newMatches.length})
           </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'all' && styles.activeTab]}
-          onPress={() => setActiveTab('all')}
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.tab,
+            activeTab === 'Received' && styles.activeTab,
+            pressed && { opacity: 0.8 },
+          ]}
+          onPress={() => setActiveTab('Received')}
         >
-          <Text style={[styles.tabText, activeTab === 'all' && styles.activeTabText]}>
-            All ({allMatches.length})
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'Received' && styles.activeTabText,
+            ]}
+          >
+            Received ({allMatches.length})
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -115,28 +149,36 @@ export default function Matches() {
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={loadMatches}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
+              ]}
+              onPress={loadMatches}
+            >
               <Text style={styles.retryButtonText}>Retry</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
-        ) : activeTab === 'new' ? (
+        ) : activeTab === 'Sent' ? (
           newMatches.length > 0 ? (
             newMatches.map(renderMatch)
           ) : (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>No new matches yet</Text>
-              <Text style={styles.emptyText}>Keep swiping to find more people who might be interested in you!</Text>
+              <Text style={styles.emptyTitle}>No connections sent</Text>
+              <Text style={styles.emptyText}>
+                Keep swiping to send more connections!
+              </Text>
             </View>
           )
+        ) : allMatches.length > 0 ? (
+          allMatches.map(renderMatch)
         ) : (
-          allMatches.length > 0 ? (
-            allMatches.map(renderMatch)
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>No matches yet</Text>
-              <Text style={styles.emptyText}>Start exploring profiles to find your perfect match!</Text>
-            </View>
-          )
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No connections received</Text>
+            <Text style={styles.emptyText}>
+              Start exploring profiles to receive more connections!
+            </Text>
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
