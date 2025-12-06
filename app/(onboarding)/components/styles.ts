@@ -1,0 +1,200 @@
+import { Colors } from '@/assets/colors/colors';
+import { StyleSheet } from 'react-native';
+
+export const profileStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  stepIndicator: {
+    fontSize: 16,
+    color: '#E11D48',
+    fontWeight: '500',
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: '#F3F4F6',
+    marginHorizontal: 24,
+    borderRadius: 2,
+  },
+  progress: {
+    height: '100%',
+    backgroundColor: '#E11D48',
+    borderRadius: 2,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  textArea: {
+    height: 100,
+    paddingTop: 14,
+  },
+  inputWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  inputText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1F2937',
+  },
+  placeholderText: {
+    color: '#9CA3AF',
+  },
+  religionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  religionCard: {
+    width: '30%',
+    aspectRatio: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    gap: 8,
+  },
+  selectedReligionCard: {
+    borderColor: Colors.primary,
+    backgroundColor: '#FFF1F2',
+  },
+  religionIcon: {
+    width: 32,
+    height: 32,
+  },
+  religionText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#374151',
+    textAlign: 'center',
+  },
+  selectedReligionText: {
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  optionsColumn: {
+    gap: 12,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  option: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  selectedOption: {
+    backgroundColor: '#E11D48',
+    borderColor: '#E11D48',
+  },
+  selectedOptionText: {
+    color: '#FFFFFF',
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    flexDirection: 'row',
+    width: '100%',
+  },
+  nextButton: {
+    backgroundColor: '#E11D48',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E11D48',
+    height: 58,
+    flex: 1,
+  },
+  nextButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  prevButton: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E11D48',
+    height: 58,
+    flex: 1,
+    marginEnd: 10,
+  },
+  prevButtonText: {
+    color: '#E11D48',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  stepContent: {
+    paddingTop: 32,
+  },
+  stepTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  stepSubtitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  form: {
+    gap: 24,
+  },
+  inputGroup: {
+    gap: 12,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#1F2937',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '500',
+  },
+});
