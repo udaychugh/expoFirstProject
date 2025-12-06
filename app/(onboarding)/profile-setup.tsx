@@ -11,8 +11,11 @@ import { ArrowLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import BasicInfoSetup from './components/basic-info-setup';
 import ProfessionalPersonaInfo from './components/prof-pres-info';
-import LocationAboutInfo from './components/location-info';
+import LifeStyle from './components/lifestyle';
 import { profileStyles } from './components/styles';
+import InterestSkills from './components/interestSkills';
+import Favourites from './components/favourites';
+import AddImages from './components/add-images';
 
 export default function ProfileSetup() {
   const router = useRouter();
@@ -36,7 +39,7 @@ export default function ProfileSetup() {
   };
 
   const handleNext = () => {
-    if (currentStep < 3) {
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
     } else {
       // Complete profile setup
@@ -63,7 +66,16 @@ export default function ProfileSetup() {
         );
 
       case 3:
-        return <LocationAboutInfo handleInputChange={handleInputChange} />;
+        return <LifeStyle handleNext={handleNext} />;
+
+      case 4:
+        return <InterestSkills handleNext={handleNext} />;
+
+      case 5:
+        return <Favourites handleNext={handleNext} />;
+
+      case 6:
+        return <AddImages handleNext={handleNext} />;
 
       default:
         return null;
@@ -77,14 +89,14 @@ export default function ProfileSetup() {
           <ArrowLeft color="#1F2937" size={24} />
         </TouchableOpacity>
         <Text style={profileStyles.title}>Profile Setup</Text>
-        <Text style={profileStyles.stepIndicator}>{currentStep}/3</Text>
+        <Text style={profileStyles.stepIndicator}>{currentStep}/6</Text>
       </View>
 
       <View style={profileStyles.progressBar}>
         <View
           style={[
             profileStyles.progress,
-            { width: `${(currentStep / 3) * 100}%` },
+            { width: `${(currentStep / 6) * 100}%` },
           ]}
         />
       </View>
@@ -102,7 +114,7 @@ export default function ProfileSetup() {
         )}
         <TouchableOpacity style={profileStyles.nextButton} onPress={handleNext}>
           <Text style={profileStyles.nextButtonText}>
-            {currentStep === 3 ? 'Complete Profile' : 'Next'}
+            {currentStep === 6 ? 'Complete Profile' : 'Next'}
           </Text>
         </TouchableOpacity>
       </View>
