@@ -317,6 +317,7 @@ export default function EditProfile() {
       });
 
       // Update personal details
+      // TODO: Add age and gender here after
       await ApiService.updatePersonalDetails({
         height: profileData.height,
         weight: profileData.weight,

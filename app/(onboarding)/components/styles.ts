@@ -102,8 +102,22 @@ export const profileStyles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
+  optionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
   option: {
     flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  gridOption: {
+    width: '48%',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,

@@ -89,12 +89,7 @@ export default function ProfileSetup() {
         />
       </View>
 
-      <ScrollView
-        style={profileStyles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        {renderStepContent()}
-      </ScrollView>
+      <View style={profileStyles.content}>{renderStepContent()}</View>
 
       <View style={profileStyles.footer}>
         {currentStep > 1 && (

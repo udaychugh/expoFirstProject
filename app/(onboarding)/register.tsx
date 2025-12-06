@@ -44,7 +44,7 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    router.push('/(onboarding)/profile-setup');
+    router.replace('/(onboarding)/profile-setup');
     return;
     if (
       !formData.fullName ||
@@ -115,7 +115,7 @@ export default function Register() {
         message:
           'Your account has been created successfully. Please complete your profile.',
       });
-      router.push('/(onboarding)/profile-setup');
+      router.replace('/(onboarding)/profile-setup');
     } else {
       setError(result.error || 'Registration failed');
       ShowAlert({

@@ -136,6 +136,8 @@ class ApiService {
   }
 
   async updatePersonalDetails(data: {
+    age?: string;
+    gender?: string;
     religion?: string;
     caste?: string;
     height?: string;

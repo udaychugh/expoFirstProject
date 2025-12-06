@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { profileStyles } from './styles';
+import { MapPin } from 'lucide-react-native';
 
 export default function ProfessionalPersonaInfo({
   handleInputChange,
@@ -9,8 +10,8 @@ export default function ProfessionalPersonaInfo({
 }) {
   const [occupation, setOccupation] = useState('');
   const [education, setEducation] = useState('');
-  const [height, setHeight] = useState('');
-  const [maritalStatus, setMaritalStatus] = useState('');
+  const [location, setLocation] = useState('');
+  const [bio, setBio] = useState('');
 
   return (
     <View style={profileStyles.stepContent}>
@@ -21,6 +22,40 @@ export default function ProfessionalPersonaInfo({
 
       <View style={profileStyles.form}>
         <View style={profileStyles.inputGroup}>
+          <Text style={profileStyles.label}>About Me</Text>
+          <TextInput
+            style={[profileStyles.input, profileStyles.textArea]}
+            value={bio}
+            onChangeText={(value) => {
+              setBio(value);
+              handleInputChange('bio', value);
+            }}
+            placeholder="Tell others about yourself, your interests, and what you're looking for..."
+            placeholderTextColor="#9CA3AF"
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+          />
+        </View>
+
+        <View style={profileStyles.inputGroup}>
+          <View style={profileStyles.inputGroup}>
+            <Text style={profileStyles.label}>Location</Text>
+            <View style={profileStyles.inputWithIcon}>
+              <MapPin color="#9CA3AF" size={20} />
+              <TextInput
+                style={profileStyles.inputText}
+                value={location}
+                onChangeText={(value) => {
+                  setLocation(value);
+                  handleInputChange('location', value);
+                }}
+                placeholder="City, State"
+                placeholderTextColor="#9CA3AF"
+              />
+            </View>
+          </View>
+
           <Text style={profileStyles.label}>Occupation</Text>
           <TextInput
             style={profileStyles.input}
@@ -46,49 +81,6 @@ export default function ProfessionalPersonaInfo({
             placeholder="Your highest qualification"
             placeholderTextColor="#9CA3AF"
           />
-        </View>
-
-        <View style={profileStyles.inputGroup}>
-          <Text style={profileStyles.label}>Height</Text>
-          <TextInput
-            style={profileStyles.input}
-            value={height}
-            onChangeText={(value) => {
-              setHeight(value);
-              handleInputChange('height', value);
-            }}
-            placeholder={`e.g., 5'6"`}
-            placeholderTextColor="#9CA3AF"
-          />
-        </View>
-
-        <View style={profileStyles.inputGroup}>
-          <Text style={profileStyles.label}>Marital Status</Text>
-          <View style={profileStyles.optionsColumn}>
-            {['Never Married', 'Divorced', 'Widowed'].map((status) => (
-              <TouchableOpacity
-                key={status}
-                style={[
-                  profileStyles.option,
-                  maritalStatus === status && profileStyles.selectedOption,
-                ]}
-                onPress={() => {
-                  setMaritalStatus(status);
-                  handleInputChange('maritalStatus', status);
-                }}
-              >
-                <Text
-                  style={[
-                    profileStyles.optionText,
-                    maritalStatus === status &&
-                      profileStyles.selectedOptionText,
-                  ]}
-                >
-                  {status}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
         </View>
       </View>
     </View>
