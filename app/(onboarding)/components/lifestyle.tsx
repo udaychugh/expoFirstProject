@@ -15,7 +15,6 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
   const [diet, setDiet] = useState('');
   const [drinkingHabit, setDrinkingHabit] = useState('');
   const [smokingHabit, setSmokingHabit] = useState('');
-  const [dressStyle, setDressStyle] = useState('');
 
   const [isLoading, setLoading] = useState(false);
 
@@ -25,7 +24,6 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
       diet,
       drinkingHabit,
       smokingHabit,
-      dressStyle,
     });
     handleNext();
   };
@@ -49,7 +47,6 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
                   {[
                     'Vegetarian',
                     'Eggetarian',
-                    'Both',
                     'Non-vegetarian',
                     'Jain',
                     'Vegan',
@@ -78,12 +75,12 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
               {/* Drinking Habit */}
               <View style={profileStyles.inputGroup}>
                 <Text style={profileStyles.label}>Drinking Habit</Text>
-                <View style={profileStyles.optionsRow}>
+                <View style={profileStyles.optionsGrid}>
                   {['No', 'Occasional', 'Regular'].map((option) => (
                     <TouchableOpacity
                       key={option}
                       style={[
-                        profileStyles.option,
+                        profileStyles.gridOption,
                         drinkingHabit === option &&
                           profileStyles.selectedOption,
                       ]}
@@ -106,12 +103,12 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
               {/* Smoking Habit */}
               <View style={profileStyles.inputGroup}>
                 <Text style={profileStyles.label}>Smoking Habit</Text>
-                <View style={profileStyles.optionsRow}>
+                <View style={profileStyles.optionsGrid}>
                   {['No', 'Occasional', 'Regular'].map((option) => (
                     <TouchableOpacity
                       key={option}
                       style={[
-                        profileStyles.option,
+                        profileStyles.gridOption,
                         smokingHabit === option && profileStyles.selectedOption,
                       ]}
                       onPress={() => setSmokingHabit(option)}
@@ -120,39 +117,6 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
                         style={[
                           profileStyles.optionText,
                           smokingHabit === option &&
-                            profileStyles.selectedOptionText,
-                        ]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              {/* Dress Style */}
-              <View style={[profileStyles.inputGroup, { marginBottom: 20 }]}>
-                <Text style={profileStyles.label}>Dress Style</Text>
-                <View style={profileStyles.optionsGrid}>
-                  {[
-                    'Traditional',
-                    'Western',
-                    'Casual',
-                    'Formal',
-                    'Mix of Both',
-                  ].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        profileStyles.gridOption,
-                        dressStyle === option && profileStyles.selectedOption,
-                      ]}
-                      onPress={() => setDressStyle(option)}
-                    >
-                      <Text
-                        style={[
-                          profileStyles.optionText,
-                          dressStyle === option &&
                             profileStyles.selectedOptionText,
                         ]}
                       >

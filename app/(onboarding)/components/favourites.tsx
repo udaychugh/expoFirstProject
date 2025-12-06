@@ -6,12 +6,14 @@ import {
   ScrollView,
   StyleSheet,
   FlatList,
+  Modal,
 } from 'react-native';
 import { profileStyles } from './styles';
 import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
 import { Image } from 'expo-image';
-import { Check } from 'lucide-react-native';
+import { Check, AlertCircle } from 'lucide-react-native';
+import { BOOKS, SONGS, MOVIES, VACATION_DESTINATIONS } from '../models/fav';
 
 export default function Favourites({ handleNext }: { handleNext: () => void }) {
   // Favourites states
@@ -21,256 +23,14 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
   const [vacationDestination, setVacationDestination] = useState<string[]>([]);
 
   const [isLoading, setLoading] = useState(false);
+  const [showSkipModal, setShowSkipModal] = useState(false);
 
-  // Data arrays with Unsplash images
-  const BOOKS = [
-    {
-      id: 'Fiction',
-      name: 'Fiction',
-      image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
-    },
-    {
-      id: 'Non-Fiction',
-      name: 'Non-Fiction',
-      image:
-        'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=400',
-    },
-    {
-      id: 'Mystery',
-      name: 'Mystery',
-      image:
-        'https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?w=400',
-    },
-    {
-      id: 'Romance',
-      name: 'Romance',
-      image:
-        'https://images.unsplash.com/photo-1474932430478-367dbb6832c1?w=400',
-    },
-    {
-      id: 'Sci-Fi',
-      name: 'Sci-Fi',
-      image:
-        'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400',
-    },
-    {
-      id: 'Biography',
-      name: 'Biography',
-      image:
-        'https://images.unsplash.com/photo-1531058020387-3be344556be6?w=400',
-    },
-    {
-      id: 'Self-Help',
-      name: 'Self-Help',
-      image:
-        'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
-    },
-    {
-      id: 'History',
-      name: 'History',
-      image:
-        'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=400',
-    },
-    {
-      id: 'Poetry',
-      name: 'Poetry',
-      image:
-        'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400',
-    },
-    {
-      id: 'Comics',
-      name: 'Comics',
-      image:
-        'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=400',
-    },
-  ];
-
-  const SONGS = [
-    {
-      id: 'English Pop',
-      name: 'English Pop',
-      image:
-        'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400',
-    },
-    {
-      id: 'Hindi',
-      name: 'Hindi',
-      image:
-        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400',
-    },
-    {
-      id: 'Punjabi',
-      name: 'Punjabi',
-      image:
-        'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400',
-    },
-    {
-      id: 'Bollywood',
-      name: 'Bollywood',
-      image:
-        'https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=400',
-    },
-    {
-      id: 'Rock',
-      name: 'Rock',
-      image:
-        'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=400',
-    },
-    {
-      id: 'Classical',
-      name: 'Classical',
-      image:
-        'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400',
-    },
-    {
-      id: 'Jazz',
-      name: 'Jazz',
-      image:
-        'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=400',
-    },
-    {
-      id: 'Hip-Hop',
-      name: 'Hip-Hop',
-      image:
-        'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=400',
-    },
-    {
-      id: 'EDM',
-      name: 'EDM',
-      image:
-        'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400',
-    },
-    {
-      id: 'Indie',
-      name: 'Indie',
-      image:
-        'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400',
-    },
-  ];
-
-  const MOVIES = [
-    {
-      id: 'Hollywood',
-      name: 'Hollywood',
-      image:
-        'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400',
-    },
-    {
-      id: 'Bollywood',
-      name: 'Bollywood',
-      image:
-        'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400',
-    },
-    {
-      id: 'Action',
-      name: 'Action',
-      image:
-        'https://images.unsplash.com/photo-1571847140471-1d7766e825ea?w=400',
-    },
-    {
-      id: 'Comedy',
-      name: 'Comedy',
-      image:
-        'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400',
-    },
-    {
-      id: 'Drama',
-      name: 'Drama',
-      image:
-        'https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400',
-    },
-    {
-      id: 'Thriller',
-      name: 'Thriller',
-      image:
-        'https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=400',
-    },
-    {
-      id: 'Horror',
-      name: 'Horror',
-      image:
-        'https://images.unsplash.com/photo-1509281373149-e957c6296406?w=400',
-    },
-    {
-      id: 'Romance',
-      name: 'Romance',
-      image:
-        'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400',
-    },
-    {
-      id: 'Sci-Fi',
-      name: 'Sci-Fi',
-      image:
-        'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400',
-    },
-    {
-      id: 'Animated',
-      name: 'Animated',
-      image:
-        'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400',
-    },
-  ];
-
-  const VACATION_DESTINATIONS = [
-    {
-      id: 'Mountains',
-      name: 'Mountains',
-      image:
-        'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
-    },
-    {
-      id: 'Beach',
-      name: 'Beach',
-      image:
-        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400',
-    },
-    {
-      id: 'City',
-      name: 'City',
-      image:
-        'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400',
-    },
-    {
-      id: 'Desert',
-      name: 'Desert',
-      image:
-        'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=400',
-    },
-    {
-      id: 'Countryside',
-      name: 'Countryside',
-      image:
-        'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400',
-    },
-    {
-      id: 'Islands',
-      name: 'Islands',
-      image: 'https://images.unsplash.com/photo-1559827260-dc066d6d1e27?w=400',
-    },
-    {
-      id: 'Historical Sites',
-      name: 'Historical Sites',
-      image:
-        'https://images.unsplash.com/photo-1525874684015-58379d421a52?w=400',
-    },
-    {
-      id: 'Adventure',
-      name: 'Adventure',
-      image:
-        'https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=400',
-    },
-    {
-      id: 'Wildlife',
-      name: 'Wildlife',
-      image:
-        'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=400',
-    },
-    {
-      id: 'Spiritual',
-      name: 'Spiritual',
-      image: 'https://images.unsplash.com/photo-1548013146-72479768bada?w=400',
-    },
-  ];
+  // Check if any selection is made
+  const hasSelections =
+    favoriteBooks.length > 0 ||
+    favoriteSongs.length > 0 ||
+    favoriteMovies.length > 0 ||
+    vacationDestination.length > 0;
 
   // Toggle selection for arrays
   const toggleSelection = (
@@ -286,13 +46,24 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
   };
 
   const handleSaveButton = () => {
-    // TODO: Implement save functionality
-    console.log({
-      favoriteBooks,
-      favoriteSongs,
-      favoriteMovies,
-      vacationDestination,
-    });
+    if (!hasSelections) {
+      // Show skip confirmation modal
+      setShowSkipModal(true);
+    } else {
+      // Save and continue
+      console.log({
+        favoriteBooks,
+        favoriteSongs,
+        favoriteMovies,
+        vacationDestination,
+      });
+      handleNext();
+    }
+  };
+
+  const handleSkipConfirm = () => {
+    setShowSkipModal(false);
+    console.log('Skipped favourites section');
     handleNext();
   };
 
@@ -300,8 +71,13 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={[profileStyles.stepContent, { paddingBottom: 20 }]}>
-          <Text style={profileStyles.stepTitle}>Your Favourites</Text>
-          <Text style={profileStyles.stepSubtitle}>Share what you love</Text>
+          <View style={styles.titleContainer}>
+            <Text style={profileStyles.stepTitle}>Your Favourites </Text>
+            <Text style={styles.optionalText}>(Optional)</Text>
+          </View>
+          <Text style={profileStyles.stepSubtitle}>
+            Share what you love to find better matches
+          </Text>
 
           <View style={profileStyles.form}>
             {/* Favourites Section */}
@@ -522,10 +298,48 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
         </View>
       </ScrollView>
       <PrimaryButton
-        title={isLoading ? 'Saving...' : 'Complete Profile'}
+        title={
+          isLoading ? 'Saving...' : hasSelections ? 'Complete Profile' : 'Skip'
+        }
         enabled={!isLoading}
         onPress={handleSaveButton}
       />
+
+      {/* Skip Confirmation Modal */}
+      <Modal
+        visible={showSkipModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowSkipModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalIconContainer}>
+              <AlertCircle color={Colors.primary} size={48} />
+            </View>
+
+            <Text style={styles.modalTitle}>Skip Favourites?</Text>
+            <Text style={styles.modalMessage}>
+              Sharing your favourite books, music, and movies can help you find
+              partners with similar tastes and boost your match score.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.continueButton}
+              onPress={() => setShowSkipModal(false)}
+            >
+              <Text style={styles.continueButtonText}>Add Favourites</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.skipButton}
+              onPress={handleSkipConfirm}
+            >
+              <Text style={styles.skipButtonText}>Skip Anyway</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -533,6 +347,16 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
 const styles = StyleSheet.create({
   section: {
     marginBottom: 32,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 8,
+  },
+  optionalText: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#9CA3AF',
   },
   horizontalList: {
     paddingVertical: 8,
@@ -585,5 +409,58 @@ const styles = StyleSheet.create({
   selectedCardText: {
     color: Colors.primary,
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalIconContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  continueButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  continueButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  skipButton: {
+    paddingVertical: 14,
+  },
+  skipButtonText: {
+    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });

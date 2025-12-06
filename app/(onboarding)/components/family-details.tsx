@@ -10,7 +10,13 @@ import {
 import { profileStyles } from './styles';
 import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
-import Slider from '@react-native-community/slider';
+import { X, Plus } from 'lucide-react-native';
+
+interface Sibling {
+  id: string;
+  name: string;
+  maritalStatus: 'Married' | 'Unmarried' | '';
+}
 
 export default function FamilyDetail({
   handleNext,
@@ -21,11 +27,42 @@ export default function FamilyDetail({
   const [motherName, setMotherName] = useState('');
   const [fatherOccupation, setFatherOccupation] = useState('');
   const [motherOccupation, setMotherOccupation] = useState('');
-  const [noOfBrothers, setNoOfBrothers] = useState(0);
-  const [noOfSisters, setNoOfSisters] = useState(0);
+  const [siblings, setSiblings] = useState<Sibling[]>([]);
   const [createdBy, setCreatedBy] = useState('');
 
   const [isLoading, setLoading] = useState(false);
+
+  const addSibling = () => {
+    const newSibling: Sibling = {
+      id: Date.now().toString(),
+      name: '',
+      maritalStatus: '',
+    };
+    setSiblings([...siblings, newSibling]);
+  };
+
+  const removeSibling = (id: string) => {
+    setSiblings(siblings.filter((sibling) => sibling.id !== id));
+  };
+
+  const updateSiblingName = (id: string, name: string) => {
+    setSiblings(
+      siblings.map((sibling) =>
+        sibling.id === id ? { ...sibling, name } : sibling
+      )
+    );
+  };
+
+  const updateSiblingMaritalStatus = (
+    id: string,
+    status: 'Married' | 'Unmarried'
+  ) => {
+    setSiblings(
+      siblings.map((sibling) =>
+        sibling.id === id ? { ...sibling, maritalStatus: status } : sibling
+      )
+    );
+  };
 
   const handleSaveButton = () => {
     // TODO: Implement save functionality
@@ -34,8 +71,7 @@ export default function FamilyDetail({
       motherName,
       fatherOccupation,
       motherOccupation,
-      noOfBrothers,
-      noOfSisters,
+      siblings,
       createdBy,
     });
     handleNext();
@@ -100,86 +136,139 @@ export default function FamilyDetail({
                 />
               </View>
 
-              {/* Number of Brothers */}
+              {/* Siblings Section */}
               <View style={profileStyles.inputGroup}>
-                <View style={styles.sliderHeader}>
-                  <Text style={profileStyles.label}>Number of Brothers</Text>
-                  <View style={styles.countBadge}>
-                    <Text style={styles.countText}>{noOfBrothers}</Text>
-                  </View>
+                <View style={styles.siblingHeader}>
+                  <Text style={profileStyles.label}>Siblings</Text>
+                  <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={addSibling}
+                  >
+                    <Plus color="#FFFFFF" size={18} />
+                    <Text style={styles.addButtonText}>Add Sibling</Text>
+                  </TouchableOpacity>
                 </View>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={10}
-                  step={1}
-                  value={noOfBrothers}
-                  onValueChange={setNoOfBrothers}
-                  minimumTrackTintColor={Colors.primary}
-                  maximumTrackTintColor="#D1D5DB"
-                  thumbTintColor={Colors.primary}
-                />
-                <View style={styles.sliderLabels}>
-                  <Text style={styles.sliderLabel}>0</Text>
-                  <Text style={styles.sliderLabel}>10</Text>
-                </View>
-              </View>
 
-              {/* Number of Sisters */}
-              <View style={profileStyles.inputGroup}>
-                <View style={styles.sliderHeader}>
-                  <Text style={profileStyles.label}>Number of Sisters</Text>
-                  <View style={styles.countBadge}>
-                    <Text style={styles.countText}>{noOfSisters}</Text>
+                {siblings.length === 0 ? (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>
+                      No siblings added yet. Tap "Add Sibling" to start.
+                    </Text>
                   </View>
-                </View>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={10}
-                  step={1}
-                  value={noOfSisters}
-                  onValueChange={setNoOfSisters}
-                  minimumTrackTintColor={Colors.primary}
-                  maximumTrackTintColor="#D1D5DB"
-                  thumbTintColor={Colors.primary}
-                />
-                <View style={styles.sliderLabels}>
-                  <Text style={styles.sliderLabel}>0</Text>
-                  <Text style={styles.sliderLabel}>10</Text>
-                </View>
+                ) : (
+                  <View style={styles.siblingsContainer}>
+                    {siblings.map((sibling, index) => (
+                      <View key={sibling.id} style={styles.siblingCard}>
+                        <View style={styles.siblingCardHeader}>
+                          <Text style={styles.siblingNumber}>
+                            Sibling {index + 1}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => removeSibling(sibling.id)}
+                            style={styles.removeButton}
+                          >
+                            <X color="#EF4444" size={20} />
+                          </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.siblingInputGroup}>
+                          <Text style={styles.siblingLabel}>Name</Text>
+                          <TextInput
+                            style={styles.siblingInput}
+                            value={sibling.name}
+                            onChangeText={(text) =>
+                              updateSiblingName(sibling.id, text)
+                            }
+                            placeholder="Enter sibling's name"
+                            placeholderTextColor="#9CA3AF"
+                          />
+                        </View>
+
+                        <View style={styles.siblingInputGroup}>
+                          <Text style={styles.siblingLabel}>
+                            Marital Status
+                          </Text>
+                          <View style={styles.maritalStatusContainer}>
+                            <TouchableOpacity
+                              style={[
+                                styles.maritalButton,
+                                sibling.maritalStatus === 'Married' &&
+                                  styles.maritalButtonSelected,
+                              ]}
+                              onPress={() =>
+                                updateSiblingMaritalStatus(
+                                  sibling.id,
+                                  'Married'
+                                )
+                              }
+                            >
+                              <Text
+                                style={[
+                                  styles.maritalButtonText,
+                                  sibling.maritalStatus === 'Married' &&
+                                    styles.maritalButtonTextSelected,
+                                ]}
+                              >
+                                Married
+                              </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[
+                                styles.maritalButton,
+                                sibling.maritalStatus === 'Unmarried' &&
+                                  styles.maritalButtonSelected,
+                              ]}
+                              onPress={() =>
+                                updateSiblingMaritalStatus(
+                                  sibling.id,
+                                  'Unmarried'
+                                )
+                              }
+                            >
+                              <Text
+                                style={[
+                                  styles.maritalButtonText,
+                                  sibling.maritalStatus === 'Unmarried' &&
+                                    styles.maritalButtonTextSelected,
+                                ]}
+                              >
+                                Unmarried
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
 
               {/* Created By */}
               <View style={[profileStyles.inputGroup, { marginBottom: 20 }]}>
                 <Text style={profileStyles.label}>Created By</Text>
                 <View style={profileStyles.optionsGrid}>
-                  {[
-                    'Father',
-                    'Mother',
-                    'Elder Brother',
-                    'Elder Sister',
-                    'Self',
-                  ].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        profileStyles.gridOption,
-                        createdBy === option && profileStyles.selectedOption,
-                      ]}
-                      onPress={() => setCreatedBy(option)}
-                    >
-                      <Text
+                  {['Father', 'Mother', 'Brother', 'Sister', 'Self'].map(
+                    (option) => (
+                      <TouchableOpacity
+                        key={option}
                         style={[
-                          profileStyles.optionText,
-                          createdBy === option &&
-                            profileStyles.selectedOptionText,
+                          profileStyles.gridOption,
+                          createdBy === option && profileStyles.selectedOption,
                         ]}
+                        onPress={() => setCreatedBy(option)}
                       >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <Text
+                          style={[
+                            profileStyles.optionText,
+                            createdBy === option &&
+                              profileStyles.selectedOptionText,
+                          ]}
+                        >
+                          {option}
+                        </Text>
+                      </TouchableOpacity>
+                    )
+                  )}
                 </View>
               </View>
             </View>
@@ -199,37 +288,107 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 32,
   },
-  sliderHeader: {
+  siblingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
-  countBadge: {
+  addButton: {
     backgroundColor: Colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    minWidth: 36,
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
   },
-  countText: {
+  addButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  slider: {
-    width: '100%',
-    height: 40,
+  emptyState: {
+    backgroundColor: '#F9FAFB',
+    padding: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
   },
-  sliderLabels: {
+  emptyStateText: {
+    color: '#9CA3AF',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  siblingsContainer: {
+    gap: 16,
+  },
+  siblingCard: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    gap: 12,
+  },
+  siblingCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 4,
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  sliderLabel: {
-    fontSize: 12,
-    color: '#9CA3AF',
+  siblingNumber: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
+  removeButton: {
+    padding: 4,
+  },
+  siblingInputGroup: {
+    gap: 8,
+  },
+  siblingLabel: {
+    fontSize: 14,
     fontWeight: '500',
+    color: '#6B7280',
+  },
+  siblingInput: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#1F2937',
+    backgroundColor: '#FFFFFF',
+  },
+  maritalStatusContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  maritalButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  maritalButtonSelected: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  maritalButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  maritalButtonTextSelected: {
+    color: '#FFFFFF',
   },
 });
