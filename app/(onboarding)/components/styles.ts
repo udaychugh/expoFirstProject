@@ -173,6 +173,7 @@ export const profileStyles = StyleSheet.create({
   },
   stepContent: {
     paddingTop: 32,
+    paddingBottom: 20,
   },
   stepTitle: {
     fontSize: 24,

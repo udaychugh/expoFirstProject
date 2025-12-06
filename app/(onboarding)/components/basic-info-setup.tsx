@@ -16,7 +16,7 @@ import InputBox from '@/components/InputBox';
 import PrimaryButton from '@/components/PrimaryButton';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
-import { router } from 'expo-router';
+import { RELIGIONS } from '../models/religions';
 
 export default function BasicInfoSetup({
   handleNext,
@@ -30,11 +30,8 @@ export default function BasicInfoSetup({
   const [religion, setReligion] = useState('');
   const [caste, setCaste] = useState('');
   const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
-  const [bodyType, setBodyType] = useState('');
-  const [complexion, setComplexion] = useState('');
 
   const [isLoading, setLoading] = useState(false);
 
@@ -86,15 +83,6 @@ export default function BasicInfoSetup({
       return;
     }
 
-    if (!weight) {
-      setLoading(false);
-      ShowAlert({
-        type: 'error',
-        title: 'Please Select your Weight',
-      });
-      return;
-    }
-
     if (!maritalStatus) {
       setLoading(false);
       ShowAlert({
@@ -104,45 +92,15 @@ export default function BasicInfoSetup({
       return;
     }
 
-    if (!bloodGroup) {
-      setLoading(false);
-      ShowAlert({
-        type: 'error',
-        title: 'Please Select your Blood Group',
-      });
-      return;
-    }
-
-    if (!bodyType) {
-      setLoading(false);
-      ShowAlert({
-        type: 'error',
-        title: 'Please Select your Body Type',
-      });
-      return;
-    }
-
-    if (!complexion) {
-      setLoading(false);
-      ShowAlert({
-        type: 'error',
-        title: 'Please Select your Complexion',
-      });
-      return;
-    }
-
     try {
       const response = await ApiService.updatePersonalDetails({
         age: formattedDate,
-        gender,
-        religion,
-        caste,
-        height,
-        weight,
-        maritalStatus,
-        bloodGroup,
-        bodyType,
-        complexion,
+        gender: gender,
+        religion: religion,
+        caste: caste,
+        height: height,
+        maritalStatus: maritalStatus,
+        bloodGroup: bloodGroup,
       });
 
       if (response.success) {
@@ -197,39 +155,6 @@ export default function BasicInfoSetup({
   const openDatePicker = () => {
     setShowDatePicker(true);
   };
-
-  const RELIGIONS = [
-    {
-      id: 'Hindu',
-      name: 'Hindu',
-      image: 'https://cdn-icons-png.flaticon.com/512/1533/1533913.png',
-    },
-    {
-      id: 'Christian',
-      name: 'Christian',
-      image: 'https://cdn-icons-png.flaticon.com/512/3004/3004024.png',
-    },
-    {
-      id: 'Sikh',
-      name: 'Sikh',
-      image: 'https://cdn-icons-png.flaticon.com/512/1533/1533924.png',
-    },
-    {
-      id: 'Buddhist',
-      name: 'Buddhist',
-      image: 'https://cdn-icons-png.flaticon.com/512/1533/1533908.png',
-    },
-    {
-      id: 'Jain',
-      name: 'Jain',
-      image: 'https://cdn-icons-png.flaticon.com/512/1533/1533918.png',
-    },
-    {
-      id: 'Other',
-      name: 'Other',
-      image: 'https://cdn-icons-png.flaticon.com/512/10412/10412463.png',
-    },
-  ];
 
   return (
     <>
@@ -321,19 +246,6 @@ export default function BasicInfoSetup({
                   setHeight(value);
                 }}
                 placeholder={`e.g., 5'6"`}
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-
-            <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Weight</Text>
-              <TextInput
-                style={profileStyles.input}
-                value={weight}
-                onChangeText={(value) => {
-                  setWeight(value);
-                }}
-                placeholder={`e.g., 60 KG`}
                 placeholderTextColor="#9CA3AF"
               />
             </View>
@@ -442,60 +354,6 @@ export default function BasicInfoSetup({
                     </TouchableOpacity>
                   )
                 )}
-              </View>
-            </View>
-
-            <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Body Type</Text>
-              <View style={profileStyles.optionsGrid}>
-                {['Slim', 'Athletic', 'Average', 'Chubby'].map((type) => (
-                  <TouchableOpacity
-                    key={type}
-                    style={[
-                      profileStyles.gridOption,
-                      bodyType === type && profileStyles.selectedOption,
-                    ]}
-                    onPress={() => {
-                      setBodyType(type);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        profileStyles.optionText,
-                        bodyType === type && profileStyles.selectedOptionText,
-                      ]}
-                    >
-                      {type}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            <View style={[profileStyles.inputGroup, { marginBottom: 20 }]}>
-              <Text style={profileStyles.label}>Complexion</Text>
-              <View style={profileStyles.optionsGrid}>
-                {['Very Fair', 'Fair', 'Wheatish', 'Dark'].map((tone) => (
-                  <TouchableOpacity
-                    key={tone}
-                    style={[
-                      profileStyles.gridOption,
-                      complexion === tone && profileStyles.selectedOption,
-                    ]}
-                    onPress={() => {
-                      setComplexion(tone);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        profileStyles.optionText,
-                        complexion === tone && profileStyles.selectedOptionText,
-                      ]}
-                    >
-                      {tone}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
               </View>
             </View>
           </View>
