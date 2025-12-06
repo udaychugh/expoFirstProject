@@ -55,7 +55,7 @@ export default function ProfileSetup() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <BasicInfoSetup handleInputChange={handleInputChange} />;
+        return <BasicInfoSetup handleNext={handleNext} />;
 
       case 2:
         return (

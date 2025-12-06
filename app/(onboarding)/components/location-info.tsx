@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  ActivityIndicator,
+  Linking,
+  Platform,
+} from 'react-native';
 import { profileStyles } from './styles';
 
 export default function LocationAboutInfo({
-  handleInputChange,
+  handleNext,
 }: {
-  handleInputChange: (field: string, value: string) => void;
+  handleNext: () => void;
 }) {
   return (
     <View style={profileStyles.stepContent}>
