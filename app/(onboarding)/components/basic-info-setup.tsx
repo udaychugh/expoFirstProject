@@ -4,15 +4,15 @@ import {
   Text,
   TouchableOpacity,
   Platform,
-  TextInput,
   ScrollView,
+  Pressable,
 } from 'react-native';
 import { profileStyles } from './styles';
 import { Calendar } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from '@/assets/colors/colors';
 import { Image } from 'expo-image';
-import InputBox from '@/components/InputBox';
+import InputOutlineBox from '@/components/InputOutlineBox';
 import PrimaryButton from '@/components/PrimaryButton';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
@@ -179,7 +179,7 @@ export default function BasicInfoSetup({
 
             <View style={profileStyles.inputGroup}>
               <Text style={profileStyles.label}>Date of Birth</Text>
-              <TouchableOpacity
+              <Pressable
                 style={profileStyles.inputWithIcon}
                 onPress={openDatePicker}
               >
@@ -192,7 +192,7 @@ export default function BasicInfoSetup({
                 >
                   {formattedDate || 'DD/MM/YYYY'}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
 
               {showDatePicker && (
                 <DateTimePicker
@@ -209,10 +209,9 @@ export default function BasicInfoSetup({
             </View>
 
             <View style={profileStyles.inputGroup}>
-              <InputBox
+              <InputOutlineBox
                 label="Height"
                 value={height}
-                icon={undefined}
                 onChangeText={(value) => {
                   setHeight(value);
                 }}
@@ -254,12 +253,11 @@ export default function BasicInfoSetup({
               </View>
             </View>
 
-            <View style={[profileStyles.inputGroup, { marginVertical: -20 }]}>
-              <InputBox
+            <View style={[profileStyles.inputGroup]}>
+              <InputOutlineBox
                 label="Caste/Community"
                 placeholder="Enter your caste/community"
                 value={caste}
-                icon={undefined}
                 onChangeText={(value) => {
                   setCaste(value);
                 }}

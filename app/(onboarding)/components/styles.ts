@@ -188,7 +188,7 @@ export const profileStyles = StyleSheet.create({
     lineHeight: 24,
   },
   form: {
-    gap: 24,
+    gap: 12,
   },
   inputGroup: {
     gap: 12,

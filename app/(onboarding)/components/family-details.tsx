@@ -11,6 +11,10 @@ import { profileStyles } from './styles';
 import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
 import { X, Plus } from 'lucide-react-native';
+import InputOutlineBox from '@/components/InputOutlineBox';
+import SelectBtns from './selectBtn';
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
 
 interface Sibling {
   id: string;
@@ -27,6 +31,7 @@ export default function FamilyDetail({
   const [motherName, setMotherName] = useState('');
   const [fatherOccupation, setFatherOccupation] = useState('');
   const [motherOccupation, setMotherOccupation] = useState('');
+  const [familyAnnualIncome, setFamilyAnnualIncome] = useState('');
   const [siblings, setSiblings] = useState<Sibling[]>([]);
   const [createdBy, setCreatedBy] = useState('');
 
@@ -64,17 +69,40 @@ export default function FamilyDetail({
     );
   };
 
-  const handleSaveButton = () => {
-    // TODO: Implement save functionality
-    console.log({
-      fatherName,
-      motherName,
-      fatherOccupation,
-      motherOccupation,
-      siblings,
-      createdBy,
-    });
-    handleNext();
+  const handleSaveButton = async () => {
+    try {
+      setLoading(true);
+      const response = await ApiService.updateFamilyDetails({
+        fatherName: fatherName,
+        motherName: motherName,
+        fatherOccupation: fatherOccupation,
+        motherOccupation: motherOccupation,
+        familyAnnualIncome: familyAnnualIncome,
+        siblings: siblings,
+        createdBy: createdBy,
+      });
+
+      if (response.success) {
+        ShowAlert({
+          type: 'success',
+          title: 'Profile Updated Successfully',
+        });
+        handleNext();
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Failed to Update Profile',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Failed to Update Profile',
+      });
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,191 +115,151 @@ export default function FamilyDetail({
           </Text>
 
           <View style={profileStyles.form}>
-            <View style={styles.section}>
-              {/* Father Name */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Father's Name</Text>
-                <TextInput
-                  style={profileStyles.input}
-                  value={fatherName}
-                  onChangeText={setFatherName}
-                  placeholder="Enter father's name"
-                  placeholderTextColor="#9CA3AF"
-                />
+            {/* Father Name */}
+            <InputOutlineBox
+              label="Father's Name"
+              value={fatherName}
+              onChangeText={setFatherName}
+              placeholder="Enter father's name"
+            />
+
+            {/* Mother Name */}
+            <InputOutlineBox
+              label="Mother's Name"
+              value={motherName}
+              onChangeText={setMotherName}
+              placeholder="Enter mother's name"
+            />
+
+            {/* Father Occupation */}
+            <InputOutlineBox
+              label="Father's Occupation"
+              value={fatherOccupation}
+              onChangeText={setFatherOccupation}
+              placeholder="Enter father's occupation"
+            />
+
+            {/* Mother Occupation */}
+            <InputOutlineBox
+              label="Mother's Occupation"
+              value={motherOccupation}
+              onChangeText={setMotherOccupation}
+              placeholder="Enter mother's occupation"
+            />
+
+            {/* Family Annual Income */}
+            <InputOutlineBox
+              label="Family Annual Income"
+              value={familyAnnualIncome}
+              onChangeText={setFamilyAnnualIncome}
+              placeholder="Enter family annual income"
+            />
+
+            {/* Siblings Section */}
+            <View style={profileStyles.inputGroup}>
+              <View style={styles.siblingHeader}>
+                <Text style={profileStyles.label}>Siblings</Text>
+                <TouchableOpacity style={styles.addButton} onPress={addSibling}>
+                  <Plus color="#FFFFFF" size={18} />
+                  <Text style={styles.addButtonText}>Add Sibling</Text>
+                </TouchableOpacity>
               </View>
 
-              {/* Mother Name */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Mother's Name</Text>
-                <TextInput
-                  style={profileStyles.input}
-                  value={motherName}
-                  onChangeText={setMotherName}
-                  placeholder="Enter mother's name"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              {/* Father Occupation */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Father's Occupation</Text>
-                <TextInput
-                  style={profileStyles.input}
-                  value={fatherOccupation}
-                  onChangeText={setFatherOccupation}
-                  placeholder="Enter father's occupation"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              {/* Mother Occupation */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Mother's Occupation</Text>
-                <TextInput
-                  style={profileStyles.input}
-                  value={motherOccupation}
-                  onChangeText={setMotherOccupation}
-                  placeholder="Enter mother's occupation"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              {/* Siblings Section */}
-              <View style={profileStyles.inputGroup}>
-                <View style={styles.siblingHeader}>
-                  <Text style={profileStyles.label}>Siblings</Text>
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={addSibling}
-                  >
-                    <Plus color="#FFFFFF" size={18} />
-                    <Text style={styles.addButtonText}>Add Sibling</Text>
-                  </TouchableOpacity>
+              {siblings.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateText}>
+                    No siblings added yet. Tap "Add Sibling" to start.
+                  </Text>
                 </View>
+              ) : (
+                <View style={styles.siblingsContainer}>
+                  {siblings.map((sibling, index) => (
+                    <View key={sibling.id} style={styles.siblingCard}>
+                      <View style={styles.siblingCardHeader}>
+                        <Text style={styles.siblingNumber}>
+                          Sibling {index + 1}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => removeSibling(sibling.id)}
+                          style={styles.removeButton}
+                        >
+                          <X color="#EF4444" size={20} />
+                        </TouchableOpacity>
+                      </View>
 
-                {siblings.length === 0 ? (
-                  <View style={styles.emptyState}>
-                    <Text style={styles.emptyStateText}>
-                      No siblings added yet. Tap "Add Sibling" to start.
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.siblingsContainer}>
-                    {siblings.map((sibling, index) => (
-                      <View key={sibling.id} style={styles.siblingCard}>
-                        <View style={styles.siblingCardHeader}>
-                          <Text style={styles.siblingNumber}>
-                            Sibling {index + 1}
-                          </Text>
+                      <View style={styles.siblingInputGroup}>
+                        <Text style={styles.siblingLabel}>Name</Text>
+                        <TextInput
+                          style={styles.siblingInput}
+                          value={sibling.name}
+                          onChangeText={(text) =>
+                            updateSiblingName(sibling.id, text)
+                          }
+                          placeholder="Enter sibling's name"
+                          placeholderTextColor="#9CA3AF"
+                        />
+                      </View>
+
+                      <View style={styles.siblingInputGroup}>
+                        <Text style={styles.siblingLabel}>Marital Status</Text>
+                        <View style={styles.maritalStatusContainer}>
                           <TouchableOpacity
-                            onPress={() => removeSibling(sibling.id)}
-                            style={styles.removeButton}
+                            style={[
+                              styles.maritalButton,
+                              sibling.maritalStatus === 'Married' &&
+                                styles.maritalButtonSelected,
+                            ]}
+                            onPress={() =>
+                              updateSiblingMaritalStatus(sibling.id, 'Married')
+                            }
                           >
-                            <X color="#EF4444" size={20} />
+                            <Text
+                              style={[
+                                styles.maritalButtonText,
+                                sibling.maritalStatus === 'Married' &&
+                                  styles.maritalButtonTextSelected,
+                              ]}
+                            >
+                              Married
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[
+                              styles.maritalButton,
+                              sibling.maritalStatus === 'Unmarried' &&
+                                styles.maritalButtonSelected,
+                            ]}
+                            onPress={() =>
+                              updateSiblingMaritalStatus(
+                                sibling.id,
+                                'Unmarried'
+                              )
+                            }
+                          >
+                            <Text
+                              style={[
+                                styles.maritalButtonText,
+                                sibling.maritalStatus === 'Unmarried' &&
+                                  styles.maritalButtonTextSelected,
+                              ]}
+                            >
+                              Unmarried
+                            </Text>
                           </TouchableOpacity>
                         </View>
-
-                        <View style={styles.siblingInputGroup}>
-                          <Text style={styles.siblingLabel}>Name</Text>
-                          <TextInput
-                            style={styles.siblingInput}
-                            value={sibling.name}
-                            onChangeText={(text) =>
-                              updateSiblingName(sibling.id, text)
-                            }
-                            placeholder="Enter sibling's name"
-                            placeholderTextColor="#9CA3AF"
-                          />
-                        </View>
-
-                        <View style={styles.siblingInputGroup}>
-                          <Text style={styles.siblingLabel}>
-                            Marital Status
-                          </Text>
-                          <View style={styles.maritalStatusContainer}>
-                            <TouchableOpacity
-                              style={[
-                                styles.maritalButton,
-                                sibling.maritalStatus === 'Married' &&
-                                  styles.maritalButtonSelected,
-                              ]}
-                              onPress={() =>
-                                updateSiblingMaritalStatus(
-                                  sibling.id,
-                                  'Married'
-                                )
-                              }
-                            >
-                              <Text
-                                style={[
-                                  styles.maritalButtonText,
-                                  sibling.maritalStatus === 'Married' &&
-                                    styles.maritalButtonTextSelected,
-                                ]}
-                              >
-                                Married
-                              </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={[
-                                styles.maritalButton,
-                                sibling.maritalStatus === 'Unmarried' &&
-                                  styles.maritalButtonSelected,
-                              ]}
-                              onPress={() =>
-                                updateSiblingMaritalStatus(
-                                  sibling.id,
-                                  'Unmarried'
-                                )
-                              }
-                            >
-                              <Text
-                                style={[
-                                  styles.maritalButtonText,
-                                  sibling.maritalStatus === 'Unmarried' &&
-                                    styles.maritalButtonTextSelected,
-                                ]}
-                              >
-                                Unmarried
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
-                        </View>
                       </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              {/* Created By */}
-              <View style={[profileStyles.inputGroup, { marginBottom: 20 }]}>
-                <Text style={profileStyles.label}>Created By</Text>
-                <View style={profileStyles.optionsGrid}>
-                  {['Father', 'Mother', 'Brother', 'Sister', 'Self'].map(
-                    (option) => (
-                      <TouchableOpacity
-                        key={option}
-                        style={[
-                          profileStyles.gridOption,
-                          createdBy === option && profileStyles.selectedOption,
-                        ]}
-                        onPress={() => setCreatedBy(option)}
-                      >
-                        <Text
-                          style={[
-                            profileStyles.optionText,
-                            createdBy === option &&
-                              profileStyles.selectedOptionText,
-                          ]}
-                        >
-                          {option}
-                        </Text>
-                      </TouchableOpacity>
-                    )
-                  )}
+                    </View>
+                  ))}
                 </View>
-              </View>
+              )}
             </View>
+
+            {/* Created By */}
+            <SelectBtns
+              title="Created By"
+              list={['Father', 'Mother', 'Brother', 'Sister', 'Self']}
+              onPress={setCreatedBy}
+            />
           </View>
         </View>
       </ScrollView>

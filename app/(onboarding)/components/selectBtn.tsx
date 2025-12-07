@@ -19,7 +19,7 @@ export default function SelectBtns({
   };
 
   return (
-    <View style={profileStyles.inputGroup}>
+    <View style={[profileStyles.inputGroup, { marginVertical: 10 }]}>
       <Text style={profileStyles.label}>{title}</Text>
       <View style={profileStyles.optionsGrid}>
         {list.map((group) => (

@@ -166,6 +166,25 @@ class ApiService {
     });
   }
 
+  async updateFamilyDetails(data: {
+    fatherName?: string;
+    motherName?: string;
+    fatherOccupation?: string;
+    motherOccupation?: string;
+    familyAnnualIncome?: string;
+    siblings?: {
+      id: string;
+      name: string;
+      maritalStatus: string;
+    }[];
+    createdBy?: string;
+  }): Promise<ApiResponse<UserProfile>> {
+    return this.makeRequest('/profile/family-details', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
   async updateLifestyle(data: {
     diet?: string;
     drinkingHabit?: string;

@@ -17,7 +17,7 @@ import * as Location from 'expo-location';
 import { Colors } from '@/assets/colors/colors';
 import { MapPin, AlertCircle, X } from 'lucide-react-native';
 import PrimaryButton from '@/components/PrimaryButton';
-import InputBox from '@/components/InputBox';
+import InputOutlineBox from '@/components/InputOutlineBox';
 import ApiService from '@/services/api';
 
 interface LocationData {
@@ -414,41 +414,33 @@ export default function ProfessionalPersonaInfo({
               </>
             )}
 
-            <View style={profileStyles.inputGroup}>
-              <InputBox
-                label="Occupation"
-                value={occupation}
-                icon={undefined}
-                onChangeText={(value) => {
-                  setOccupation(value);
-                }}
-                placeholder="What do you do for work?"
-              />
-            </View>
+            <InputOutlineBox
+              label="Occupation"
+              value={occupation}
+              onChangeText={(value) => {
+                setOccupation(value);
+              }}
+              placeholder="What do you do for work?"
+            />
 
-            <View style={profileStyles.inputGroup}>
-              <InputBox
-                label="Annual Salary"
-                value={salary}
-                icon={undefined}
-                onChangeText={(value) => {
-                  setSalary(value);
-                }}
-                placeholder="What is your annual salary?"
-              />
-            </View>
+            <InputOutlineBox
+              label="Annual Salary"
+              value={salary}
+              onChangeText={(value) => {
+                setSalary(value);
+              }}
+              placeholder="What is your annual salary?"
+              keyboardType="numeric"
+            />
 
-            <View style={profileStyles.inputGroup}>
-              <InputBox
-                label="Education"
-                value={education}
-                icon={undefined}
-                onChangeText={(value) => {
-                  setEducation(value);
-                }}
-                placeholder="Your highest qualification"
-              />
-            </View>
+            <InputOutlineBox
+              label="Education"
+              value={education}
+              onChangeText={(value) => {
+                setEducation(value);
+              }}
+              placeholder="Your highest qualification"
+            />
           </View>
         </View>
       </ScrollView>
