@@ -190,10 +190,10 @@ class ApiService {
   }
 
   async updateFavorites(data: {
-    favoriteBooks?: string;
-    favoriteSongs?: string;
-    favoriteMovies?: string;
-    vacationDestination?: string;
+    favoriteBooks?: string[];
+    favoriteSongs?: string[];
+    favoriteMovies?: string[];
+    vacationDestination?: string[];
   }): Promise<ApiResponse<UserProfile>> {
     return this.makeRequest('/profile/favorites', {
       method: 'PUT',

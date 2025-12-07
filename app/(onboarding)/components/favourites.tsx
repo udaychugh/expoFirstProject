@@ -5,15 +5,16 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  FlatList,
   Modal,
 } from 'react-native';
 import { profileStyles } from './styles';
 import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
-import { Image } from 'expo-image';
-import { Check, AlertCircle } from 'lucide-react-native';
+import { AlertCircle } from 'lucide-react-native';
 import { BOOKS, SONGS, MOVIES, VACATION_DESTINATIONS } from '../models/fav';
+import SelectList from './selectList';
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
 
 export default function Favourites({ handleNext }: { handleNext: () => void }) {
   // Favourites states
@@ -32,32 +33,41 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
     favoriteMovies.length > 0 ||
     vacationDestination.length > 0;
 
-  // Toggle selection for arrays
-  const toggleSelection = (
-    item: string,
-    selectedArray: string[],
-    setSelectedArray: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    if (selectedArray.includes(item)) {
-      setSelectedArray(selectedArray.filter((i) => i !== item));
-    } else {
-      setSelectedArray([...selectedArray, item]);
-    }
-  };
-
-  const handleSaveButton = () => {
+  const handleSaveButton = async () => {
     if (!hasSelections) {
       // Show skip confirmation modal
       setShowSkipModal(true);
     } else {
-      // Save and continue
-      console.log({
-        favoriteBooks,
-        favoriteSongs,
-        favoriteMovies,
-        vacationDestination,
-      });
-      handleNext();
+      try {
+        setLoading(true);
+        const response = await ApiService.updateFavorites({
+          favoriteBooks: favoriteBooks,
+          favoriteSongs: favoriteSongs,
+          favoriteMovies: favoriteMovies,
+          vacationDestination: vacationDestination,
+        });
+
+        if (response.success) {
+          ShowAlert({
+            type: 'success',
+            title: 'Profile Updated Successfully',
+          });
+          handleNext();
+        } else {
+          ShowAlert({
+            type: 'error',
+            title: 'Failed to Update Profile',
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        ShowAlert({
+          type: 'error',
+          title: 'Failed to Update Profile',
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -80,220 +90,29 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
           </Text>
 
           <View style={profileStyles.form}>
-            {/* Favourites Section */}
-            <View style={styles.section}>
-              {/* Favorite Books */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Favorite Books </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={BOOKS}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.horizontalList}
-                  renderItem={({ item }) => {
-                    const isSelected = favoriteBooks.includes(item.id);
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.imageCard,
-                          isSelected && styles.selectedImageCard,
-                        ]}
-                        onPress={() =>
-                          toggleSelection(
-                            item.id,
-                            favoriteBooks,
-                            setFavoriteBooks
-                          )
-                        }
-                      >
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                          />
-                          {isSelected && (
-                            <View style={styles.checkmarkOverlay}>
-                              <View style={styles.checkmarkCircle}>
-                                <Check color="#FFFFFF" size={16} />
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.cardText,
-                            isSelected && styles.selectedCardText,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
+            <SelectList
+              title="Favorite Books"
+              listData={BOOKS}
+              setItemData={setFavoriteBooks}
+            />
 
-              {/* Favorite Songs */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Favorite Music </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={SONGS}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.horizontalList}
-                  renderItem={({ item }) => {
-                    const isSelected = favoriteSongs.includes(item.id);
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.imageCard,
-                          isSelected && styles.selectedImageCard,
-                        ]}
-                        onPress={() =>
-                          toggleSelection(
-                            item.id,
-                            favoriteSongs,
-                            setFavoriteSongs
-                          )
-                        }
-                      >
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                          />
-                          {isSelected && (
-                            <View style={styles.checkmarkOverlay}>
-                              <View style={styles.checkmarkCircle}>
-                                <Check color="#FFFFFF" size={16} />
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.cardText,
-                            isSelected && styles.selectedCardText,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
+            <SelectList
+              title="Favorite Music"
+              listData={SONGS}
+              setItemData={setFavoriteSongs}
+            />
 
-              {/* Favorite Movies */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Favorite Movies </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={MOVIES}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.horizontalList}
-                  renderItem={({ item }) => {
-                    const isSelected = favoriteMovies.includes(item.id);
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.imageCard,
-                          isSelected && styles.selectedImageCard,
-                        ]}
-                        onPress={() =>
-                          toggleSelection(
-                            item.id,
-                            favoriteMovies,
-                            setFavoriteMovies
-                          )
-                        }
-                      >
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                          />
-                          {isSelected && (
-                            <View style={styles.checkmarkOverlay}>
-                              <View style={styles.checkmarkCircle}>
-                                <Check color="#FFFFFF" size={16} />
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.cardText,
-                            isSelected && styles.selectedCardText,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
+            <SelectList
+              title="Favorite Movies"
+              listData={MOVIES}
+              setItemData={setFavoriteMovies}
+            />
 
-              {/* Vacation Destinations */}
-              <View style={[profileStyles.inputGroup, { marginBottom: 20 }]}>
-                <Text style={profileStyles.label}>Dream Vacation </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={VACATION_DESTINATIONS}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.horizontalList}
-                  renderItem={({ item }) => {
-                    const isSelected = vacationDestination.includes(item.id);
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.imageCard,
-                          isSelected && styles.selectedImageCard,
-                        ]}
-                        onPress={() =>
-                          toggleSelection(
-                            item.id,
-                            vacationDestination,
-                            setVacationDestination
-                          )
-                        }
-                      >
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                          />
-                          {isSelected && (
-                            <View style={styles.checkmarkOverlay}>
-                              <View style={styles.checkmarkCircle}>
-                                <Check color="#FFFFFF" size={16} />
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.cardText,
-                            isSelected && styles.selectedCardText,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
-            </View>
+            <SelectList
+              title="Dream Vacation"
+              listData={VACATION_DESTINATIONS}
+              setItemData={setVacationDestination}
+            />
           </View>
         </View>
       </ScrollView>

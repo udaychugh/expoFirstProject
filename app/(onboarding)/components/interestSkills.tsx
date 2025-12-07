@@ -5,15 +5,16 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  FlatList,
   Modal,
 } from 'react-native';
 import { profileStyles } from './styles';
 import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
-import { Image } from 'expo-image';
-import { Check, AlertCircle } from 'lucide-react-native';
+import { AlertCircle } from 'lucide-react-native';
 import { HOBBIES, SPORTS_FITNESS, LANGUAGES } from '../models/interests';
+import SelectList from './selectList';
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
 
 export default function InterestSkills({
   handleNext,
@@ -34,31 +35,41 @@ export default function InterestSkills({
     sportsAndFitness.length > 0 ||
     languagesSpoken.length > 0;
 
-  // Toggle selection for arrays
-  const toggleSelection = (
-    item: string,
-    selectedArray: string[],
-    setSelectedArray: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    if (selectedArray.includes(item)) {
-      setSelectedArray(selectedArray.filter((i) => i !== item));
-    } else {
-      setSelectedArray([...selectedArray, item]);
-    }
-  };
-
-  const handleSaveButton = () => {
+  const handleSaveButton = async () => {
     if (!hasSelections) {
       // Show skip confirmation modal
       setShowSkipModal(true);
     } else {
-      // Save and continue
-      console.log({
-        hobbies,
-        sportsAndFitness,
-        languagesSpoken,
-      });
-      handleNext();
+      setLoading(true);
+
+      try {
+        const response = await ApiService.updateInterests({
+          hobbies: hobbies,
+          sportsAndFitness: sportsAndFitness,
+          languagesSpoken: languagesSpoken,
+        });
+
+        if (response.success) {
+          ShowAlert({
+            type: 'success',
+            title: 'Profile Updated Successfully',
+          });
+          handleNext();
+        } else {
+          ShowAlert({
+            type: 'error',
+            title: 'Failed to Update Profile',
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        ShowAlert({
+          type: 'error',
+          title: 'Failed to Update Profile',
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -81,163 +92,23 @@ export default function InterestSkills({
           </Text>
 
           <View style={profileStyles.form}>
-            {/* Interests Section */}
-            <View style={styles.section}>
-              {/* Hobbies */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Hobbies & Interests </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={HOBBIES}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.horizontalList}
-                  renderItem={({ item }) => {
-                    const isSelected = hobbies.includes(item.id);
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.imageCard,
-                          isSelected && styles.selectedImageCard,
-                        ]}
-                        onPress={() =>
-                          toggleSelection(item.id, hobbies, setHobbies)
-                        }
-                      >
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                          />
-                          {isSelected && (
-                            <View style={styles.checkmarkOverlay}>
-                              <View style={styles.checkmarkCircle}>
-                                <Check color="#FFFFFF" size={16} />
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.cardText,
-                            isSelected && styles.selectedCardText,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
+            <SelectList
+              title="Hobbies & Interests"
+              listData={HOBBIES}
+              setItemData={setHobbies}
+            />
 
-              {/* Sports & Fitness */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Sports & Fitness </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={SPORTS_FITNESS}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.horizontalList}
-                  renderItem={({ item }) => {
-                    const isSelected = sportsAndFitness.includes(item.id);
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.imageCard,
-                          isSelected && styles.selectedImageCard,
-                        ]}
-                        onPress={() =>
-                          toggleSelection(
-                            item.id,
-                            sportsAndFitness,
-                            setSportsAndFitness
-                          )
-                        }
-                      >
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                          />
-                          {isSelected && (
-                            <View style={styles.checkmarkOverlay}>
-                              <View style={styles.checkmarkCircle}>
-                                <Check color="#FFFFFF" size={16} />
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.cardText,
-                            isSelected && styles.selectedCardText,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
+            <SelectList
+              title="Sports & Fitness"
+              listData={SPORTS_FITNESS}
+              setItemData={setSportsAndFitness}
+            />
 
-              {/* Languages Spoken */}
-              <View style={[profileStyles.inputGroup, { marginBottom: 20 }]}>
-                <Text style={profileStyles.label}>Languages Spoken </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={LANGUAGES}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.horizontalList}
-                  renderItem={({ item }) => {
-                    const isSelected = languagesSpoken.includes(item.id);
-                    return (
-                      <TouchableOpacity
-                        style={[
-                          styles.imageCard,
-                          isSelected && styles.selectedImageCard,
-                        ]}
-                        onPress={() =>
-                          toggleSelection(
-                            item.id,
-                            languagesSpoken,
-                            setLanguagesSpoken
-                          )
-                        }
-                      >
-                        <View style={styles.imageContainer}>
-                          <Image
-                            source={{ uri: item.image }}
-                            style={styles.cardImage}
-                            contentFit="cover"
-                          />
-                          {isSelected && (
-                            <View style={styles.checkmarkOverlay}>
-                              <View style={styles.checkmarkCircle}>
-                                <Check color="#FFFFFF" size={16} />
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                        <Text
-                          style={[
-                            styles.cardText,
-                            isSelected && styles.selectedCardText,
-                          ]}
-                        >
-                          {item.name}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-              </View>
-            </View>
+            <SelectList
+              title="Languages Spoken"
+              listData={LANGUAGES}
+              setItemData={setLanguagesSpoken}
+            />
           </View>
         </View>
       </ScrollView>

@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { profileStyles } from './styles';
-import { Colors } from '@/assets/colors/colors';
 import PrimaryButton from '@/components/PrimaryButton';
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
+import SelectBtns from './selectBtn';
 
 export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
   // Lifestyle states
@@ -18,14 +14,64 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
 
   const [isLoading, setLoading] = useState(false);
 
-  const handleSaveButton = () => {
-    // TODO: Implement save functionality
-    console.log({
-      diet,
-      drinkingHabit,
-      smokingHabit,
-    });
-    handleNext();
+  const handleSaveButton = async () => {
+    setLoading(true);
+
+    if (!diet) {
+      setLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Diet is required',
+      });
+      return;
+    }
+
+    if (!drinkingHabit) {
+      setLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Drinking Habit is required',
+      });
+      return;
+    }
+
+    if (!smokingHabit) {
+      setLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Smoking Habit is required',
+      });
+      return;
+    }
+
+    try {
+      const response = await ApiService.updateLifestyle({
+        diet: diet,
+        drinkingHabit: drinkingHabit,
+        smokingHabit: smokingHabit,
+      });
+
+      if (response.success) {
+        ShowAlert({
+          type: 'success',
+          title: 'Profile Updated Successfully',
+        });
+        handleNext();
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Failed to Update Profile',
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      ShowAlert({
+        type: 'error',
+        title: 'Failed to Update Profile',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,95 +84,35 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
           </Text>
 
           <View style={profileStyles.form}>
-            {/* Lifestyle Section */}
-            <View style={styles.section}>
-              {/* Diet */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Diet Preference</Text>
-                <View style={profileStyles.optionsGrid}>
-                  {[
-                    'Vegetarian',
-                    'Eggetarian',
-                    'Non-vegetarian',
-                    'Jain',
-                    'Vegan',
-                  ].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        profileStyles.gridOption,
-                        diet === option && profileStyles.selectedOption,
-                      ]}
-                      onPress={() => setDiet(option)}
-                    >
-                      <Text
-                        style={[
-                          profileStyles.optionText,
-                          diet === option && profileStyles.selectedOptionText,
-                        ]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
+            <SelectBtns
+              title="Diet Preference"
+              list={[
+                'Vegetarian',
+                'Eggetarian',
+                'Non-vegetarian',
+                'Jain',
+                'Vegan',
+              ]}
+              onPress={(value) => {
+                setDiet(value);
+              }}
+            />
 
-              {/* Drinking Habit */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Drinking Habit</Text>
-                <View style={profileStyles.optionsGrid}>
-                  {['No', 'Occasional', 'Regular'].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        profileStyles.gridOption,
-                        drinkingHabit === option &&
-                          profileStyles.selectedOption,
-                      ]}
-                      onPress={() => setDrinkingHabit(option)}
-                    >
-                      <Text
-                        style={[
-                          profileStyles.optionText,
-                          drinkingHabit === option &&
-                            profileStyles.selectedOptionText,
-                        ]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
+            <SelectBtns
+              title="Drinking Habit"
+              list={['No', 'Occasional', 'Regular']}
+              onPress={(value) => {
+                setDrinkingHabit(value);
+              }}
+            />
 
-              {/* Smoking Habit */}
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Smoking Habit</Text>
-                <View style={profileStyles.optionsGrid}>
-                  {['No', 'Occasional', 'Regular'].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        profileStyles.gridOption,
-                        smokingHabit === option && profileStyles.selectedOption,
-                      ]}
-                      onPress={() => setSmokingHabit(option)}
-                    >
-                      <Text
-                        style={[
-                          profileStyles.optionText,
-                          smokingHabit === option &&
-                            profileStyles.selectedOptionText,
-                        ]}
-                      >
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </View>
+            <SelectBtns
+              title="Smoking Habit"
+              list={['No', 'Occasional', 'Regular']}
+              onPress={(value) => {
+                setSmokingHabit(value);
+              }}
+            />
           </View>
         </View>
       </ScrollView>
@@ -138,9 +124,3 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginBottom: 32,
-  },
-});
