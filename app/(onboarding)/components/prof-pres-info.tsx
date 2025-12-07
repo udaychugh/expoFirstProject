@@ -17,21 +17,26 @@ import * as Location from 'expo-location';
 import { Colors } from '@/assets/colors/colors';
 import { MapPin, AlertCircle, X } from 'lucide-react-native';
 import PrimaryButton from '@/components/PrimaryButton';
+import InputBox from '@/components/InputBox';
+import ApiService from '@/services/api';
 
 interface LocationData {
   city: string;
   state: string;
   country: string;
-  latitude: number;
-  longitude: number;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export default function ProfessionalPersonaInfo({
-  handleInputChange,
+  handleNext,
 }: {
-  handleInputChange: (field: string, value: string) => void;
+  handleNext: () => void;
 }) {
   const [occupation, setOccupation] = useState('');
+  const [salary, setSalary] = useState('');
   const [education, setEducation] = useState('');
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState<LocationData | null>(null);
@@ -47,7 +52,112 @@ export default function ProfessionalPersonaInfo({
   const [permanentLocation, setPermanentLocation] = useState('');
   const [sameAsCurrentPermanent, setSameAsCurrentPermanent] = useState(false);
 
-  const handleSaveButton = () => {};
+  const handleSaveButton = async () => {
+    setBtnLoading(true);
+
+    if (!occupation) {
+      setBtnLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Occupation is required',
+      });
+      return;
+    }
+
+    if (!salary) {
+      setBtnLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Salary is required',
+      });
+      return;
+    }
+
+    if (!education) {
+      setBtnLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Education is required',
+      });
+      return;
+    }
+
+    if (!bio) {
+      setBtnLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Bio is required',
+      });
+      return;
+    }
+
+    if (!location) {
+      setBtnLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Location is required',
+      });
+      return;
+    }
+
+    if (!jobLocation) {
+      setBtnLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Job Location is required',
+      });
+      return;
+    }
+
+    if (!permanentLocation) {
+      setBtnLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Permanent Location is required',
+      });
+      return;
+    }
+
+    let isNRI = false;
+
+    if (location.country.toLowerCase() != 'india') {
+      isNRI = true;
+    }
+
+    try {
+      const response = await ApiService.updateBasicInfo({
+        location: location,
+        jobLocation: jobLocation,
+        permanentLocation: permanentLocation,
+        occupation: occupation,
+        salary: salary,
+        education: education,
+        bio: bio,
+        isNRI: isNRI,
+      });
+
+      if (response.success) {
+        ShowAlert({
+          type: 'success',
+          title: 'Profile Updated Successfully',
+        });
+        handleNext();
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Failed to Update Profile',
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      ShowAlert({
+        type: 'error',
+        title: 'Failed to Update Profile',
+      });
+    } finally {
+      setBtnLoading(false);
+    }
+  };
 
   const handleLocationPress = async () => {
     setIsLoading(true);
@@ -92,20 +202,10 @@ export default function ProfessionalPersonaInfo({
           city: address.city || address.subregion || '',
           state: address.region || '',
           country: address.country || '',
-          latitude,
-          longitude,
+          coordinates: { latitude, longitude },
         };
 
         setLocation(locationData);
-
-        // Pass location data to parent
-        handleInputChange('city', locationData.city);
-        handleInputChange('state', locationData.state);
-        handleInputChange('country', locationData.country);
-        handleInputChange(
-          'coordinates',
-          `${locationData.latitude},${locationData.longitude}`
-        );
 
         ShowAlert({
           type: 'success',
@@ -130,7 +230,6 @@ export default function ProfessionalPersonaInfo({
     if (checked && location) {
       const formattedLocation = `${location.city}, ${location.state}, ${location.country}`;
       setJobLocation(formattedLocation);
-      handleInputChange('jobLocation', formattedLocation);
     }
   };
 
@@ -140,7 +239,6 @@ export default function ProfessionalPersonaInfo({
     if (checked && location) {
       const formattedLocation = `${location.city}, ${location.state}, ${location.country}`;
       setPermanentLocation(formattedLocation);
-      handleInputChange('permanentLocation', formattedLocation);
     }
   };
 
@@ -171,7 +269,6 @@ export default function ProfessionalPersonaInfo({
                 value={bio}
                 onChangeText={(value) => {
                   setBio(value);
-                  handleInputChange('bio', value);
                 }}
                 placeholder="Tell others about yourself, your interests, and what you're looking for..."
                 placeholderTextColor="#9CA3AF"
@@ -182,170 +279,174 @@ export default function ProfessionalPersonaInfo({
             </View>
 
             <View style={profileStyles.inputGroup}>
-              <View style={profileStyles.inputGroup}>
-                <Text style={profileStyles.label}>Current Location</Text>
+              <Text style={profileStyles.label}>Current Location</Text>
 
-                <TouchableOpacity
-                  style={styles.locationButton}
-                  onPress={handleLocationPress}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <ActivityIndicator color={Colors.primary} size="small" />
-                  ) : (
-                    <MapPin color={Colors.primary} size={20} />
-                  )}
-                  <View style={styles.locationTextContainer}>
-                    {location ? (
-                      <>
-                        <Text style={styles.locationText}>
-                          {location.city}, {location.state}
-                        </Text>
-                        <Text style={styles.locationSubText}>
-                          {location.country}
-                        </Text>
-                      </>
-                    ) : (
-                      <Text style={styles.locationPlaceholder}>
-                        {isLoading
-                          ? 'Fetching location...'
-                          : 'Tap to get your current location'}
-                      </Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
-
-                {location && (
-                  <View style={styles.coordinatesContainer}>
-                    <Text style={styles.coordinatesText}>
-                      📍 {location.latitude.toFixed(6)},{' '}
-                      {location.longitude.toFixed(6)}
-                    </Text>
-                  </View>
+              <TouchableOpacity
+                style={styles.locationButton}
+                onPress={handleLocationPress}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={Colors.primary} size="small" />
+                ) : (
+                  <MapPin color={Colors.primary} size={20} />
                 )}
-              </View>
+                <View style={styles.locationTextContainer}>
+                  {location ? (
+                    <>
+                      <Text style={styles.locationText}>
+                        {location.city}, {location.state}
+                      </Text>
+                      <Text style={styles.locationSubText}>
+                        {location.country}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text style={styles.locationPlaceholder}>
+                      {isLoading
+                        ? 'Fetching location...'
+                        : 'Tap to get your current location'}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
 
-              {/* Show Job and Permanent Location only after current location is fetched */}
               {location && (
-                <>
-                  {/* Job Location */}
-                  <View style={profileStyles.inputGroup}>
-                    <Text style={profileStyles.label}>Job Location</Text>
-                    <TextInput
-                      style={[
-                        profileStyles.input,
-                        sameAsCurrentJob && styles.disabledInput,
-                      ]}
-                      value={jobLocation}
-                      onChangeText={(value) => {
-                        setJobLocation(value);
-                        handleInputChange('jobLocation', value);
-                      }}
-                      placeholder="Enter your job location"
-                      placeholderTextColor="#9CA3AF"
-                      editable={!sameAsCurrentJob}
-                    />
-                    <TouchableOpacity
-                      style={styles.checkboxContainer}
-                      onPress={() =>
-                        handleJobLocationCheckbox(!sameAsCurrentJob)
-                      }
-                      disabled={!location}
-                    >
-                      <View
-                        style={[
-                          styles.checkbox,
-                          sameAsCurrentJob && styles.checkboxChecked,
-                          !location && styles.checkboxDisabled,
-                        ]}
-                      >
-                        {sameAsCurrentJob && (
-                          <Text style={styles.checkboxCheck}>✓</Text>
-                        )}
-                      </View>
-                      <Text
-                        style={[
-                          styles.checkboxLabel,
-                          !location && styles.checkboxLabelDisabled,
-                        ]}
-                      >
-                        Same as current location
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* Permanent Location */}
-                  <View style={profileStyles.inputGroup}>
-                    <Text style={profileStyles.label}>Permanent Location</Text>
-                    <TextInput
-                      style={[
-                        profileStyles.input,
-                        sameAsCurrentPermanent && styles.disabledInput,
-                      ]}
-                      value={permanentLocation}
-                      onChangeText={(value) => {
-                        setPermanentLocation(value);
-                        handleInputChange('permanentLocation', value);
-                      }}
-                      placeholder="Enter your permanent location"
-                      placeholderTextColor="#9CA3AF"
-                      editable={!sameAsCurrentPermanent}
-                    />
-                    <TouchableOpacity
-                      style={styles.checkboxContainer}
-                      onPress={() =>
-                        handlePermanentLocationCheckbox(!sameAsCurrentPermanent)
-                      }
-                      disabled={!location}
-                    >
-                      <View
-                        style={[
-                          styles.checkbox,
-                          sameAsCurrentPermanent && styles.checkboxChecked,
-                          !location && styles.checkboxDisabled,
-                        ]}
-                      >
-                        {sameAsCurrentPermanent && (
-                          <Text style={styles.checkboxCheck}>✓</Text>
-                        )}
-                      </View>
-                      <Text
-                        style={[
-                          styles.checkboxLabel,
-                          !location && styles.checkboxLabelDisabled,
-                        ]}
-                      >
-                        Same as current location
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
+                <View style={styles.coordinatesContainer}>
+                  <Text style={styles.coordinatesText}>
+                    📍 {location.coordinates.latitude.toFixed(6)},{' '}
+                    {location.coordinates.longitude.toFixed(6)}
+                  </Text>
+                </View>
               )}
+            </View>
 
-              <Text style={profileStyles.label}>Occupation</Text>
-              <TextInput
-                style={profileStyles.input}
+            {/* Show Job and Permanent Location only after current location is fetched */}
+            {location && (
+              <>
+                {/* Job Location */}
+                <View style={profileStyles.inputGroup}>
+                  <Text style={profileStyles.label}>Job Location</Text>
+                  <TextInput
+                    style={[
+                      profileStyles.input,
+                      sameAsCurrentJob && styles.disabledInput,
+                    ]}
+                    value={jobLocation}
+                    onChangeText={(value) => {
+                      setJobLocation(value);
+                    }}
+                    placeholder="Enter your job location"
+                    placeholderTextColor="#9CA3AF"
+                    editable={!sameAsCurrentJob}
+                  />
+                  <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => handleJobLocationCheckbox(!sameAsCurrentJob)}
+                    disabled={!location}
+                  >
+                    <View
+                      style={[
+                        styles.checkbox,
+                        sameAsCurrentJob && styles.checkboxChecked,
+                        !location && styles.checkboxDisabled,
+                      ]}
+                    >
+                      {sameAsCurrentJob && (
+                        <Text style={styles.checkboxCheck}>✓</Text>
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        styles.checkboxLabel,
+                        !location && styles.checkboxLabelDisabled,
+                      ]}
+                    >
+                      Same as current location
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Permanent Location */}
+                <View style={profileStyles.inputGroup}>
+                  <Text style={profileStyles.label}>Permanent Location</Text>
+                  <TextInput
+                    style={[
+                      profileStyles.input,
+                      sameAsCurrentPermanent && styles.disabledInput,
+                    ]}
+                    value={permanentLocation}
+                    onChangeText={(value) => {
+                      setPermanentLocation(value);
+                    }}
+                    placeholder="Enter your permanent location"
+                    placeholderTextColor="#9CA3AF"
+                    editable={!sameAsCurrentPermanent}
+                  />
+                  <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() =>
+                      handlePermanentLocationCheckbox(!sameAsCurrentPermanent)
+                    }
+                    disabled={!location}
+                  >
+                    <View
+                      style={[
+                        styles.checkbox,
+                        sameAsCurrentPermanent && styles.checkboxChecked,
+                        !location && styles.checkboxDisabled,
+                      ]}
+                    >
+                      {sameAsCurrentPermanent && (
+                        <Text style={styles.checkboxCheck}>✓</Text>
+                      )}
+                    </View>
+                    <Text
+                      style={[
+                        styles.checkboxLabel,
+                        !location && styles.checkboxLabelDisabled,
+                      ]}
+                    >
+                      Same as current location
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+
+            <View style={profileStyles.inputGroup}>
+              <InputBox
+                label="Occupation"
                 value={occupation}
+                icon={undefined}
                 onChangeText={(value) => {
                   setOccupation(value);
-                  handleInputChange('occupation', value);
                 }}
                 placeholder="What do you do for work?"
-                placeholderTextColor="#9CA3AF"
               />
             </View>
 
             <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Education</Text>
-              <TextInput
-                style={profileStyles.input}
+              <InputBox
+                label="Annual Salary"
+                value={salary}
+                icon={undefined}
+                onChangeText={(value) => {
+                  setSalary(value);
+                }}
+                placeholder="What is your annual salary?"
+              />
+            </View>
+
+            <View style={profileStyles.inputGroup}>
+              <InputBox
+                label="Education"
                 value={education}
+                icon={undefined}
                 onChangeText={(value) => {
                   setEducation(value);
-                  handleInputChange('education', value);
                 }}
                 placeholder="Your highest qualification"
-                placeholderTextColor="#9CA3AF"
               />
             </View>
           </View>

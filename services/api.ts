@@ -124,8 +124,20 @@ class ApiService {
 
   async updateBasicInfo(data: {
     name?: string;
-    location?: string;
+    location?: {
+      city: string;
+      state: string;
+      country: string;
+      coordinates: {
+        latitude: number;
+        longitude: number;
+      };
+    };
+    jobLocation?: string;
+    permanentLocation?: string;
+    isNRI?: boolean;
     occupation?: string;
+    salary?: string;
     education?: string;
     bio?: string;
   }): Promise<ApiResponse<UserProfile>> {

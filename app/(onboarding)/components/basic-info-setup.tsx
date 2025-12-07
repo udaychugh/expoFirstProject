@@ -17,6 +17,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 import { RELIGIONS } from '../models/religions';
+import SelectBtns from './selectBtn';
 
 export default function BasicInfoSetup({
   handleNext,
@@ -116,6 +117,10 @@ export default function BasicInfoSetup({
         });
       }
     } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Failed to Update Profile',
+      });
       console.log(error);
     } finally {
       setLoading(false);
@@ -164,47 +169,13 @@ export default function BasicInfoSetup({
           <Text style={profileStyles.stepSubtitle}>Tell us about yourself</Text>
 
           <View style={profileStyles.form}>
-            <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Gender</Text>
-              <View style={profileStyles.optionsRow}>
-                <TouchableOpacity
-                  style={[
-                    profileStyles.option,
-                    gender === 'Male' && profileStyles.selectedOption,
-                  ]}
-                  onPress={() => {
-                    setGender('Male');
-                  }}
-                >
-                  <Text
-                    style={[
-                      profileStyles.optionText,
-                      gender === 'Male' && profileStyles.selectedOptionText,
-                    ]}
-                  >
-                    Male
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    profileStyles.option,
-                    gender === 'Female' && profileStyles.selectedOption,
-                  ]}
-                  onPress={() => {
-                    setGender('Female');
-                  }}
-                >
-                  <Text
-                    style={[
-                      profileStyles.optionText,
-                      gender === 'Female' && profileStyles.selectedOptionText,
-                    ]}
-                  >
-                    Female
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <SelectBtns
+              title="Gender"
+              list={['Male', 'Female']}
+              onPress={(value) => {
+                setGender(value);
+              }}
+            />
 
             <View style={profileStyles.inputGroup}>
               <Text style={profileStyles.label}>Date of Birth</Text>
@@ -238,15 +209,14 @@ export default function BasicInfoSetup({
             </View>
 
             <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Height</Text>
-              <TextInput
-                style={profileStyles.input}
+              <InputBox
+                label="Height"
                 value={height}
+                icon={undefined}
                 onChangeText={(value) => {
                   setHeight(value);
                 }}
                 placeholder={`e.g., 5'6"`}
-                placeholderTextColor="#9CA3AF"
               />
             </View>
 
@@ -296,66 +266,21 @@ export default function BasicInfoSetup({
               />
             </View>
 
-            <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Marital Status</Text>
-              <View style={profileStyles.optionsGrid}>
-                {['Never Married', 'Divorced', 'Widowed', 'Separated'].map(
-                  (status) => (
-                    <TouchableOpacity
-                      key={status}
-                      style={[
-                        profileStyles.gridOption,
-                        maritalStatus === status &&
-                          profileStyles.selectedOption,
-                      ]}
-                      onPress={() => {
-                        setMaritalStatus(status);
-                      }}
-                    >
-                      <Text
-                        style={[
-                          profileStyles.optionText,
-                          maritalStatus === status &&
-                            profileStyles.selectedOptionText,
-                        ]}
-                      >
-                        {status}
-                      </Text>
-                    </TouchableOpacity>
-                  )
-                )}
-              </View>
-            </View>
+            <SelectBtns
+              title="Marital Status"
+              list={['Never Married', 'Divorced', 'Widowed', 'Separated']}
+              onPress={(value) => {
+                setMaritalStatus(value);
+              }}
+            />
 
-            <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Blood Group</Text>
-              <View style={profileStyles.optionsGrid}>
-                {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(
-                  (group) => (
-                    <TouchableOpacity
-                      key={group}
-                      style={[
-                        profileStyles.gridOption,
-                        bloodGroup === group && profileStyles.selectedOption,
-                      ]}
-                      onPress={() => {
-                        setBloodGroup(group);
-                      }}
-                    >
-                      <Text
-                        style={[
-                          profileStyles.optionText,
-                          bloodGroup === group &&
-                            profileStyles.selectedOptionText,
-                        ]}
-                      >
-                        {group}
-                      </Text>
-                    </TouchableOpacity>
-                  )
-                )}
-              </View>
-            </View>
+            <SelectBtns
+              title="Blood Group"
+              list={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
+              onPress={(value) => {
+                setBloodGroup(value);
+              }}
+            />
           </View>
         </View>
       </ScrollView>

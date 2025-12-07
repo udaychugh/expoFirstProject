@@ -86,9 +86,7 @@ export default function ProfileSetup() {
         return <BasicInfoSetup handleNext={handleNext} />;
 
       case 2:
-        return (
-          <ProfessionalPersonaInfo handleInputChange={handleInputChange} />
-        );
+        return <ProfessionalPersonaInfo handleNext={handleNext} />;
 
       case 3:
         return <FamilyDetail handleNext={handleNext} />;
