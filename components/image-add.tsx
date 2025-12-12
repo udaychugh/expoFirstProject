@@ -6,17 +6,16 @@ import AppImage from './AppImage';
 import { ShowAlert } from './Alert';
 import * as ImagePicker from 'expo-image-picker';
 import { Plus, X } from 'lucide-react-native';
-import {
-  NestableScrollContainer,
-  NestableDraggableFlatList,
-} from 'react-native-draggable-flatlist';
+import { DraggableGrid } from 'react-native-draggable-grid';
 
 export default function ImageAdd({
   images,
   setImages,
+  setScrollEnabled,
 }: {
   images: string[];
   setImages: React.Dispatch<React.SetStateAction<string[]>>;
+  setScrollEnabled?: (enabled: boolean) => void;
 }) {
   const handleImagePicker = async () => {
     if (images.length >= 6) {
@@ -45,6 +44,30 @@ export default function ImageAdd({
     setImages(newImages);
   };
 
+  const gridData = React.useMemo(() => {
+    return images.map((uri) => ({ key: uri, uri }));
+  }, [images]);
+
+  const renderGridItem = (
+    item: { key: string; uri: string },
+    index: number
+  ) => (
+    <View key={item.key} style={styles.imageContainer}>
+      <AppImage src={item.uri} style={styles.image} disableFullScreen={true} />
+      <Pressable
+        style={styles.removeButton}
+        onPress={() => handleRemoveImage(index)}
+      >
+        <X color="#FFFFFF" size={16} />
+      </Pressable>
+      {index === 0 && (
+        <View style={styles.mainBadge}>
+          <Text style={styles.mainBadgeText}>Main</Text>
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <View style={profileStyles.form}>
       <View style={styles.section}>
@@ -54,58 +77,25 @@ export default function ImageAdd({
         </Text>
 
         <View style={styles.imagesGrid}>
-          <NestableScrollContainer>
-            <NestableDraggableFlatList
-              data={images}
-              numColumns={3}
-              renderItem={({ item, drag, isActive }) => {
-                const index = images.indexOf(item);
-                return (
-                  <Pressable
-                    key={index}
-                    style={[
-                      styles.imageContainer,
-                      isActive && styles.imageContainerActive,
-                    ]}
-                    onLongPress={drag}
-                    disabled={isActive}
-                  >
-                    <AppImage
-                      src={item}
-                      style={styles.image}
-                      disableFullScreen={false}
-                    />
-                    <Pressable
-                      style={styles.removeButton}
-                      onPress={() => handleRemoveImage(index)}
-                    >
-                      <X color="#FFFFFF" size={16} />
-                    </Pressable>
-                    {index === 0 && (
-                      <View style={styles.mainBadge}>
-                        <Text style={styles.mainBadgeText}>Main</Text>
-                      </View>
-                    )}
-                  </Pressable>
-                );
-              }}
-              onDragEnd={({ data }) => setImages(data)}
-              keyExtractor={(item, index) => `image-${index}`}
-              ListFooterComponent={
-                images.length < 6 ? (
-                  <View style={styles.addButtonContainer}>
-                    <Pressable
-                      style={styles.addButton}
-                      onPress={handleImagePicker}
-                    >
-                      <Plus color="#9CA3AF" size={32} />
-                      <Text style={styles.addButtonText}>Add Photo</Text>
-                    </Pressable>
-                  </View>
-                ) : null
-              }
-            />
-          </NestableScrollContainer>
+          <DraggableGrid
+            numColumns={3}
+            renderItem={renderGridItem}
+            data={gridData}
+            onDragRelease={(data) => {
+              setScrollEnabled?.(true);
+              setImages(data.map((item) => item.uri));
+            }}
+            onDragStart={() => setScrollEnabled?.(false)}
+          />
+
+          {images.length < 6 && (
+            <View style={styles.addButtonContainer}>
+              <Pressable style={styles.addButton} onPress={handleImagePicker}>
+                <Plus color="#9CA3AF" size={32} />
+                <Text style={styles.addButtonText}>Add Photo</Text>
+              </Pressable>
+            </View>
+          )}
         </View>
 
         {images.length === 0 && (
