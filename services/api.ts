@@ -250,10 +250,18 @@ class ApiService {
     const formData = new FormData();
 
     imageUris.forEach((uri, index) => {
+      const extension = uri.split('.').pop()?.toLowerCase() || 'jpg';
+
+      const mimeType =
+        extension === 'png'
+          ? 'image/png'
+          : extension === 'webp'
+          ? 'image/webp'
+          : 'image/jpeg';
       formData.append('images', {
         uri: uri,
-        type: 'image/jpeg',
-        name: `profile-${index}.jpg`,
+        type: mimeType,
+        name: `profile-${index}.${extension}`,
       } as any);
     });
 

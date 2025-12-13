@@ -4,7 +4,6 @@ import { Colors } from '@/assets/colors/colors';
 import { GlobalStyles } from '@/styles/globalStyle';
 import Brand from '@/components/Brand';
 import { useRouter } from 'expo-router';
-import { getStoreToken, getUserInfo } from '@/services/db/dataManager';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function AppStartLayout() {

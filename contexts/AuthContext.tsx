@@ -21,6 +21,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const updateProfileInfo = async () => {
+    if (profile == null) return;
+  };
+
   const checkAuthStatus = async (): Promise<string> => {
     try {
       setIsLoading(true);
@@ -51,14 +55,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       const response = await AuthService.login({ email, password });
-      console.debug("response = %s", JSON.stringify(response))
+      console.debug('response = %s', JSON.stringify(response));
       if (response.success && response.data) {
         console.log('Login successful, user data:', response.data.user);
         setUser(response.data.user);
 
         return { success: true };
       } else {
-        return { success: false, error: response.error || response.message || 'Login failed' };
+        return {
+          success: false,
+          error: response.error || response.message || 'Login failed',
+        };
       }
     } catch (error) {
       return { success: false, error: 'An unexpected error occurred' };

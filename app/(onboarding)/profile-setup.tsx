@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Modal,
   BackHandler,
 } from 'react-native';
@@ -22,32 +21,18 @@ import { Colors } from '@/assets/colors/colors';
 import FamilyDetail from './components/family-details';
 
 export default function ProfileSetup() {
+  const MAX_STEP = 7;
+  const MID_STEP = 4;
+  const START_STEP = 1;
+
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(START_STEP);
   const [showSkipModal, setShowSkipModal] = useState(false);
 
-  const [profileData, setProfileData] = useState({
-    gender: '',
-    dateOfBirth: '',
-    religion: '',
-    caste: '',
-    occupation: '',
-    education: '',
-    height: '',
-    maritalStatus: '',
-    location: '',
-    bio: '',
-  });
-
-  const handleInputChange = (field: string, value: string) => {
-    setProfileData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleNext = () => {
-    if (currentStep < 7) {
+    if (currentStep < MAX_STEP) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete profile setup
       router.push('/(tabs)');
     }
   };
@@ -62,14 +47,14 @@ export default function ProfileSetup() {
 
   const handleDoLater = () => {
     setShowSkipModal(false);
-    router.push('/(tabs)');
+    router.replace('/(tabs)');
   };
 
   // Handle hardware back button
   useEffect(() => {
     const backAction = () => {
       setShowSkipModal(true);
-      return true; // Prevent default back action
+      return true;
     };
 
     const backHandler = BackHandler.addEventListener(
@@ -82,25 +67,25 @@ export default function ProfileSetup() {
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 1:
+      case START_STEP:
         return <BasicInfoSetup handleNext={handleNext} />;
 
-      case 2:
+      case START_STEP + 1:
         return <ProfessionalPersonaInfo handleNext={handleNext} />;
 
-      case 3:
+      case START_STEP + 2:
         return <FamilyDetail handleNext={handleNext} />;
 
-      case 4:
+      case MID_STEP:
         return <LifeStyle handleNext={handleNext} />;
 
-      case 5:
+      case MAX_STEP - 2:
         return <InterestSkills handleNext={handleNext} />;
 
-      case 6:
+      case MAX_STEP - 1:
         return <Favourites handleNext={handleNext} />;
 
-      case 7:
+      case MAX_STEP:
         return <AddImages handleNext={handleNext} />;
 
       default:
@@ -128,7 +113,7 @@ export default function ProfileSetup() {
         <View
           style={[
             profileStyles.progress,
-            { width: `${(currentStep / 7) * 100}%` },
+            { width: `${(currentStep / MAX_STEP) * 100}%` },
           ]}
         />
       </View>

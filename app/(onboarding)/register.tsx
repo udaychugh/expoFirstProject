@@ -22,6 +22,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShowAlert } from '@/components/Alert';
 import PrimaryButton from '@/components/PrimaryButton';
+import SecondaryButton from '@/components/SecondaryButton';
 
 export default function Register() {
   const router = useRouter();
@@ -44,8 +45,6 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    router.replace('/(onboarding)/profile-setup');
-    return;
     if (
       !formData.fullName ||
       !formData.email ||
@@ -253,6 +252,13 @@ export default function Register() {
             onPress={handleRegister}
             enabled={!isLoading}
           />
+
+          {__DEV__ && (
+            <SecondaryButton
+              title="Direct Jump"
+              onPress={() => router.replace('/(onboarding)/profile-setup')}
+            />
+          )}
 
           <Text style={styles.termsText}>
             By creating an account, you agree to our Terms of Service and

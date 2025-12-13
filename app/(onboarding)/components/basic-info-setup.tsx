@@ -28,6 +28,7 @@ export default function BasicInfoSetup({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [formattedDate, setFormattedDate] = useState('');
+  const [apiDate, setApiDate] = useState('');
   const [religion, setReligion] = useState('');
   const [caste, setCaste] = useState('');
   const [height, setHeight] = useState('');
@@ -95,7 +96,7 @@ export default function BasicInfoSetup({
 
     try {
       const response = await ApiService.updatePersonalDetails({
-        age: formattedDate,
+        dateOfBirth: apiDate,
         gender: gender,
         religion: religion,
         caste: caste,
@@ -150,6 +151,7 @@ export default function BasicInfoSetup({
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
       setFormattedDate(`${day}/${month}/${year}`);
+      setApiDate(`${year}-${month}-${day}`);
     }
 
     if (Platform.OS === 'ios' && event.type === 'dismissed') {

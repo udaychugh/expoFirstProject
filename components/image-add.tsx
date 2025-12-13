@@ -5,6 +5,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import AppImage from './AppImage';
 import { ShowAlert } from './Alert';
 import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
 import { Plus, X } from 'lucide-react-native';
 import { DraggableGrid } from 'react-native-draggable-grid';
 
@@ -40,6 +41,7 @@ export default function ImageAdd({
   };
 
   const handleRemoveImage = (index: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
   };
@@ -82,10 +84,14 @@ export default function ImageAdd({
             renderItem={renderGridItem}
             data={gridData}
             onDragRelease={(data) => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               setScrollEnabled?.(true);
               setImages(data.map((item) => item.uri));
             }}
-            onDragStart={() => setScrollEnabled?.(false)}
+            onDragStart={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setScrollEnabled?.(false);
+            }}
           />
 
           {images.length < 6 && (

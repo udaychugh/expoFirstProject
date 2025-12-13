@@ -1,25 +1,48 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { profileStyles } from './styles';
 import PrimaryButton from '@/components/PrimaryButton';
 import ImageAdd from '@/components/image-add';
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
 
 export default function AddImages({ handleNext }: { handleNext: () => void }) {
   const [images, setImages] = useState<string[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [scrollEnabled, setScrollEnabled] = useState(true);
 
-  const handleSaveButton = () => {
+  const handleSaveButton = async () => {
     if (images.length === 0) {
-      Alert.alert('No Images', 'Please add at least one photo to continue', [
-        { text: 'OK' },
-      ]);
+      ShowAlert({
+        type: 'error',
+        title: 'No Images',
+        message: 'Please add at least one photo to continue',
+      });
       return;
     }
 
-    // TODO: Implement save functionality
-    console.log({ images });
-    handleNext();
+    try {
+      setLoading(true);
+      const response = await ApiService.uploadMultipleImages(images);
+
+      if (response.success) {
+        handleNext();
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Upload Failed',
+          message: response.error || 'Failed to upload images',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'An unexpected error occurred',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
