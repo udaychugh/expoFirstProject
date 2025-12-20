@@ -22,6 +22,8 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
+import { UserProfile } from '@/contexts/model/userProfile';
+import AppImage from '@/components/AppImage';
 
 const { width } = Dimensions.get('window');
 
@@ -29,7 +31,7 @@ export default function ProfileDetails() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +45,7 @@ export default function ProfileDetails() {
     setLoading(true);
     setError(null);
     try {
-      const response = await ApiService.getUserProfile(id as string);
+      const response = await ApiService.getDiscoveredProfileDetails(id as string);
       if (response.success && response.data) {
         setProfile(response.data);
         // Track profile view
@@ -187,20 +189,12 @@ export default function ProfileDetails() {
               setCurrentImageIndex(index);
             }}
           >
-            {profile.images?.map((image: string, index: number) => (
-              <Image
-                key={index}
-                source={{ uri: image }}
-                style={styles.profileImage}
-              />
-            )) || (
-              <Image
-                source={{
-                  uri: 'https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg?auto=compress&cs=tinysrgb&w=400',
-                }}
-                style={styles.profileImage}
-              />
-            )}
+            {profile.images?.map((image: any, index: number) => (
+              <AppImage
+              src={image.url}
+              style={styles.profileImage}
+               />
+            ))}
           </ScrollView>
           {renderImageIndicators()}
         </View>
@@ -208,13 +202,13 @@ export default function ProfileDetails() {
         {/* Basic Information */}
         <View style={styles.section}>
           <Text style={styles.name}>
-            {profile.name}, {profile.age}
+            {profile.fullName}, {profile.age}
           </Text>
 
           <View style={styles.infoGrid}>
             <View style={styles.infoRow}>
               <MapPin color="#6B7280" size={16} />
-              <Text style={styles.infoText}>{profile.location}</Text>
+              <Text style={styles.infoText}>{profile.location.city}, {profile.location.state}</Text>
             </View>
 
             <View style={styles.infoRow}>
@@ -265,28 +259,28 @@ export default function ProfileDetails() {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Diet</Text>
               <Text style={styles.detailValue}>
-                {profile.lifestyle?.diet || 'Not specified'}
+                {profile.diet || 'Not specified'}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Smoking</Text>
               <Text style={styles.detailValue}>
-                {profile.lifestyle?.smoking || 'Not specified'}
+                {profile.smokingHabit || 'Not specified'}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Drinking</Text>
               <Text style={styles.detailValue}>
-                {profile.lifestyle?.drinking || 'Not specified'}
+                {profile.drinkingHabit || 'Not specified'}
               </Text>
             </View>
           </View>
         </View>
 
         {/* Interests */}
-        {profile.interests && profile.interests.length > 0 && (
+        {/* {profile && profile.interests.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Interests</Text>
             <View style={styles.interestsContainer}>
@@ -297,7 +291,7 @@ export default function ProfileDetails() {
               ))}
             </View>
           </View>
-        )}
+        )} */}
       </ScrollView>
 
       {/* Action Buttons */}

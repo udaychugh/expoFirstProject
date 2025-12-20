@@ -27,7 +27,7 @@ class AuthService {
         body: JSON.stringify(credentials),
       });
 
-      console.log("response with actual calling = ", response);
+      console.log('response with actual calling = ', response);
       const data = await response.json();
 
       console.debug('login request at = ', API_BASE_URL + '/auth/login');
@@ -72,6 +72,11 @@ class AuthService {
       const data = await response.json();
 
       if (response.ok && data.success) {
+        this.token = data.data.token;
+        this.refreshToken = data.data.refreshToken;
+
+        storeToken(this.token, this.refreshToken);
+        storeUserInfo(data.data.user);
         return data;
       } else {
         return {

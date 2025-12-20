@@ -137,7 +137,7 @@ class ApiService {
     permanentLocation?: string;
     isNRI?: boolean;
     occupation?: string;
-    salary?: string;
+    annualSalary?: string;
     education?: string;
     bio?: string;
   }): Promise<ApiResponse<UserProfile>> {
@@ -148,7 +148,7 @@ class ApiService {
   }
 
   async updatePersonalDetails(data: {
-    age?: string;
+    dateOfBirth?: string;
     gender?: string;
     religion?: string;
     caste?: string;
@@ -171,7 +171,7 @@ class ApiService {
     motherName?: string;
     fatherOccupation?: string;
     motherOccupation?: string;
-    familyAnnualIncome?: string;
+    familyIncome?: string;
     siblings?: {
       id: string;
       name: string;
@@ -181,7 +181,9 @@ class ApiService {
   }): Promise<ApiResponse<UserProfile>> {
     return this.makeRequest('/profile/family-details', {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+      familyDetails: data,
+    }),
     });
   }
 
@@ -332,6 +334,13 @@ class ApiService {
         ).toString()}`
       : '';
     return this.makeRequest(`/discovery/profiles${queryParams}`);
+  }
+
+  // Get Profile Detail
+  async getDiscoveredProfileDetails(
+    profileId: string
+  ): Promise<ApiResponse<UserProfile>> {
+    return this.makeRequest(`/discovery/profiles/${profileId}`);
   }
 
   async swipeProfile(data: SwipeAction): Promise<ApiResponse<MatchResult>> {

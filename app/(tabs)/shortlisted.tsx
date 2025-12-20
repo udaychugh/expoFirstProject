@@ -24,7 +24,7 @@ interface ShortlistProfile {
   isPinned: boolean;
 }
 
-export default function Shortlist() {
+export default function Shortlisted() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<ShortlistProfile[]>([
     {

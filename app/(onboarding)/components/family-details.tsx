@@ -77,7 +77,7 @@ export default function FamilyDetail({
         motherName: motherName,
         fatherOccupation: fatherOccupation,
         motherOccupation: motherOccupation,
-        familyAnnualIncome: familyAnnualIncome,
+        familyIncome: familyAnnualIncome,
         siblings: siblings,
         createdBy: createdBy,
       });

@@ -130,7 +130,7 @@ export default function ProfessionalPersonaInfo({
         jobLocation: jobLocation,
         permanentLocation: permanentLocation,
         occupation: occupation,
-        salary: salary,
+        annualSalary: salary,
         education: education,
         bio: bio,
         isNRI: isNRI,
@@ -424,7 +424,7 @@ export default function ProfessionalPersonaInfo({
             />
 
             <InputOutlineBox
-              label="Annual Salary"
+              label="Annual Income"
               value={salary}
               onChangeText={(value) => {
                 setSalary(value);

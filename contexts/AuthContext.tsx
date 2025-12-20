@@ -83,8 +83,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     try {
       const response = await AuthService.register(userData);
-
-      if (response.success) {
+      console.debug('response = %s', JSON.stringify(response));
+      if (response.success && response.data) {
+        setUser(response.data.user);
         return { success: true };
       } else {
         return {
