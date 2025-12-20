@@ -16,7 +16,11 @@
       "output": "single",
       "favicon": "./assets/images/icon.png"
     },
-    "plugins": ["expo-router", "expo-font", "expo-web-browser"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser"
+    ],
     "experiments": {
       "typedRoutes": true
     },
@@ -27,6 +31,7 @@
     "extra": {
       "router": {},
       "eas": {
+        "projectId": "277f3f87-f40a-4cae-8ec0-31fd4163c88d"
       }
     }
   }
