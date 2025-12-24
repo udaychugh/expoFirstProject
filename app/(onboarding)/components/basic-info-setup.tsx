@@ -29,6 +29,12 @@ export default function BasicInfoSetup({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [formattedDate, setFormattedDate] = useState('');
   const [apiDate, setApiDate] = useState('');
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<Date | undefined>(undefined);
+  const [formattedTime, setFormattedTime] = useState('');
+  const [apiTime, setApiTime] = useState('');
+  const [rememberBirthTime, setRememberBirthTime] = useState(true);
+  const [manglik, setManglik] = useState('');
   const [religion, setReligion] = useState('');
   const [caste, setCaste] = useState('');
   const [height, setHeight] = useState('');
@@ -54,6 +60,15 @@ export default function BasicInfoSetup({
       ShowAlert({
         type: 'error',
         title: 'Please Select your Date of Birth',
+      });
+      return;
+    }
+
+    if (rememberBirthTime && !formattedTime) {
+      setLoading(false);
+      ShowAlert({
+        type: 'error',
+        title: 'Please Select your Time of Birth',
       });
       return;
     }
@@ -97,7 +112,9 @@ export default function BasicInfoSetup({
     try {
       const response = await ApiService.updatePersonalDetails({
         dateOfBirth: apiDate,
+        timeOfBirth: rememberBirthTime ? apiTime : undefined,
         gender: gender,
+        manglik: manglik,
         religion: religion,
         caste: caste,
         height: height,
@@ -163,6 +180,30 @@ export default function BasicInfoSetup({
     setShowDatePicker(true);
   };
 
+  const handleTimeChange = (event: any, time?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+    }
+
+    if (time) {
+      setSelectedTime(time);
+      // Format time as HH:MM:SS
+      const hours = String(time.getHours()).padStart(2, '0');
+      const minutes = String(time.getMinutes()).padStart(2, '0');
+      const seconds = String(time.getSeconds()).padStart(2, '0');
+      setFormattedTime(`${hours}:${minutes}:${seconds}`);
+      setApiTime(`${hours}:${minutes}:${seconds}`);
+    }
+
+    if (Platform.OS === 'ios' && event.type === 'dismissed') {
+      setShowTimePicker(false);
+    }
+  };
+
+  const openTimePicker = () => {
+    setShowTimePicker(true);
+  };
+
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -211,6 +252,87 @@ export default function BasicInfoSetup({
             </View>
 
             <View style={profileStyles.inputGroup}>
+              <Text style={profileStyles.label}>Time of Birth</Text>
+              <Pressable
+                style={[
+                  profileStyles.inputWithIcon,
+                  !rememberBirthTime && { opacity: 0.5 },
+                ]}
+                onPress={openTimePicker}
+                disabled={!rememberBirthTime}
+              >
+                <Calendar color="#9CA3AF" size={20} />
+                <Text
+                  style={[
+                    profileStyles.inputText,
+                    !formattedTime && profileStyles.placeholderText,
+                  ]}
+                >
+                  {formattedTime || 'HH:MM:SS'}
+                </Text>
+              </Pressable>
+
+              {showTimePicker && (
+                <DateTimePicker
+                  value={selectedTime || new Date()}
+                  mode="time"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={handleTimeChange}
+                  accentColor={Colors.primary}
+                  textColor={Colors.primary}
+                  is24Hour={true}
+                />
+              )}
+
+              <Pressable
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 12,
+                }}
+                onPress={() => {
+                  setRememberBirthTime(!rememberBirthTime);
+                  if (rememberBirthTime) {
+                    setFormattedTime('');
+                    setApiTime('');
+                    setSelectedTime(undefined);
+                  }
+                }}
+              >
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderWidth: 2,
+                    borderColor: Colors.primary,
+                    borderRadius: 4,
+                    marginRight: 8,
+                    backgroundColor: !rememberBirthTime
+                      ? Colors.primary
+                      : 'transparent',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  {!rememberBirthTime && (
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: 14,
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      ✓
+                    </Text>
+                  )}
+                </View>
+                <Text style={{ fontSize: 14, color: '#6B7280' }}>
+                  I don't remember my time of birth
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={profileStyles.inputGroup}>
               <InputOutlineBox
                 label="Height"
                 value={height}
@@ -220,6 +342,14 @@ export default function BasicInfoSetup({
                 placeholder={`e.g., 5'6"`}
               />
             </View>
+
+            <SelectBtns
+              title="Manglik"
+              list={['Manglik', 'Non-Manglik']}
+              onPress={(value) => {
+                setManglik(value);
+              }}
+            />
 
             <View style={profileStyles.inputGroup}>
               <Text style={profileStyles.label}>Religion</Text>

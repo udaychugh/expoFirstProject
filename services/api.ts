@@ -149,7 +149,9 @@ class ApiService {
 
   async updatePersonalDetails(data: {
     dateOfBirth?: string;
+    timeOfBirth?: string;
     gender?: string;
+    manglik?: string;
     religion?: string;
     caste?: string;
     height?: string;
@@ -182,8 +184,8 @@ class ApiService {
     return this.makeRequest('/profile/family-details', {
       method: 'PUT',
       body: JSON.stringify({
-      familyDetails: data,
-    }),
+        familyDetails: data,
+      }),
     });
   }
 
