@@ -415,6 +415,15 @@ export default function ProfessionalPersonaInfo({
             )}
 
             <InputOutlineBox
+              label="Education"
+              value={education}
+              onChangeText={(value) => {
+                setEducation(value);
+              }}
+              placeholder="Your highest qualification"
+            />
+
+            <InputOutlineBox
               label="Occupation"
               value={occupation}
               onChangeText={(value) => {
@@ -431,15 +440,6 @@ export default function ProfessionalPersonaInfo({
               }}
               placeholder="What is your annual salary?"
               keyboardType="numeric"
-            />
-
-            <InputOutlineBox
-              label="Education"
-              value={education}
-              onChangeText={(value) => {
-                setEducation(value);
-              }}
-              placeholder="Your highest qualification"
             />
           </View>
         </View>

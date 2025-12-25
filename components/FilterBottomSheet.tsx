@@ -23,6 +23,7 @@ export interface FilterOptions {
   education?: string;
   occupation?: string;
   maritalStatus?: string;
+  manglik?: string;
 }
 
 interface FilterBottomSheetProps {
@@ -39,6 +40,7 @@ const FILTER_CATEGORIES = [
   { id: 'education', label: 'Education', icon: '🎓' },
   { id: 'occupation', label: 'Occupation', icon: '💼' },
   { id: 'maritalStatus', label: 'Marital Status', icon: '💍' },
+  { id: 'manglik', label: 'Manglik', icon: '✨' },
 ];
 
 const LOCATIONS = [
@@ -118,6 +120,11 @@ const MARITAL_STATUS = [
   { id: 'divorced', name: 'Divorced' },
   { id: 'widowed', name: 'Widowed' },
   { id: 'separated', name: 'Separated' },
+];
+
+const MANGLIK_STATUS = [
+  { id: 'manglik', name: 'Manglik' },
+  { id: 'non-manglik', name: 'Non-Manglik' },
 ];
 
 export default function FilterBottomSheet({
@@ -357,6 +364,40 @@ export default function FilterBottomSheet({
                     {status.name}
                   </Text>
                   {filters.maritalStatus === status.name && (
+                    <Check color="#E11D48" size={20} />
+                  )}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        );
+      case 'manglik':
+        return (
+          <View style={styles.rightContent}>
+            <Text style={styles.rightTitle}>Select Manglik Status</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {MANGLIK_STATUS.map((status) => (
+                <Pressable
+                  key={status.id}
+                  style={({ pressed }) => [
+                    styles.optionItem,
+                    filters.manglik === status.name && styles.optionItemActive,
+                    pressed && styles.pressedEffect,
+                  ]}
+                  onPress={() =>
+                    setFilters({ ...filters, manglik: status.name })
+                  }
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      filters.manglik === status.name &&
+                        styles.optionTextActive,
+                    ]}
+                  >
+                    {status.name}
+                  </Text>
+                  {filters.manglik === status.name && (
                     <Check color="#E11D48" size={20} />
                   )}
                 </Pressable>

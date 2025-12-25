@@ -43,6 +43,7 @@ export default function BasicInfoSetup({
   const [height, setHeight] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
+  const [placeOfBirth, setPlaceOfBirth] = useState('');
 
   const [isLoading, setLoading] = useState(false);
 
@@ -248,7 +249,7 @@ export default function BasicInfoSetup({
               )}
             </View>
 
-            <View style={profileStyles.inputGroup}>
+            <View style={[profileStyles.inputGroup, { marginBottom: 10 }]}>
               <Text style={profileStyles.label}>Time of Birth</Text>
               <Pressable
                 style={[
@@ -317,6 +318,17 @@ export default function BasicInfoSetup({
                   I don't remember my time of birth
                 </Text>
               </Pressable>
+            </View>
+
+            <View style={profileStyles.inputGroup}>
+              <InputOutlineBox
+                label="Place of birth"
+                value={placeOfBirth}
+                onChangeText={(value) => {
+                  setPlaceOfBirth(value);
+                }}
+                placeholder={`e.g., Karnal, Haryana`}
+              />
             </View>
 
             <View style={profileStyles.inputGroup}>
