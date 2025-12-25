@@ -22,6 +22,8 @@ import { INTERESTS_DATA } from '@/utils/interestsData';
 import UserFirstDetail from '@/components/info/userFirstDetail';
 import UserBio from '@/components/info/userBio';
 import UserPersonalDetails from '@/components/info/userPersonalDetails';
+import UserFamilyInfo from '@/components/info/userFamilyInfo';
+import UserLocationInfo from '@/components/info/userLocationInfo';
 
 const { width } = Dimensions.get('window');
 
@@ -258,8 +260,47 @@ export default function ProfileDetails() {
             smokingHabit={profile.smokingHabit}
             drinkingHabit={profile.drinkingHabit}
             bloodGroup={profile.bloodGroup}
+            income={
+              profile.annualSalary
+                ? `${profile.annualSalary} ${profile.income.currency}`
+                : 'Not mentioned'
+            }
           />
         </View>
+
+        {/* Location Info */}
+        {profile.jobLocation || profile.permanentLocation ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Location Details</Text>
+            <UserLocationInfo
+              jobLocation={profile.jobLocation}
+              permanentLocation={profile.permanentLocation}
+            />
+          </View>
+        ) : null}
+
+        {/* Family Details */}
+        {profile.family && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Family Details</Text>
+            <UserFamilyInfo
+              fatherName={profile.family?.fatherName}
+              fatherOccupation={profile.family?.fatherOccupation}
+              motherName={profile.family?.motherName}
+              motherOccupation={profile.family?.motherOccupation}
+              familyIncome={profile.family?.familyIncome}
+              siblings={profile.family?.siblings}
+              createdBy={profile.family?.createdBy}
+            />
+          </View>
+        )}
+
+        {/* Languages Spoken */}
+        <InterestsSection
+          title="Languages Spoken"
+          items={profile.languagesSpoken || []}
+          dataSource={INTERESTS_DATA.languages}
+        />
 
         {/* Hobbies */}
         <InterestsSection

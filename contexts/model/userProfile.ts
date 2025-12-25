@@ -6,14 +6,18 @@ export interface UserProfile {
   isVerified: boolean;
   profileComplete: boolean;
   isNRI: boolean;
+  annualSalary: string;
 
   location: {
     city: string;
     state: string;
     country: string;
   };
+  jobLocation?: string;
+  permanentLocation?: string;
 
   income: {
+    amount: number;
     currency: string;
   };
 
@@ -85,6 +89,19 @@ export interface UserProfile {
   vacationDestination: string[];
 
   mainImage: string;
+
+  family?: {
+    fatherName: string;
+    fatherOccupation: string;
+    motherName: string;
+    motherOccupation: string;
+    familyIncome: string;
+    siblings: {
+      name: string;
+      occupation: string;
+    }[];
+    createdBy: string;
+  };
 }
 
 export interface UserResponse {

@@ -25,6 +25,8 @@ import UserBio from '@/components/info/userBio';
 import UserPersonalDetails from '@/components/info/userPersonalDetails';
 import InterestsSection from '@/components/InterestsSection';
 import { INTERESTS_DATA } from '@/utils/interestsData';
+import UserFamilyInfo from '@/components/info/userFamilyInfo';
+import UserLocationInfo from '@/components/info/userLocationInfo';
 
 export default function Profile() {
   const router = useRouter();
@@ -126,6 +128,43 @@ export default function Profile() {
             smokingHabit={profile?.smokingHabit}
             drinkingHabit={profile?.drinkingHabit}
             bloodGroup={profile?.bloodGroup}
+            income={
+              profile?.annualSalary
+                ? `${profile?.annualSalary}`
+                : 'Not mentioned'
+            }
+          />
+        </View>
+
+        {/* Location Info */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Location Details</Text>
+          <UserLocationInfo
+            jobLocation={profile?.jobLocation}
+            permanentLocation={profile?.permanentLocation}
+          />
+        </View>
+
+        {/* Family Details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Family Details</Text>
+          <UserFamilyInfo
+            fatherName={profile?.family?.fatherName}
+            fatherOccupation={profile?.family?.fatherOccupation}
+            motherName={profile?.family?.motherName}
+            motherOccupation={profile?.family?.motherOccupation}
+            familyIncome={profile?.family?.familyIncome}
+            siblings={profile?.family?.siblings}
+            createdBy={profile?.family?.createdBy}
+          />
+        </View>
+
+        {/* Languages Spoken */}
+        <View style={[styles.section, { padding: 0 }]}>
+          <InterestsSection
+            title="Languages Spoken"
+            items={profile?.languagesSpoken || []}
+            dataSource={INTERESTS_DATA.languages}
           />
         </View>
 

@@ -9,6 +9,7 @@ export default function UserPersonalDetails({
   smokingHabit,
   drinkingHabit,
   bloodGroup,
+  income,
 }: {
   religion?: string;
   caste?: string;
@@ -17,6 +18,7 @@ export default function UserPersonalDetails({
   smokingHabit?: string;
   drinkingHabit?: string;
   bloodGroup?: string;
+  income?: string;
 }) {
   const renderPersonalDetails = ({
     title,
@@ -68,6 +70,11 @@ export default function UserPersonalDetails({
       {renderPersonalDetails({
         title: 'Blood Group',
         value: bloodGroup,
+      })}
+
+      {renderPersonalDetails({
+        title: 'Annual Salary',
+        value: income,
       })}
     </View>
   );
