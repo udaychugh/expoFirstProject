@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   Image,
   Dimensions,
 } from 'react-native';
@@ -16,6 +16,8 @@ import {
   GraduationCap,
   Users,
   Moon,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
@@ -24,6 +26,8 @@ import { UserProfile } from '@/contexts/model/userProfile';
 import AppImage from '@/components/AppImage';
 import SwipeHandler from '@/components/SwipeHandler';
 import { calculateAge } from '@/utils/helper';
+import InterestsSection from '@/components/InterestsSection';
+import { INTERESTS_DATA } from '@/utils/interestsData';
 
 const { width } = Dimensions.get('window');
 
@@ -34,6 +38,7 @@ export default function ProfileDetails() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -120,9 +125,9 @@ export default function ProfileDetails() {
   const HeaderSection = () => {
     return (
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()}>
           <ArrowLeft color="#1F2937" size={24} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.headerTitle}>Profile Details</Text>
         <View style={{ width: 24 }} />
       </View>
@@ -146,9 +151,9 @@ export default function ProfileDetails() {
         <HeaderSection />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error || 'Profile not found'}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadProfile}>
+          <Pressable style={styles.retryButton} onPress={loadProfile}>
             <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </SafeAreaView>
     );
@@ -209,9 +214,44 @@ export default function ProfileDetails() {
 
         {/* Basic Information */}
         <View style={styles.section}>
-          <Text style={styles.name}>
-            {profile.fullName}, {calculateAge(profile.dateOfBirth)}
-          </Text>
+          <View style={styles.nameContainer}>
+            <Text style={styles.name}>
+              {profile.fullName}, {calculateAge(profile.dateOfBirth)}
+            </Text>
+            <Pressable
+              onPress={() => {
+                setShowTooltip(true);
+                setTimeout(() => setShowTooltip(false), 2500);
+              }}
+              style={styles.verificationBadge}
+            >
+              {profile.isVerified ? (
+                <CheckCircle2 size={20} fill="#3B82F6" />
+              ) : (
+                <AlertCircle size={20} fill="#F59E0B" />
+              )}
+              {showTooltip && (
+                <View
+                  style={[
+                    styles.tooltipContainer,
+                    !profile.isVerified && { backgroundColor: '#F59E0B' },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.tooltipArrow,
+                      !profile.isVerified && { borderTopColor: '#F59E0B' },
+                    ]}
+                  />
+                  <Text style={styles.tooltipText}>
+                    {profile.isVerified
+                      ? 'User verified'
+                      : 'User verification pending'}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
 
           <View style={styles.infoGrid}>
             <View style={styles.infoRow}>
@@ -292,6 +332,48 @@ export default function ProfileDetails() {
             })}
           </View>
         </View>
+
+        {/* Hobbies */}
+        <InterestsSection
+          title="Hobbies"
+          items={profile.hobbies || []}
+          dataSource={INTERESTS_DATA.hobbies}
+        />
+
+        {/* Sports & Fitness */}
+        <InterestsSection
+          title="Sports & Fitness"
+          items={profile.sportsAndFitness || []}
+          dataSource={INTERESTS_DATA.sportsAndFitness}
+        />
+
+        {/* Favorite Books */}
+        <InterestsSection
+          title="Favorite Books"
+          items={profile.favoriteBooks || []}
+          dataSource={INTERESTS_DATA.favoriteBooks}
+        />
+
+        {/* Favorite Movies */}
+        <InterestsSection
+          title="Favorite Movies"
+          items={profile.favoriteMovies || []}
+          dataSource={INTERESTS_DATA.favoriteMovies}
+        />
+
+        {/* Favorite Songs */}
+        <InterestsSection
+          title="Favorite Songs"
+          items={profile.favoriteSongs || []}
+          dataSource={INTERESTS_DATA.favoriteSongs}
+        />
+
+        {/* Vacation Destinations */}
+        <InterestsSection
+          title="Dream Vacation Destinations"
+          items={profile.vacationDestination || []}
+          dataSource={INTERESTS_DATA.vacationDestination}
+        />
       </ScrollView>
 
       {/* Action Buttons */}
@@ -392,11 +474,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 20,
   },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
   name: {
     fontSize: 28,
     fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 16,
+  },
+  verificationBadge: {
+    paddingTop: 2,
+    zIndex: 10,
+    position: 'relative',
+  },
+  tooltipContainer: {
+    position: 'absolute',
+    bottom: '100%',
+    left: '50%',
+    transform: [{ translateX: -70 }],
+    marginBottom: 8,
+    backgroundColor: '#3B82F6',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    width: 140,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  tooltipArrow: {
+    position: 'absolute',
+    top: '100%',
+    left: '50%',
+    transform: [{ translateX: -6 }],
+    borderWidth: 6,
+    borderColor: 'transparent',
+    borderTopColor: '#3B82F6',
+  },
+  tooltipText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   infoGrid: {
     gap: 12,
