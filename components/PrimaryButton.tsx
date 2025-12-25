@@ -5,23 +5,35 @@ import { Text, StyleSheet, Pressable } from 'react-native';
 export default function PrimaryButton({
   title,
   enabled = true,
+  backgroundColor,
+  fontSize,
   onPress,
 }: {
   title: string;
   enabled?: boolean;
+  backgroundColor?: string;
+  fontSize?: number;
   onPress: () => void;
 }) {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.primaryButton,
+        backgroundColor && { backgroundColor },
         !enabled && styles.buttonDisabled,
-        pressed && styles.buttonPressed,
+        !backgroundColor && pressed && styles.buttonPressed,
       ]}
       onPress={onPress}
       disabled={!enabled}
     >
-      <Text style={styles.primaryButtonText}>{title}</Text>
+      <Text
+        style={[
+          styles.primaryButtonText,
+          { fontSize: fontSize ? fontSize : 18 },
+        ]}
+      >
+        {title}
+      </Text>
     </Pressable>
   );
 }

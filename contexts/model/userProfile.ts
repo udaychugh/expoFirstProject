@@ -5,6 +5,7 @@ export interface UserProfile {
   phone: string;
   isVerified: boolean;
   profileComplete: boolean;
+  isNRI: boolean;
 
   location: {
     city: string;

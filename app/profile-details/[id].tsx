@@ -9,16 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  ArrowLeft,
-  MapPin,
-  Briefcase,
-  GraduationCap,
-  Users,
-  Moon,
-  CheckCircle2,
-  AlertCircle,
-} from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
@@ -28,6 +19,9 @@ import SwipeHandler from '@/components/SwipeHandler';
 import { calculateAge } from '@/utils/helper';
 import InterestsSection from '@/components/InterestsSection';
 import { INTERESTS_DATA } from '@/utils/interestsData';
+import UserFirstDetail from '@/components/info/userFirstDetail';
+import UserBio from '@/components/info/userBio';
+import UserPersonalDetails from '@/components/info/userPersonalDetails';
 
 const { width } = Dimensions.get('window');
 
@@ -172,21 +166,6 @@ export default function ProfileDetails() {
     </View>
   );
 
-  const renderPersonalDetails = ({
-    title,
-    value,
-  }: {
-    title: string;
-    value: string;
-  }) => {
-    return value ? (
-      <View style={styles.detailRow}>
-        <Text style={styles.detailLabel}>{title}</Text>
-        <Text style={styles.detailValue}>{value}</Text>
-      </View>
-    ) : null;
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <HeaderSection />
@@ -253,84 +232,33 @@ export default function ProfileDetails() {
             </Pressable>
           </View>
 
-          <View style={styles.infoGrid}>
-            <View style={styles.infoRow}>
-              <MapPin color="#6B7280" size={16} />
-              <Text style={styles.infoText}>
-                {profile.location.city}, {profile.location.state}
-              </Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Briefcase color="#6B7280" size={16} />
-              <Text style={styles.infoText}>{profile.occupation}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <GraduationCap color="#6B7280" size={16} />
-              <Text style={styles.infoText}>{profile.education}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Users color="#6B7280" size={16} />
-              <Text style={styles.infoText}>{profile.maritalStatus}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Moon color="#6B7280" size={16} />
-              <Text style={styles.infoText}>
-                {profile.manglik ? 'Manglik' : 'Not Manglik'}
-              </Text>
-            </View>
-          </View>
+          <UserFirstDetail
+            city={profile.location.city}
+            state={profile.location.state}
+            country={profile.location.country}
+            isNRI={profile.isNRI}
+            occupation={profile.occupation}
+            education={profile.education}
+            maritalStatus={profile.maritalStatus}
+            manglik={profile.manglik}
+          />
         </View>
 
         {/* About Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About Me</Text>
-          <Text style={styles.bio}>{profile.bio}</Text>
-        </View>
+        <UserBio bio={profile.bio} />
 
         {/* Personal Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Details</Text>
-
-          <View style={styles.detailsGrid}>
-            {renderPersonalDetails({
-              title: 'Religion',
-              value: profile.religion,
-            })}
-
-            {renderPersonalDetails({
-              title: 'Caste',
-              value: profile.caste,
-            })}
-
-            {renderPersonalDetails({
-              title: 'Height',
-              value: profile.height,
-            })}
-
-            {renderPersonalDetails({
-              title: 'Diet',
-              value: profile.diet,
-            })}
-
-            {renderPersonalDetails({
-              title: 'Smoking',
-              value: profile.smokingHabit,
-            })}
-
-            {renderPersonalDetails({
-              title: 'Drinking',
-              value: profile.drinkingHabit,
-            })}
-
-            {renderPersonalDetails({
-              title: 'Blood Group',
-              value: profile.bloodGroup,
-            })}
-          </View>
+          <UserPersonalDetails
+            religion={profile.religion}
+            caste={profile.caste}
+            height={profile.height}
+            diet={profile.diet}
+            smokingHabit={profile.smokingHabit}
+            drinkingHabit={profile.drinkingHabit}
+            bloodGroup={profile.bloodGroup}
+          />
         </View>
 
         {/* Hobbies */}
@@ -523,46 +451,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  infoGrid: {
-    gap: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  infoText: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 16,
-  },
-  bio: {
-    fontSize: 16,
-    color: '#6B7280',
-    lineHeight: 24,
-  },
-  detailsGrid: {
-    gap: 16,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  detailLabel: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  detailValue: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1F2937',
   },
   interestsContainer: {
     flexDirection: 'row',

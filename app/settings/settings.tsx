@@ -1,11 +1,37 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Switch,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, User, Shield, Bell, Eye, Heart, MessageCircle, CircleHelp as HelpCircle, LogOut, ChevronRight, Moon, Globe, Lock } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  User,
+  Shield,
+  Bell,
+  Eye,
+  Heart,
+  MessageCircle,
+  CircleHelp as HelpCircle,
+  LogOut,
+  ChevronRight,
+  Moon,
+  Globe,
+  Lock,
+} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Settings() {
   const router = useRouter();
+
+  const { logout } = useAuth();
+
   const [settings, setSettings] = useState({
     notifications: {
       newMatches: true,
@@ -25,24 +51,27 @@ export default function Settings() {
   });
 
   const handleToggle = (category: string, setting: string) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       [category]: {
         ...prev[category as keyof typeof prev],
-        [setting]: !(prev[category as keyof typeof prev] as any)[setting]
-      }
+        [setting]: !(prev[category as keyof typeof prev] as any)[setting],
+      },
     }));
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: () => router.push('/(onboarding)/login') },
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await logout();
+          router.push('/(onboarding)/login');
+        },
+      },
+    ]);
   };
 
   const handleDeleteAccount = () => {
@@ -51,21 +80,25 @@ export default function Settings() {
       'This action cannot be undone. All your data will be permanently deleted.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => console.log('Account deleted') },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => console.log('Account deleted'),
+        },
       ]
     );
   };
 
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    onPress, 
-    showToggle = false, 
-    toggleValue = false, 
+  const SettingItem = ({
+    icon,
+    title,
+    subtitle,
+    onPress,
+    showToggle = false,
+    toggleValue = false,
     onToggle,
     showArrow = true,
-    danger = false 
+    danger = false,
   }: {
     icon: React.ReactNode;
     title: string;
@@ -77,17 +110,21 @@ export default function Settings() {
     showArrow?: boolean;
     danger?: boolean;
   }) => (
-    <TouchableOpacity 
-      style={styles.settingItem} 
+    <TouchableOpacity
+      style={styles.settingItem}
       onPress={onPress}
       disabled={showToggle}
     >
       <View style={styles.settingLeft}>
-        <View style={[styles.iconContainer, danger && styles.dangerIconContainer]}>
+        <View
+          style={[styles.iconContainer, danger && styles.dangerIconContainer]}
+        >
           {icon}
         </View>
         <View style={styles.settingText}>
-          <Text style={[styles.settingTitle, danger && styles.dangerText]}>{title}</Text>
+          <Text style={[styles.settingTitle, danger && styles.dangerText]}>
+            {title}
+          </Text>
           {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
         </View>
       </View>
@@ -137,7 +174,12 @@ export default function Settings() {
               icon={<Lock color="#6B7280" size={20} />}
               title="Change Password"
               subtitle="Update your password"
-              onPress={() => Alert.alert('Change Password', 'Password change functionality would be implemented here')}
+              onPress={() =>
+                Alert.alert(
+                  'Change Password',
+                  'Password change functionality would be implemented here'
+                )
+              }
             />
           </View>
         </View>
@@ -228,7 +270,12 @@ export default function Settings() {
               icon={<Globe color="#6B7280" size={20} />}
               title="Language"
               subtitle="English"
-              onPress={() => Alert.alert('Language', 'Language selection would be implemented here')}
+              onPress={() =>
+                Alert.alert(
+                  'Language',
+                  'Language selection would be implemented here'
+                )
+              }
             />
           </View>
         </View>
@@ -241,19 +288,34 @@ export default function Settings() {
               icon={<HelpCircle color="#6B7280" size={20} />}
               title="Help & Support"
               subtitle="Get help or contact support"
-              onPress={() => Alert.alert('Help & Support', 'Support functionality would be implemented here')}
+              onPress={() =>
+                Alert.alert(
+                  'Help & Support',
+                  'Support functionality would be implemented here'
+                )
+              }
             />
             <SettingItem
               icon={<Shield color="#6B7280" size={20} />}
               title="Privacy Policy"
               subtitle="Read our privacy policy"
-              onPress={() => Alert.alert('Privacy Policy', 'Privacy policy would be displayed here')}
+              onPress={() =>
+                Alert.alert(
+                  'Privacy Policy',
+                  'Privacy policy would be displayed here'
+                )
+              }
             />
             <SettingItem
               icon={<Shield color="#6B7280" size={20} />}
               title="Terms of Service"
               subtitle="Read our terms of service"
-              onPress={() => Alert.alert('Terms of Service', 'Terms of service would be displayed here')}
+              onPress={() =>
+                Alert.alert(
+                  'Terms of Service',
+                  'Terms of service would be displayed here'
+                )
+              }
             />
           </View>
         </View>

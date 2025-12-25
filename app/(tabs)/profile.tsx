@@ -1,18 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-  Platform,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Settings,
-  CreditCard as Edit3,
+  Pencil as Edit3,
   Camera,
   MapPin,
   Briefcase,
@@ -20,204 +11,176 @@ import {
   Heart,
   Users,
   MessageCircle,
-  LogOut,
-  TriangleAlert as AlertTriangle,
   CircleCheck as CheckCircle,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import AppImage from '@/components/AppImage';
 import { Colors } from '@/assets/colors/colors';
+import { calculateAge } from '@/utils/helper';
+import NotVerified from '../tabsComp/profile/notVerified';
+import Clickable from '@/components/Clickable';
+import ActionImages from '../tabsComp/profile/actionImages';
+import UserFirstDetail from '@/components/info/userFirstDetail';
+import UserBio from '@/components/info/userBio';
+import UserPersonalDetails from '@/components/info/userPersonalDetails';
+import InterestsSection from '@/components/InterestsSection';
+import { INTERESTS_DATA } from '@/utils/interestsData';
 
 export default function Profile() {
   const router = useRouter();
 
-  const { logout, user, profile } = useAuth();
+  const { user, profile } = useAuth();
   const stats = 0;
 
   const handleEditProfile = () => {
     router.push('/edit-profile');
   };
 
-  const handleVerification = () => {
-    router.push('/verification');
-  };
-
-  const handleLogout = () => {
-    if (Platform.OS === 'web') {
-      router.push('/(onboarding)/welcome');
-    } else {
-      Alert.alert('Logout', 'Are you sure you want to logout?', [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.push('/(onboarding)/welcome');
-          },
-        },
-      ]);
-    }
-  };
-
   const handleSettings = () => {
-    router.push('/settings');
+    router.push('/settings/settings');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity onPress={handleSettings}>
+        <Clickable onPress={handleSettings}>
           <Settings color="#6B7280" size={24} />
-        </TouchableOpacity>
+        </Clickable>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Verification Status */}
-        {!user?.isVerified && (
-          <View style={styles.verificationBanner}>
-            <View style={styles.verificationContent}>
-              <AlertTriangle color="#F59E0B" size={24} />
-              <View style={styles.verificationText}>
-                <Text style={styles.verificationTitle}>
-                  Account Not Verified
-                </Text>
-                <Text style={styles.verificationSubtitle}>
-                  Complete verification to gain trust and get more matches
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.verificationButton}
-              onPress={handleVerification}
-            >
-              <Text style={styles.verificationButtonText}>
-                Complete Verification
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {user?.isVerified && (
-          <View style={styles.verifiedBanner}>
-            <CheckCircle color="#10B981" size={24} />
-            <Text style={styles.verifiedText}>Account Verified</Text>
-          </View>
-        )}
+        {!user?.isVerified && <NotVerified />}
 
         {/* Profile Images */}
-        <View style={styles.imagesContainer}>
-          <View style={styles.mainImageContainer}>
-            {/* <Image source={{ uri: user?.images[0] }} style={styles.mainImage} /> */}
-            <AppImage src={profile?.images[0].url} style={styles.mainImage} />
-            <TouchableOpacity style={styles.cameraButton}>
-              <Camera color="#FFFFFF" size={20} />
-            </TouchableOpacity>
-          </View>
-
-          {profile?.images[1] && (
-            <View style={styles.secondaryImageContainer}>
-              <AppImage src={profile?.images[1].url} style={styles.secondaryImage} />
-            </View>
-          )}
-        </View>
+        <ActionImages
+          imageOne={profile?.images[0].url}
+          imageTwo={profile?.images[1].url}
+        />
 
         {/* Basic Info */}
         <View style={styles.basicInfo}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>
-              {profile?.fullName}, {profile?.age}
+              {profile?.fullName}, {calculateAge(profile?.dateOfBirth ?? '')}
             </Text>
-            <TouchableOpacity
-              style={styles.editButton}
-              onPress={handleEditProfile}
-            >
+            <Clickable style={styles.editButton} onPress={handleEditProfile}>
               <Edit3 color="#E11D48" size={20} />
-            </TouchableOpacity>
+            </Clickable>
           </View>
 
-          <View style={styles.infoRow}>
-            <MapPin color="#6B7280" size={16} />
-            <Text style={styles.infoText}>
-              {profile?.location?.city}, {profile?.location?.state}, {profile?.location?.country}
-            </Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Briefcase color="#6B7280" size={16} />
-            <Text style={styles.infoText}>{profile?.occupation}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <GraduationCap color="#6B7280" size={16} />
-            <Text style={styles.infoText}>{profile?.education}</Text>
-          </View>
+          <UserFirstDetail
+            city={profile?.location?.city}
+            state={profile?.location?.state}
+            country={profile?.location?.country}
+            isNRI={profile?.isNRI}
+            occupation={profile?.occupation}
+            education={profile?.education}
+            maritalStatus={profile?.maritalStatus}
+            manglik={profile?.manglik}
+          />
         </View>
 
         {/* Stats */}
         <View style={styles.statsContainer}>
           {stats > 0 && (
             <View style={styles.statItem}>
-            <Heart color={Colors.primary} size={24} />
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Likes</Text>
-          </View>
+              <Heart color={Colors.primary} size={24} />
+              <Text style={styles.statNumber}>0</Text>
+              <Text style={styles.statLabel}>Likes</Text>
+            </View>
           )}
 
           {stats > 0 && (
             <View style={styles.statItem}>
-            <Users color={Colors.pink} size={24} />
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Matches</Text>
-          </View>
+              <Users color={Colors.pink} size={24} />
+              <Text style={styles.statNumber}>0</Text>
+              <Text style={styles.statLabel}>Matches</Text>
+            </View>
           )}
 
           {stats > 0 && (
             <View style={styles.statItem}>
-            <MessageCircle color={Colors.purple} size={24} />
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Messages</Text>
-          </View>
+              <MessageCircle color={Colors.purple} size={24} />
+              <Text style={styles.statNumber}>0</Text>
+              <Text style={styles.statLabel}>Messages</Text>
+            </View>
           )}
         </View>
 
         {/* About Me */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About Me</Text>
-          <Text style={styles.bio}>{profile?.bio}</Text>
+        <View style={[styles.section, { padding: 0 }]}>
+          <UserBio bio={profile?.bio} />
         </View>
 
         {/* Profile Details */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Details</Text>
+          <Text style={styles.sectionTitle}>Personal Details</Text>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Religion</Text>
-            <Text style={styles.detailValue}>{profile?.religion}</Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Height</Text>
-            <Text style={styles.detailValue}>{profile?.height}</Text>
-          </View>
+          <UserPersonalDetails
+            religion={profile?.religion}
+            caste={profile?.caste}
+            height={profile?.height}
+            diet={profile?.diet}
+            smokingHabit={profile?.smokingHabit}
+            drinkingHabit={profile?.drinkingHabit}
+            bloodGroup={profile?.bloodGroup}
+          />
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.editProfileButton}
-            onPress={handleEditProfile}
-          >
-            <Edit3 color="#FFFFFF" size={20} />
-            <Text style={styles.editProfileButtonText}>Edit Profile</Text>
-          </TouchableOpacity>
+        {/* Hobbies */}
+        <View style={[styles.section, { padding: 0 }]}>
+          <InterestsSection
+            title="Hobbies"
+            items={profile?.hobbies || []}
+            dataSource={INTERESTS_DATA.hobbies}
+          />
+        </View>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <LogOut color="#EF4444" size={20} />
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </TouchableOpacity>
+        {/* Sports & Fitness */}
+        <View style={[styles.section, { padding: 0 }]}>
+          <InterestsSection
+            title="Sports & Fitness"
+            items={profile?.sportsAndFitness || []}
+            dataSource={INTERESTS_DATA.sportsAndFitness}
+          />
+        </View>
+
+        {/* Favorite Books */}
+        <View style={[styles.section, { padding: 0 }]}>
+          <InterestsSection
+            title="Favorite Books"
+            items={profile?.favoriteBooks || []}
+            dataSource={INTERESTS_DATA.favoriteBooks}
+          />
+        </View>
+
+        {/* Favorite Movies */}
+        <View style={[styles.section, { padding: 0 }]}>
+          <InterestsSection
+            title="Favorite Movies"
+            items={profile?.favoriteMovies || []}
+            dataSource={INTERESTS_DATA.favoriteMovies}
+          />
+        </View>
+
+        {/* Favorite Songs */}
+        <View style={[styles.section, { padding: 0 }]}>
+          <InterestsSection
+            title="Favorite Songs"
+            items={profile?.favoriteSongs || []}
+            dataSource={INTERESTS_DATA.favoriteSongs}
+          />
+        </View>
+
+        {/* Vacation Destinations */}
+        <View style={[styles.section, { padding: 0 }]}>
+          <InterestsSection
+            title="Dream Vacation Destinations"
+            items={profile?.vacationDestination || []}
+            dataSource={INTERESTS_DATA.vacationDestination}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -244,94 +207,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 24,
-  },
-  verificationBanner: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#FED7AA',
-  },
-  verificationContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  verificationText: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  verificationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#92400E',
-  },
-  verificationSubtitle: {
-    fontSize: 14,
-    color: '#92400E',
-    marginTop: 2,
-  },
-  verificationButton: {
-    backgroundColor: '#F59E0B',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  verificationButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  verifiedBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  verifiedText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#065F46',
-    marginLeft: 12,
-  },
-  imagesContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
-  mainImageContainer: {
-    flex: 2,
-    position: 'relative',
-  },
-  mainImage: {
-    width: '100%',
-    height: 240,
-    borderRadius: 16,
-  },
-  cameraButton: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
-    width: 36,
-    height: 36,
-    backgroundColor: '#E11D48',
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryImageContainer: {
-    flex: 1,
-  },
-  secondaryImage: {
-    width: '100%',
-    height: 240,
-    borderRadius: 16,
   },
   basicInfo: {
     backgroundColor: '#FFFFFF',
