@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,10 @@ import {
   Platform,
   ScrollView,
   Pressable,
+  Modal,
 } from 'react-native';
 import { profileStyles } from './styles';
-import { Calendar } from 'lucide-react-native';
+import { Calendar, X } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from '@/assets/colors/colors';
 import { Image } from 'expo-image';
@@ -30,7 +31,9 @@ export default function BasicInfoSetup({
   const [formattedDate, setFormattedDate] = useState('');
   const [apiDate, setApiDate] = useState('');
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedTime, setSelectedTime] = useState<Date | undefined>(undefined);
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(0);
   const [formattedTime, setFormattedTime] = useState('');
   const [apiTime, setApiTime] = useState('');
   const [rememberBirthTime, setRememberBirthTime] = useState(true);
@@ -180,28 +183,22 @@ export default function BasicInfoSetup({
     setShowDatePicker(true);
   };
 
-  const handleTimeChange = (event: any, time?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowTimePicker(false);
-    }
-
-    if (time) {
-      setSelectedTime(time);
-      // Format time as HH:MM:SS
-      const hours = String(time.getHours()).padStart(2, '0');
-      const minutes = String(time.getMinutes()).padStart(2, '0');
-      const seconds = String(time.getSeconds()).padStart(2, '0');
-      setFormattedTime(`${hours}:${minutes}:${seconds}`);
-      setApiTime(`${hours}:${minutes}:${seconds}`);
-    }
-
-    if (Platform.OS === 'ios' && event.type === 'dismissed') {
-      setShowTimePicker(false);
-    }
-  };
-
   const openTimePicker = () => {
     setShowTimePicker(true);
+  };
+
+  const closeTimePicker = () => {
+    setShowTimePicker(false);
+  };
+
+  const handleTimeConfirm = () => {
+    const hoursStr = String(hours).padStart(2, '0');
+    const minutesStr = String(minutes).padStart(2, '0');
+    const secondsStr = String(seconds).padStart(2, '0');
+
+    setFormattedTime(`${hoursStr}:${minutesStr}:${secondsStr}`);
+    setApiTime(`${hoursStr}:${minutesStr}:${secondsStr}`);
+    closeTimePicker();
   };
 
   return (
@@ -272,18 +269,6 @@ export default function BasicInfoSetup({
                 </Text>
               </Pressable>
 
-              {showTimePicker && (
-                <DateTimePicker
-                  value={selectedTime || new Date()}
-                  mode="time"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={handleTimeChange}
-                  accentColor={Colors.primary}
-                  textColor={Colors.primary}
-                  is24Hour={true}
-                />
-              )}
-
               <Pressable
                 style={{
                   flexDirection: 'row',
@@ -295,7 +280,9 @@ export default function BasicInfoSetup({
                   if (rememberBirthTime) {
                     setFormattedTime('');
                     setApiTime('');
-                    setSelectedTime(undefined);
+                    setHours(0);
+                    setMinutes(0);
+                    setSeconds(0);
                   }
                 }}
               >
@@ -419,6 +406,299 @@ export default function BasicInfoSetup({
         enabled={!isLoading}
         onPress={handleSaveButton}
       />
+
+      {/* Custom Time Picker Bottom Sheet Modal */}
+      <Modal
+        visible={showTimePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={closeTimePicker}
+      >
+        <Pressable
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'flex-end',
+          }}
+          onPress={closeTimePicker}
+        >
+          <Pressable
+            style={{
+              backgroundColor: 'white',
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingTop: 20,
+              paddingBottom: 40,
+              maxHeight: '70%',
+            }}
+            onPress={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingHorizontal: 20,
+                paddingBottom: 20,
+                borderBottomWidth: 1,
+                borderBottomColor: '#E5E7EB',
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: 'bold',
+                  color: '#111827',
+                }}
+              >
+                Select Birth Time
+              </Text>
+              <TouchableOpacity onPress={closeTimePicker}>
+                <X color="#6B7280" size={24} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Number Pickers */}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingVertical: 30,
+                paddingHorizontal: 20,
+                gap: 12,
+              }}
+            >
+              {/* Hours Picker */}
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: '#6B7280',
+                    marginBottom: 8,
+                    fontWeight: '600',
+                  }}
+                >
+                  Hours
+                </Text>
+                <ScrollView
+                  style={{
+                    height: 200,
+                    borderWidth: 2,
+                    borderColor: Colors.primary,
+                    borderRadius: 12,
+                    backgroundColor: '#F9FAFB',
+                  }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
+                    <TouchableOpacity
+                      key={hour}
+                      onPress={() => setHours(hour)}
+                      style={{
+                        paddingVertical: 12,
+                        paddingHorizontal: 20,
+                        backgroundColor:
+                          hours === hour ? Colors.primary : 'transparent',
+                        borderRadius: 8,
+                        marginVertical: 2,
+                        marginHorizontal: 8,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: hours === hour ? 'bold' : 'normal',
+                          color: hours === hour ? 'white' : '#374151',
+                          textAlign: 'center',
+                        }}
+                      >
+                        {String(hour).padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: Colors.primary,
+                }}
+              >
+                :
+              </Text>
+
+              {/* Minutes Picker */}
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: '#6B7280',
+                    marginBottom: 8,
+                    fontWeight: '600',
+                  }}
+                >
+                  Minutes
+                </Text>
+                <ScrollView
+                  style={{
+                    height: 200,
+                    borderWidth: 2,
+                    borderColor: Colors.primary,
+                    borderRadius: 12,
+                    backgroundColor: '#F9FAFB',
+                  }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
+                    <TouchableOpacity
+                      key={minute}
+                      onPress={() => setMinutes(minute)}
+                      style={{
+                        paddingVertical: 12,
+                        paddingHorizontal: 20,
+                        backgroundColor:
+                          minutes === minute ? Colors.primary : 'transparent',
+                        borderRadius: 8,
+                        marginVertical: 2,
+                        marginHorizontal: 8,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: minutes === minute ? 'bold' : 'normal',
+                          color: minutes === minute ? 'white' : '#374151',
+                          textAlign: 'center',
+                        }}
+                      >
+                        {String(minute).padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: Colors.primary,
+                }}
+              >
+                :
+              </Text>
+
+              {/* Seconds Picker */}
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: '#6B7280',
+                    marginBottom: 8,
+                    fontWeight: '600',
+                  }}
+                >
+                  Seconds
+                </Text>
+                <ScrollView
+                  style={{
+                    height: 200,
+                    borderWidth: 2,
+                    borderColor: Colors.primary,
+                    borderRadius: 12,
+                    backgroundColor: '#F9FAFB',
+                  }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {Array.from({ length: 60 }, (_, i) => i).map((second) => (
+                    <TouchableOpacity
+                      key={second}
+                      onPress={() => setSeconds(second)}
+                      style={{
+                        paddingVertical: 12,
+                        paddingHorizontal: 20,
+                        backgroundColor:
+                          seconds === second ? Colors.primary : 'transparent',
+                        borderRadius: 8,
+                        marginVertical: 2,
+                        marginHorizontal: 8,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: seconds === second ? 'bold' : 'normal',
+                          color: seconds === second ? 'white' : '#374151',
+                          textAlign: 'center',
+                        }}
+                      >
+                        {String(second).padStart(2, '0')}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View
+              style={{
+                flexDirection: 'row',
+                paddingHorizontal: 20,
+                gap: 12,
+              }}
+            >
+              <TouchableOpacity
+                onPress={closeTimePicker}
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  borderWidth: 2,
+                  borderColor: Colors.primary,
+                  backgroundColor: 'white',
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: Colors.primary,
+                    fontSize: 16,
+                    fontWeight: '600',
+                  }}
+                >
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleTimeConfirm}
+                style={{
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  backgroundColor: Colors.primary,
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: 16,
+                    fontWeight: '600',
+                  }}
+                >
+                  Confirm
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </>
   );
 }

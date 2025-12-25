@@ -22,7 +22,6 @@ export default function AppImage({
   style?: any;
   disableFullScreen?: boolean;
 }) {
-  console.log(src);
   const [modalVisible, setModalVisible] = useState(false);
 
   const blurhash =

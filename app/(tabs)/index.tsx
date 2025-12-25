@@ -28,6 +28,8 @@ import FilterBottomSheet, {
   FilterOptions,
 } from '@/components/FilterBottomSheet';
 import AppImage from '@/components/AppImage';
+import { calculateAge } from '@/utils/helper';
+import SwipeHandler from '@/components/SwipeHandler';
 
 const { width, height } = Dimensions.get('window');
 const CARD_HEIGHT = height * 0.6;
@@ -271,7 +273,7 @@ export default function Home() {
           {...panResponder.panHandlers}
         >
           <AppImage
-            src={profiles[currentIndex].images?.[0]}
+            src={profiles[currentIndex].mainImage}
             style={styles.profileImage}
             disableFullScreen={true}
           />
@@ -279,20 +281,22 @@ export default function Home() {
           <View style={styles.overlay} pointerEvents="box-none">
             <View style={styles.profileInfo} pointerEvents="none">
               <Text style={styles.name}>
-                {profiles[currentIndex].fullName}, {profiles[currentIndex].age}
+                {profiles[currentIndex].fullName},{' '}
+                {calculateAge(profiles[currentIndex].dateOfBirth)}
               </Text>
 
               <View style={styles.infoRow}>
                 <MapPin color="#FFFFFF" size={16} />
                 <Text style={styles.infoText}>
-                  {JSON.stringify(profiles[currentIndex].location)}
+                  {profiles[currentIndex].location.city},{' '}
+                  {profiles[currentIndex].location.state}
                 </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Briefcase color="#FFFFFF" size={16} />
                 <Text style={styles.infoText}>
-                  {JSON.stringify(profiles[currentIndex].occupation)}
+                  {profiles[currentIndex].occupation}
                 </Text>
               </View>
 
@@ -327,60 +331,11 @@ export default function Home() {
         </Animated.View>
       </View>
 
-      <View style={styles.actions}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.passButton,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handlePass}
-        >
-          {({ pressed }) => (
-            <>
-              <X color="#EF4444" size={24} />
-              <Text style={styles.actionLabel}>Not Interested</Text>
-            </>
-          )}
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.shortlistButton,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleShortlist}
-        >
-          {({ pressed }) => (
-            <>
-              <Star
-                color="#F59E0B"
-                size={28}
-                fill={pressed ? '#F59E0B' : 'none'}
-              />
-              <Text style={styles.actionLabelShortlist}>Shortlist</Text>
-            </>
-          )}
-        </Pressable>
-
-        <Pressable
-          style={({ pressed }) => [
-            styles.likeButton,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleLike}
-        >
-          {({ pressed }) => (
-            <>
-              <Heart
-                color="#E11D48"
-                size={24}
-                fill={pressed ? '#E11D48' : 'none'}
-              />
-              <Text style={styles.actionLabel}>Interested</Text>
-            </>
-          )}
-        </Pressable>
-      </View>
+      <SwipeHandler
+        handlePass={() => handlePass()}
+        handleShortlist={() => handleShortlist()}
+        handleLike={() => handleLike()}
+      />
 
       <FilterBottomSheet
         visible={filterModalVisible}
@@ -565,86 +520,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.4)',
     transform: [{ scale: 0.9 }],
     opacity: 0.8,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    gap: 12,
-  },
-  passButton: {
-    flex: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#EF4444',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.5,
-    borderColor: '#FEE2E2',
-  },
-  shortlistButton: {
-    flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#F59E0B',
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 6,
-    borderWidth: 2,
-    borderColor: '#FEF3C7',
-  },
-  likeButton: {
-    flex: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#E11D48',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1.5,
-    borderColor: '#FEE2E2',
-  },
-  buttonPressed: {
-    transform: [{ scale: 0.95 }],
-    opacity: 0.8,
-  },
-  actionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  actionLabelShortlist: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#F59E0B',
-    marginTop: 4,
   },
 });

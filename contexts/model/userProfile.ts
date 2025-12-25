@@ -32,6 +32,7 @@ export interface UserProfile {
   gender: string;
   languagesSpoken: string[];
   maritalStatus: string;
+  manglik: boolean;
   hasChildren: string;
   hasDisability: boolean;
   hobbies: string[];

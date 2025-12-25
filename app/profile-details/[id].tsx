@@ -11,19 +11,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeft,
-  Heart,
-  X,
-  MessageCircle,
   MapPin,
   Briefcase,
   GraduationCap,
   Users,
+  Moon,
 } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 import { UserProfile } from '@/contexts/model/userProfile';
 import AppImage from '@/components/AppImage';
+import SwipeHandler from '@/components/SwipeHandler';
+import { calculateAge } from '@/utils/helper';
 
 const { width } = Dimensions.get('window');
 
@@ -45,7 +45,9 @@ export default function ProfileDetails() {
     setLoading(true);
     setError(null);
     try {
-      const response = await ApiService.getDiscoveredProfileDetails(id as string);
+      const response = await ApiService.getDiscoveredProfileDetails(
+        id as string
+      );
       if (response.success && response.data) {
         setProfile(response.data);
         // Track profile view
@@ -110,21 +112,27 @@ export default function ProfileDetails() {
     }
   };
 
-  const handleConnect = () => {
+  const handleShortlist = () => {
     console.log('Connect with profile:', id);
     router.push(`/chat/${id}`);
+  };
+
+  const HeaderSection = () => {
+    return (
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <ArrowLeft color="#1F2937" size={24} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Profile Details</Text>
+        <View style={{ width: 24 }} />
+      </View>
+    );
   };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ArrowLeft color="#1F2937" size={24} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile Details</Text>
-          <View style={{ width: 24 }} />
-        </View>
+        <HeaderSection />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading profile...</Text>
         </View>
@@ -135,13 +143,7 @@ export default function ProfileDetails() {
   if (error || !profile) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ArrowLeft color="#1F2937" size={24} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile Details</Text>
-          <View style={{ width: 24 }} />
-        </View>
+        <HeaderSection />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error || 'Profile not found'}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={loadProfile}>
@@ -165,15 +167,24 @@ export default function ProfileDetails() {
     </View>
   );
 
+  const renderPersonalDetails = ({
+    title,
+    value,
+  }: {
+    title: string;
+    value: string;
+  }) => {
+    return value ? (
+      <View style={styles.detailRow}>
+        <Text style={styles.detailLabel}>{title}</Text>
+        <Text style={styles.detailValue}>{value}</Text>
+      </View>
+    ) : null;
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <ArrowLeft color="#1F2937" size={24} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile Details</Text>
-        <View style={{ width: 24 }} />
-      </View>
+      <HeaderSection />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Images */}
@@ -190,10 +201,7 @@ export default function ProfileDetails() {
             }}
           >
             {profile.images?.map((image: any, index: number) => (
-              <AppImage
-              src={image.url}
-              style={styles.profileImage}
-               />
+              <AppImage src={image.url} style={styles.profileImage} />
             ))}
           </ScrollView>
           {renderImageIndicators()}
@@ -202,13 +210,15 @@ export default function ProfileDetails() {
         {/* Basic Information */}
         <View style={styles.section}>
           <Text style={styles.name}>
-            {profile.fullName}, {profile.age}
+            {profile.fullName}, {calculateAge(profile.dateOfBirth)}
           </Text>
 
           <View style={styles.infoGrid}>
             <View style={styles.infoRow}>
               <MapPin color="#6B7280" size={16} />
-              <Text style={styles.infoText}>{profile.location.city}, {profile.location.state}</Text>
+              <Text style={styles.infoText}>
+                {profile.location.city}, {profile.location.state}
+              </Text>
             </View>
 
             <View style={styles.infoRow}>
@@ -225,6 +235,13 @@ export default function ProfileDetails() {
               <Users color="#6B7280" size={16} />
               <Text style={styles.infoText}>{profile.maritalStatus}</Text>
             </View>
+
+            <View style={styles.infoRow}>
+              <Moon color="#6B7280" size={16} />
+              <Text style={styles.infoText}>
+                {profile.manglik ? 'Manglik' : 'Not Manglik'}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -239,76 +256,50 @@ export default function ProfileDetails() {
           <Text style={styles.sectionTitle}>Personal Details</Text>
 
           <View style={styles.detailsGrid}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Religion</Text>
-              <Text style={styles.detailValue}>{profile.religion}</Text>
-            </View>
+            {renderPersonalDetails({
+              title: 'Religion',
+              value: profile.religion,
+            })}
 
-            {profile.caste && (
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Caste</Text>
-                <Text style={styles.detailValue}>{profile.caste}</Text>
-              </View>
-            )}
+            {renderPersonalDetails({
+              title: 'Caste',
+              value: profile.caste,
+            })}
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Height</Text>
-              <Text style={styles.detailValue}>{profile.height}</Text>
-            </View>
+            {renderPersonalDetails({
+              title: 'Height',
+              value: profile.height,
+            })}
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Diet</Text>
-              <Text style={styles.detailValue}>
-                {profile.diet || 'Not specified'}
-              </Text>
-            </View>
+            {renderPersonalDetails({
+              title: 'Diet',
+              value: profile.diet,
+            })}
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Smoking</Text>
-              <Text style={styles.detailValue}>
-                {profile.smokingHabit || 'Not specified'}
-              </Text>
-            </View>
+            {renderPersonalDetails({
+              title: 'Smoking',
+              value: profile.smokingHabit,
+            })}
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Drinking</Text>
-              <Text style={styles.detailValue}>
-                {profile.drinkingHabit || 'Not specified'}
-              </Text>
-            </View>
+            {renderPersonalDetails({
+              title: 'Drinking',
+              value: profile.drinkingHabit,
+            })}
+
+            {renderPersonalDetails({
+              title: 'Blood Group',
+              value: profile.bloodGroup,
+            })}
           </View>
         </View>
-
-        {/* Interests */}
-        {/* {profile && profile.interests.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Interests</Text>
-            <View style={styles.interestsContainer}>
-              {profile.interests.map((interest, index) => (
-                <View key={index} style={styles.interestTag}>
-                  <Text style={styles.interestText}>{interest}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )} */}
       </ScrollView>
 
       {/* Action Buttons */}
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.passButton} onPress={handlePass}>
-          <X color="#EF4444" size={24} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.connectButton} onPress={handleConnect}>
-          <MessageCircle color="#FFFFFF" size={20} />
-          <Text style={styles.connectButtonText}>Connect</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.likeButton} onPress={handleLike}>
-          <Heart color="#E11D48" size={24} />
-        </TouchableOpacity>
-      </View>
+      <SwipeHandler
+        handlePass={handlePass}
+        handleShortlist={handleShortlist}
+        handleLike={handleLike}
+      />
     </SafeAreaView>
   );
 }
@@ -465,51 +456,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#E11D48',
     fontWeight: '500',
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  passButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#FEF2F2',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-  },
-  connectButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E11D48',
-    paddingVertical: 16,
-    borderRadius: 28,
-    marginHorizontal: 16,
-    gap: 8,
-  },
-  connectButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  likeButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#FEF2F2',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#FECACA',
   },
 });
