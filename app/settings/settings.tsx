@@ -168,7 +168,7 @@ export default function Settings() {
               icon={<Shield color="#6B7280" size={20} />}
               title="Account Verification"
               subtitle="Verify your identity"
-              onPress={() => router.push('/verification')}
+              onPress={() => router.push('/verification/verification')}
             />
             <SettingItem
               icon={<Lock color="#6B7280" size={20} />}

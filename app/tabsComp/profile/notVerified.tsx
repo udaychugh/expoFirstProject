@@ -9,7 +9,7 @@ export default function NotVerified() {
   const router = useRouter();
 
   const handleVerification = () => {
-    router.push('/verification');
+    router.push('/verification/verification');
   };
 
   return (
