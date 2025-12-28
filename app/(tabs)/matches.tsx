@@ -41,14 +41,18 @@ export default function Matches() {
       if (tab === 'Sent') {
         const response = await ApiService.getSentConnections();
         if (response.success && response.data) {
-          setSentConnections(response.data);
+          setSentConnections(
+            response.data.filter((item) => item.status !== 'cancelled')
+          );
         } else {
           setError(response.error || 'Failed to load sent connections');
         }
       } else {
         const response = await ApiService.getReceivedConnections();
         if (response.success && response.data) {
-          setReceivedConnections(response.data);
+          setReceivedConnections(
+            response.data.filter((item) => item.status !== 'cancelled')
+          );
         } else {
           setError(response.error || 'Failed to load received connections');
         }

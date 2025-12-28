@@ -33,7 +33,7 @@ export interface ConnectionResponse {
     email: string | null;
     phone: string | null;
   };
-  status: 'pending' | 'accepted' | 'rejected';
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
   message: string | null;
   responseReason: string | null;
   respondedAt: string | null;

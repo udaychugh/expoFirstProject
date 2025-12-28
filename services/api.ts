@@ -396,6 +396,16 @@ class ApiService {
     });
   }
 
+  async sendConnectionRequest(
+    profileId: string,
+    message?: string
+  ): Promise<ApiResponse> {
+    return this.makeRequest('/profile/send-connection', {
+      method: 'POST',
+      body: JSON.stringify({ to: profileId, message: message }),
+    });
+  }
+
   async getMatches(): Promise<ApiResponse<UserProfile[]>> {
     return this.makeRequest('/matches');
   }
@@ -499,6 +509,13 @@ class ApiService {
     return this.makeRequest('/account/change-password', {
       method: 'PUT',
       body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  }
+
+  async shortListUser(profleId: string): Promise<ApiResponse<UserProfile[]>> {
+    return this.makeRequest('/shortlist', {
+      method: 'POST',
+      body: JSON.stringify({ profileId: profleId }),
     });
   }
 

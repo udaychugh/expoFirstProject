@@ -28,6 +28,7 @@ import AppImage from '@/components/AppImage';
 import { calculateAge } from '@/utils/helper';
 import SwipeHandler from '@/components/SwipeHandler';
 import RequestToProcess from '@/components/process/requestToCompleteProfile';
+import { ShowAlert } from '@/components/Alert';
 
 const { width, height } = Dimensions.get('window');
 const CARD_HEIGHT = height * 0.65;
@@ -116,16 +117,16 @@ export default function Home() {
 
     // Call API for swipe action
     try {
-      // const action = direction === 'right' ? 'like' : 'pass';
-      // const response = await ApiService.swipeProfile({
-      //   profileId: currentProfile.id,
-      //   action,
-      // });
-      // if (response.success && response.data?.isMatch && direction === 'right') {
-      //   // Show match notification or navigate to match screen
-      //   console.log('It\'s a match!', response.data);
-      //   // You can show a match modal here
-      // }
+      const action = direction === 'right' ? 'like' : 'pass';
+      const response = await ApiService.swipeProfile({
+        profileId: currentProfile.id,
+        action,
+      });
+      if (response.success && response.data?.isMatch && direction === 'right') {
+        // Show match notification or navigate to match screen
+        console.log("It's a match!", response.data);
+        // You can show a match modal here
+      }
     } catch (error) {
       console.error('Swipe error:', error);
     }
@@ -153,8 +154,36 @@ export default function Home() {
       toValue: { x: width, y: 0 },
       duration: 200,
       useNativeDriver: false,
-    }).start(() => {
-      handleSwipe('right');
+    }).start(async () => {
+      try {
+        const currentProfile = profiles[currentIndex];
+        if (!currentProfile) return;
+        const response = await ApiService.sendConnectionRequest(
+          currentProfile.id
+        );
+        if (response.success) {
+          console.log('Connection request sent successfully');
+          ShowAlert({
+            type: 'success',
+            title: 'Success',
+            message: 'Connection request sent successfully',
+          });
+          changeIndex();
+        } else {
+          ShowAlert({
+            type: 'error',
+            title: 'Error',
+            message: 'Connection request failed',
+          });
+        }
+      } catch (error) {
+        console.error('Connection request error:', error);
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: 'Connection request failed',
+        });
+      }
     });
   };
 
@@ -168,14 +197,7 @@ export default function Home() {
     });
   };
 
-  const handleShortlist = () => {
-    const currentProfile = profiles[currentIndex];
-    if (!currentProfile) return;
-
-    // TODO: Call API to add profile to shortlist
-    console.log('Shortlisted profile:', currentProfile.id);
-
-    // Move to next profile without animation
+  const changeIndex = () => {
     const nextIndex = currentIndex + 1;
     if (nextIndex >= profiles.length) {
       setCurrentIndex(0);
@@ -183,6 +205,40 @@ export default function Home() {
       setCurrentIndex(nextIndex);
     }
     pan.setValue({ x: 0, y: 0 });
+  };
+
+  const handleShortlist = async () => {
+    const currentProfile = profiles[currentIndex];
+    if (!currentProfile) return;
+
+    // TODO: Call API to add profile to shortlist
+    console.log('Shortlisted profile:', currentProfile.id);
+
+    try {
+      const response = await ApiService.shortListUser(currentProfile.id);
+      if (response.success) {
+        console.log('Profile shortlisted successfully');
+        ShowAlert({
+          type: 'success',
+          title: 'Success',
+          message: 'Profile shortlisted successfully',
+        });
+        changeIndex();
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: 'Profile shortlisted failed',
+        });
+      }
+    } catch (error) {
+      console.error('Error shortlisting profile:', error);
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Profile shortlisted failed',
+      });
+    }
   };
 
   const handleApplyFilters = (filters: FilterOptions) => {
