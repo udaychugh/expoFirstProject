@@ -31,7 +31,7 @@ import UserLocationInfo from '@/components/info/userLocationInfo';
 export default function Profile() {
   const router = useRouter();
 
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const stats = 0;
 
   const handleEditProfile = () => {
@@ -53,7 +53,7 @@ export default function Profile() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Verification Status */}
-        {!user?.isVerified && (
+        {!profile?.isVerified && (
           <NotVerified
             status={profile?.verificationStatus ?? 'not_submitted'}
           />
