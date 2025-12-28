@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
-import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Platform,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 import { ChevronDown, ChevronUp } from 'lucide-react-native';
 
 interface RenderSectionProps {
   title: string;
   children: React.ReactNode;
+  action?: string;
+  loading?: boolean;
   isExpanded: boolean;
+  onActionClick?: () => void;
 }
 
 export default function RenderSection({
   title,
   children,
+  action,
+  loading,
   isExpanded,
+  onActionClick,
 }: RenderSectionProps) {
   const [toggle, setToggle] = useState(isExpanded);
 
@@ -26,7 +39,13 @@ export default function RenderSection({
         android_ripple={{ color: 'rgba(225, 29, 72, 0.1)' }}
       >
         <Text style={styles.sectionTitle}>{title}</Text>
-        {toggle ? (
+        {loading ? (
+          <ActivityIndicator size="small" color="#E11D48" />
+        ) : action ? (
+          <Pressable onPress={onActionClick}>
+            <Text>{action}</Text>
+          </Pressable>
+        ) : toggle ? (
           <ChevronUp size={24} color="#E11D48" />
         ) : (
           <ChevronDown size={24} color="#E11D48" />

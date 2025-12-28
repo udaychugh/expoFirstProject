@@ -33,6 +33,8 @@ export interface UserProfile {
 
   _id: string;
   dateOfBirth: string;
+  timeOfBirth: string;
+  placeOfBirth: string;
   age: number;
   gender: string;
   languagesSpoken: string[];

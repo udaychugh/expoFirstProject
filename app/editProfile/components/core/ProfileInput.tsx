@@ -7,6 +7,7 @@ export default function ProfileInput({
   presetValue = '',
   keyboard = 'default',
   isMutliLine = false,
+  enabled = true,
   onChange,
 }: {
   label: string;
@@ -21,6 +22,7 @@ export default function ProfileInput({
     | 'phone-pad'
     | 'url';
   isMutliLine?: boolean;
+  enabled?: boolean;
   onChange: (change: string) => void;
 }) {
   const [value, setValue] = useState<string>(presetValue);
@@ -43,6 +45,7 @@ export default function ProfileInput({
         multiline={isMutliLine}
         numberOfLines={isMutliLine ? 4 : undefined}
         textAlignVertical="top"
+        editable={enabled}
       />
     </View>
   );

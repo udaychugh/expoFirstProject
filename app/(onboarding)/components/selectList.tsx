@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { Colors } from '@/assets/colors/colors';
 export default function SelectList({
   title,
   listData,
+  preSelectedData,
   setItemData,
 }: {
   title: string;
@@ -22,9 +23,16 @@ export default function SelectList({
     name: string;
     image: string;
   }[];
+  preSelectedData?: string[];
   setItemData: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   const [value, setValue] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (preSelectedData) {
+      setValue(preSelectedData);
+    }
+  }, [preSelectedData]);
 
   // Toggle selection for arrays
   const toggleSelection = (

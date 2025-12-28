@@ -35,7 +35,7 @@ export default function Profile() {
   const stats = 0;
 
   const handleEditProfile = () => {
-    router.push('/edit-profile');
+    router.push('/editProfile/edit-profile');
   };
 
   const handleSettings = () => {
