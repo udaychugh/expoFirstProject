@@ -13,30 +13,32 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import ApiService from '@/services/api';
 import AppImage from '@/components/AppImage';
 import { ShowAlert } from '@/components/Alert';
-import { UserProfile } from '@/contexts/model/userProfile';
 import { calculateAge } from '@/utils/helper';
+import { ConnectionResponse } from '@/contexts/model/connectionResponse';
 
 export default function Matches() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'Sent' | 'Received'>('Received');
-  const [sentConnections, setSentConnections] = useState<UserProfile[]>([]);
-  const [receivedConnections, setReceivedConnections] = useState<UserProfile[]>(
+  const [sentConnections, setSentConnections] = useState<ConnectionResponse[]>(
     []
   );
+  const [receivedConnections, setReceivedConnections] = useState<
+    ConnectionResponse[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
-      loadConnections();
+      loadConnections(activeTab);
     }, [activeTab])
   );
 
-  const loadConnections = async () => {
+  const loadConnections = async (tab: 'Sent' | 'Received') => {
     setLoading(true);
     setError(null);
     try {
-      if (activeTab === 'Sent') {
+      if (tab === 'Sent') {
         const response = await ApiService.getSentConnections();
         if (response.success && response.data) {
           setSentConnections(response.data);
@@ -58,10 +60,15 @@ export default function Matches() {
     }
   };
 
+  const getDisplayProfile = (connection: ConnectionResponse) => {
+    if (activeTab === 'Sent') return connection.to;
+    return connection.from || connection.to;
+  };
+
   const handleAccept = async (id: string, name: string) => {
     // Optimistic update
-    const connection = receivedConnections.find((c) => c._id === id); // Use _id or id depending on API
-    setReceivedConnections((prev) => prev.filter((c) => c._id !== id));
+    const connection = receivedConnections.find((c) => c.id === id);
+    setReceivedConnections((prev) => prev.filter((c) => c.id !== id));
 
     try {
       const response = await ApiService.acceptConnection(id);
@@ -71,7 +78,6 @@ export default function Matches() {
           title: 'Connection Accepted',
           message: `You are now connected with ${name}`,
         });
-        // Optionally refresh or move to chat
       } else {
         // Revert
         if (connection) setReceivedConnections((prev) => [...prev, connection]);
@@ -89,8 +95,8 @@ export default function Matches() {
 
   const handleReject = async (id: string) => {
     // Optimistic update
-    const connection = receivedConnections.find((c) => c._id === id);
-    setReceivedConnections((prev) => prev.filter((c) => c._id !== id));
+    const connection = receivedConnections.find((c) => c.id === id);
+    setReceivedConnections((prev) => prev.filter((c) => c.id !== id));
 
     try {
       const response = await ApiService.rejectConnection(id);
@@ -110,8 +116,8 @@ export default function Matches() {
 
   const handleCancel = async (id: string) => {
     // Optimistic update
-    const connection = sentConnections.find((c) => c._id === id);
-    setSentConnections((prev) => prev.filter((c) => c._id !== id));
+    const connection = sentConnections.find((c) => c.id === id);
+    setSentConnections((prev) => prev.filter((c) => c.id !== id));
 
     try {
       const response = await ApiService.cancelConnection(id);
@@ -135,60 +141,72 @@ export default function Matches() {
     }
   };
 
-  const renderConnectionItem = (item: UserProfile) => (
-    <View key={item._id || item.id} style={styles.connectionCard}>
-      <Pressable
-        onPress={() => router.push(`/profile-details/${item._id || item.id}`)}
-        style={styles.profileContainer}
-      >
-        <AppImage src={item.mainImage} style={styles.profileImage} />
-        <View style={styles.infoContainer}>
-          <Text style={styles.name}>
-            {item.fullName}, {item.age || calculateAge(item.dateOfBirth)}
-          </Text>
-          <View style={styles.locationRow}>
-            <MapPin color="#6B7280" size={14} />
-            <Text style={styles.locationText}>
-              {item.location?.city}, {item.location?.state}
+  const renderConnectionItem = (item: ConnectionResponse) => {
+    const profile = getDisplayProfile(item);
+
+    // Ensure profile exists to avoid crashes
+    if (!profile) return null;
+
+    return (
+      <View key={item.id} style={styles.connectionCard}>
+        <Pressable
+          onPress={() => router.push(`/profile-details/${profile.id}`)}
+          style={styles.profileContainer}
+        >
+          <AppImage
+            src={profile.mainImage || undefined}
+            style={styles.profileImage}
+          />
+          <View style={styles.infoContainer}>
+            <Text style={styles.name}>
+              {profile.fullName},{' '}
+              {profile.dateOfBirth ? calculateAge(profile.dateOfBirth) : 'N/A'}
+            </Text>
+            <View style={styles.locationRow}>
+              <MapPin color="#6B7280" size={14} />
+              <Text style={styles.locationText}>
+                {profile.location?.city || 'Unknown'},{' '}
+                {profile.location?.state || ''}
+              </Text>
+            </View>
+            <Text style={styles.occupation} numberOfLines={1}>
+              {profile.occupation || 'Not specified'}
             </Text>
           </View>
-          <Text style={styles.occupation} numberOfLines={1}>
-            {item.occupation}
-          </Text>
+        </Pressable>
+
+        <View style={styles.actionContainer}>
+          {activeTab === 'Received' ? (
+            <>
+              <Pressable
+                style={[styles.actionButton, styles.rejectButton]}
+                onPress={() => handleReject(item.id)}
+              >
+                <X color="#EF4444" size={20} />
+                <Text style={styles.rejectText}>Reject</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.actionButton, styles.acceptButton]}
+                onPress={() => handleAccept(item.id, profile.fullName)}
+              >
+                <Check color="#FFFFFF" size={20} />
+                <Text style={styles.acceptText}>Accept</Text>
+              </Pressable>
+            </>
+          ) : (
+            <Pressable
+              style={[styles.actionButton, styles.cancelButton]}
+              onPress={() => handleCancel(item.id)}
+            >
+              <Ban color="#6B7280" size={20} />
+              <Text style={styles.cancelText}>Cancel Request</Text>
+            </Pressable>
+          )}
         </View>
-      </Pressable>
-
-      <View style={styles.actionContainer}>
-        {activeTab === 'Received' ? (
-          <>
-            <Pressable
-              style={[styles.actionButton, styles.rejectButton]}
-              onPress={() => handleReject(item._id || item.id)}
-            >
-              <X color="#EF4444" size={20} />
-              <Text style={styles.rejectText}>Reject</Text>
-            </Pressable>
-
-            <Pressable
-              style={[styles.actionButton, styles.acceptButton]}
-              onPress={() => handleAccept(item._id || item.id, item.fullName)}
-            >
-              <Check color="#FFFFFF" size={20} />
-              <Text style={styles.acceptText}>Accept</Text>
-            </Pressable>
-          </>
-        ) : (
-          <Pressable
-            style={[styles.actionButton, styles.cancelButton]}
-            onPress={() => handleCancel(item._id || item.id)}
-          >
-            <Ban color="#6B7280" size={20} />
-            <Text style={styles.cancelText}>Cancel Request</Text>
-          </Pressable>
-        )}
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -201,11 +219,7 @@ export default function Matches() {
 
       <View style={styles.tabs}>
         <Pressable
-          style={({ pressed }) => [
-            styles.tab,
-            activeTab === 'Received' && styles.activeTab,
-            pressed && { opacity: 0.8 },
-          ]}
+          style={[styles.tab, activeTab === 'Received' && styles.activeTab]}
           onPress={() => setActiveTab('Received')}
         >
           <Text
@@ -219,11 +233,7 @@ export default function Matches() {
         </Pressable>
 
         <Pressable
-          style={({ pressed }) => [
-            styles.tab,
-            activeTab === 'Sent' && styles.activeTab,
-            pressed && { opacity: 0.8 },
-          ]}
+          style={[styles.tab, activeTab === 'Sent' && styles.activeTab]}
           onPress={() => setActiveTab('Sent')}
         >
           <Text
@@ -255,7 +265,7 @@ export default function Matches() {
                 styles.retryButton,
                 pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
               ]}
-              onPress={loadConnections}
+              onPress={() => loadConnections(activeTab)}
             >
               <Text style={styles.retryButtonText}>Retry</Text>
             </Pressable>

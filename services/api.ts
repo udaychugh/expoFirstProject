@@ -4,6 +4,7 @@ import { ApiResponse } from './model/apiResponse';
 import { API_BASE_URL } from './model/constants';
 import { MatchResult, SwipeAction } from './model/postauth/actions';
 import { UserProfile } from '../contexts/model/userProfile';
+import { ConnectionResponse } from '@/contexts/model/connectionResponse';
 
 class ApiService {
   private static instance: ApiService;
@@ -512,11 +513,11 @@ class ApiService {
   }
 
   // Connection APIs
-  async getSentConnections(): Promise<ApiResponse<UserProfile[]>> {
+  async getSentConnections(): Promise<ApiResponse<ConnectionResponse[]>> {
     return this.makeRequest('/profile/sent-connections');
   }
 
-  async getReceivedConnections(): Promise<ApiResponse<UserProfile[]>> {
+  async getReceivedConnections(): Promise<ApiResponse<ConnectionResponse[]>> {
     return this.makeRequest('/profile/received-connections');
   }
 
