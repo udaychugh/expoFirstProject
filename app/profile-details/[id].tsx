@@ -52,7 +52,7 @@ export default function ProfileDetails() {
       if (response.success && response.data) {
         setProfile(response.data);
         // Track profile view
-        await ApiService.viewProfile(id as string);
+        //await ApiService.viewProfile(id as string);
       } else {
         setError(response.error || 'Failed to load profile');
       }
@@ -187,7 +187,7 @@ export default function ProfileDetails() {
             }}
           >
             {profile.images?.map((image: any, index: number) => (
-              <AppImage src={image.url} style={styles.profileImage} />
+              <AppImage key={index} src={image.url} style={styles.profileImage} />
             ))}
           </ScrollView>
           {renderImageIndicators()}

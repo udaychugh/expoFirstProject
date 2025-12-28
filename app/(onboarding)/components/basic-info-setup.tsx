@@ -37,7 +37,7 @@ export default function BasicInfoSetup({
   const [formattedTime, setFormattedTime] = useState('');
   const [apiTime, setApiTime] = useState('');
   const [rememberBirthTime, setRememberBirthTime] = useState(true);
-  const [manglik, setManglik] = useState('');
+  const [manglik, setManglik] = useState(false);
   const [religion, setReligion] = useState('');
   const [caste, setCaste] = useState('');
   const [height, setHeight] = useState('');
@@ -346,7 +346,11 @@ export default function BasicInfoSetup({
               title="Manglik"
               list={['Manglik', 'Non-Manglik']}
               onPress={(value) => {
-                setManglik(value);
+                if (value == 'Manglik') {
+                  setManglik(true);
+                } else {
+                  setManglik(false);
+                }
               }}
             />
 
@@ -404,7 +408,7 @@ export default function BasicInfoSetup({
             />
 
             <SelectBtns
-              title="Blood Group"
+              title="Blood Group (optional)"
               list={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
               onPress={(value) => {
                 setBloodGroup(value);

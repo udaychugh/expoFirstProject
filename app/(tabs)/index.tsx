@@ -12,14 +12,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  Heart,
-  X,
   MapPin,
   Briefcase,
   GraduationCap,
   Info,
   Filter,
-  Star,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import ApiService from '@/services/api';
@@ -30,15 +27,16 @@ import FilterBottomSheet, {
 import AppImage from '@/components/AppImage';
 import { calculateAge } from '@/utils/helper';
 import SwipeHandler from '@/components/SwipeHandler';
+import RequestToProcess from '@/components/process/requestToCompleteProfile';
 
 const { width, height } = Dimensions.get('window');
-const CARD_HEIGHT = height * 0.6;
+const CARD_HEIGHT = height * 0.65;
 
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const pan = useRef(new Animated.ValueXY()).current;
 
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -48,8 +46,10 @@ export default function Home() {
 
   // Load profiles on component mount
   useEffect(() => {
-    loadProfiles();
-  }, []);
+    if (profile?.profileComplete && profile?.isVerified) {
+      loadProfiles();
+    }
+  }, [profile]);
 
   const loadProfiles = async (filters?: FilterOptions) => {
     setLoading(true);
@@ -190,6 +190,32 @@ export default function Home() {
     loadProfiles(filters);
   };
 
+  if (profile && !profile.profileComplete) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <RequestToProcess
+          title="Incomplete Profile"
+          description="Please complete your profile to start discovering profiles."
+          buttonTitle="Complete Profile"
+          route="/edit-profile"
+        />
+      </SafeAreaView>
+    );
+  }
+
+  if (profile && !profile.isVerified) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <RequestToProcess
+          title="Verification Required"
+          description="Please verify yourself to view profiles."
+          buttonTitle="Verify Profile"
+          route="/verification/verification"
+        />
+      </SafeAreaView>
+    );
+  }
+
   if (loading && profiles.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
@@ -228,6 +254,7 @@ export default function Home() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View>
@@ -252,6 +279,7 @@ export default function Home() {
         </View>
       </View>
 
+      {/* Card Container */}
       <View style={styles.cardContainer}>
         <Animated.View
           style={[
@@ -322,7 +350,7 @@ export default function Home() {
                   'Info button clicked! Profile ID:',
                   profiles[currentIndex]._id
                 );
-                router.push(`/profile-details/${profiles[currentIndex]._id}`);
+                router.push(`/profile-details/${profiles[currentIndex].id}`);
               }}
             >
               <Info color="#FFFFFF" size={20} />
@@ -446,7 +474,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
-    marginTop: 20,
+    marginTop: 10,
   },
   card: {
     width: width - 40,
@@ -457,7 +485,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 8,
+      height: 4,
     },
     shadowOpacity: 0.15,
     shadowRadius: 16,

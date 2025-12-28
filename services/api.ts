@@ -43,7 +43,6 @@ class ApiService {
       });
 
       console.debug('API response status: ', response.status);
-      console.debug('API response headers: ', JSON.stringify(response));
 
       // Handle token expiration
       if (response.status === 401) {
@@ -67,6 +66,7 @@ class ApiService {
       }
 
       const data = await response.json();
+      console.log('Data of api call = ', JSON.stringify(data));
       return data;
     } catch (error) {
       console.error('API request error:', error);
@@ -151,7 +151,7 @@ class ApiService {
     dateOfBirth?: string;
     timeOfBirth?: string;
     gender?: string;
-    manglik?: string;
+    manglik?: boolean;
     religion?: string;
     caste?: string;
     height?: string;
