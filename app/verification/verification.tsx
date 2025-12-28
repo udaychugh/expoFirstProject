@@ -8,21 +8,17 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  ArrowLeft,
-  CircleAlert as AlertCircle,
-  Clock,
-  XCircle,
-  CheckCircle2,
-  Mail,
-} from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/contexts/AuthContext';
-import { Colors } from '@/assets/colors/colors';
-import IdCardUpload from './components/idCardUpload';
+import ApiService from '@/services/api';
 import PrimaryButton from '@/components/PrimaryButton';
 import { ShowAlert } from '@/components/Alert';
+import VerificationPending from './components/VerificationPending';
+import VerificationRejected from './components/VerificationRejected';
+import VerificationApproved from './components/VerificationApproved';
+import VerificationNotSubmitted from './components/VerificationNotSubmitted';
 
 export default function Verification() {
   const router = useRouter();
@@ -33,7 +29,7 @@ export default function Verification() {
 
   const [idCardType, setIdCardType] = useState<string>('');
 
-  const { user, profile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,17 +71,50 @@ export default function Verification() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      ShowAlert({
-        type: 'success',
-        title: 'Verification Submitted',
-        message:
-          'Your verification documents have been submitted successfully. We will review them within 24-48 hours.',
+    try {
+      const response = await ApiService.submitVerification({
+        idCardImage: verificationData.idCard,
+        selfieImage: verificationData.selfie || '',
+        idType: idCardType,
+        fullName: profile?.fullName || user?.fullName || 'user',
       });
-      router.back();
-    }, 2000);
+
+      if (response.success) {
+        // Update profile status locally
+        if (response.data && response.data.verificationStatus) {
+          updateProfile({
+            verificationStatus: response.data.verificationStatus,
+          });
+        } else {
+          // Fallback to pending if data not returned
+          updateProfile({ verificationStatus: 'pending' });
+        }
+
+        ShowAlert({
+          type: 'success',
+          title: 'Verification Submitted',
+          message:
+            response.message ||
+            'Your verification documents have been submitted successfully.',
+        });
+
+        router.back();
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Submission Failed',
+          message: response.error || 'Failed to submit verification documents.',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'An unexpected error occurred. Please try again.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -101,101 +130,19 @@ export default function Verification() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {(!profile?.verificationStatus ||
           profile?.verificationStatus === 'not_submitted') && (
-          <>
-            <View style={styles.infoCard}>
-              <AlertCircle color="#F59E0B" size={24} />
-              <Text style={styles.infoTitle}>Verification Required</Text>
-              <Text style={styles.infoText}>
-                To ensure the safety and authenticity of our community, please
-                complete your account verification by uploading the required
-                documents.
-              </Text>
-            </View>
-
-            {/* ID Card Upload */}
-            <IdCardUpload
-              verificationData={verificationData}
-              setVerificationData={setVerificationData}
-              idCardType={idCardType}
-              setIdCardType={setIdCardType}
-            />
-
-            {/* Guidelines */}
-            <View style={styles.guidelines}>
-              <Text style={styles.guidelinesTitle}>
-                Verification Guidelines
-              </Text>
-              <View style={styles.guideline}>
-                <Text style={styles.bulletPoint}>•</Text>
-                <Text style={styles.guidelineText}>
-                  Ensure your ID card is clearly visible and readable
-                </Text>
-              </View>
-              <View style={styles.guideline}>
-                <Text style={styles.bulletPoint}>•</Text>
-                <Text style={styles.guidelineText}>
-                  Verification typically takes 24-48 hours
-                </Text>
-              </View>
-            </View>
-          </>
+          <VerificationNotSubmitted
+            verificationData={verificationData}
+            setVerificationData={setVerificationData}
+            idCardType={idCardType}
+            setIdCardType={setIdCardType}
+          />
         )}
 
-        {profile?.verificationStatus === 'pending' && (
-          <View style={styles.statusContainer}>
-            <View
-              style={[styles.statusIconBox, { backgroundColor: '#FFFBEB' }]}
-            >
-              <Clock color="#F59E0B" size={48} />
-            </View>
-            <Text style={styles.statusTitle}>Waiting for Approval</Text>
-            <Text style={styles.statusDescription}>
-              Your documents have been submitted and are currently being
-              reviewed by our team. This process usually takes 24-48 hours.
-            </Text>
-          </View>
-        )}
+        {profile?.verificationStatus === 'pending' && <VerificationPending />}
 
-        {profile?.verificationStatus === 'rejected' && (
-          <View style={styles.statusContainer}>
-            <View
-              style={[styles.statusIconBox, { backgroundColor: '#FEF2F2' }]}
-            >
-              <XCircle color="#EF4444" size={48} />
-            </View>
-            <Text style={[styles.statusTitle, { color: '#EF4444' }]}>
-              Verification Reject
-            </Text>
-            <Text style={styles.statusDescription}>
-              Unfortunately, your verification request was not approved.
-            </Text>
+        {profile?.verificationStatus === 'rejected' && <VerificationRejected />}
 
-            <View style={styles.supportBox}>
-              <Mail color="#6B7280" size={20} />
-              <Text style={styles.supportText}>
-                Write mail to us at{' '}
-                <Text style={styles.supportEmail}>support@freelab.tech</Text>{' '}
-                for more support or help to complete verification.
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {profile?.verificationStatus === 'approved' && (
-          <View style={styles.statusContainer}>
-            <View
-              style={[styles.statusIconBox, { backgroundColor: '#F0FDF4' }]}
-            >
-              <CheckCircle2 color="#22C55E" size={48} />
-            </View>
-            <Text style={[styles.statusTitle, { color: '#22C55E' }]}>
-              You are Verified
-            </Text>
-            <Text style={styles.statusDescription}>
-              Congratulations! Your account is fully verified.
-            </Text>
-          </View>
-        )}
+        {profile?.verificationStatus === 'approved' && <VerificationApproved />}
       </ScrollView>
 
       {(!profile?.verificationStatus ||
@@ -236,123 +183,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
   },
-  infoCard: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 20,
-    borderWidth: 1,
-    borderColor: '#FED7AA',
-    alignItems: 'center',
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#92400E',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#92400E',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  guidelines: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-  },
-  guidelinesTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 16,
-  },
-  guideline: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  bulletPoint: {
-    fontSize: 16,
-    color: '#E11D48',
-    marginRight: 8,
-    fontWeight: '600',
-  },
-  guidelineText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-  },
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
-  },
-  submitButton: {
-    backgroundColor: '#E11D48',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  submitButtonDisabled: {
-    backgroundColor: '#9CA3AF',
-  },
-  submitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  statusContainer: {
-    padding: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-  },
-  statusIconBox: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  statusTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  statusDescription: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 32,
-  },
-  supportBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 32,
-    gap: 12,
-  },
-  supportText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#374151',
-    lineHeight: 20,
-  },
-  supportEmail: {
-    fontWeight: '600',
-    color: Colors.primary,
   },
 });

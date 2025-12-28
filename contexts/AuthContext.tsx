@@ -159,6 +159,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const updateProfile = (profileData: Partial<UserProfile>) => {
+    if (profile) {
+      setProfile({ ...profile, ...profileData });
+    }
+  };
+
   const value: AuthContextType = {
     user,
     profile,
@@ -171,6 +177,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     resetPassword,
     logout,
     updateUser,
+    updateProfile,
     checkAuthStatus,
   };
 

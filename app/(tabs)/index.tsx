@@ -204,12 +204,25 @@ export default function Home() {
   }
 
   if (profile && !profile.isVerified) {
+    const description =
+      profile.verificationStatus == 'pending'
+        ? 'Please wait for admin to approve your account.'
+        : profile.verificationStatus == 'rejected'
+        ? 'Go to more details to check what can be done now to fix the issue.'
+        : 'Please verify yourself to view profiles.';
+
+    const buttonText =
+      profile.verificationStatus == 'pending'
+        ? 'See Status'
+        : profile.verificationStatus == 'rejected'
+        ? 'More Details'
+        : 'Verify Profile';
     return (
       <SafeAreaView style={styles.container}>
         <RequestToProcess
           title="Verification Required"
-          description="Please verify yourself to view profiles."
-          buttonTitle="Verify Profile"
+          description={description}
+          buttonTitle={buttonText}
           route="/verification/verification"
         />
       </SafeAreaView>

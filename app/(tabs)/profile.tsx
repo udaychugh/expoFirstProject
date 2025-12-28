@@ -53,7 +53,11 @@ export default function Profile() {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Verification Status */}
-        {!user?.isVerified && <NotVerified />}
+        {!user?.isVerified && (
+          <NotVerified
+            status={profile?.verificationStatus ?? 'not_submitted'}
+          />
+        )}
 
         {/* Profile Images */}
         <ActionImages

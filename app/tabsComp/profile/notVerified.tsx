@@ -5,8 +5,29 @@ import PrimaryButton from '@/components/PrimaryButton';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/assets/colors/colors';
 
-export default function NotVerified() {
+export default function NotVerified({ status }: { status: string }) {
   const router = useRouter();
+
+  const title =
+    status === 'pending'
+      ? 'Account Status Pending'
+      : status === 'rejected'
+      ? 'Account Rejected'
+      : 'Account Not Verified';
+
+  const description =
+    status === 'pending'
+      ? 'Please wait for admin to approve your account.'
+      : status === 'rejected'
+      ? 'Go to more details to check what can be done now to fix the issue.'
+      : 'Complete verification to gain trust and get more matches';
+
+  const buttonTitle =
+    status === 'pending'
+      ? 'See Status'
+      : status === 'rejected'
+      ? 'More Details'
+      : 'Complete Verification';
 
   const handleVerification = () => {
     router.push('/verification/verification');
@@ -17,14 +38,12 @@ export default function NotVerified() {
       <View style={styles.verificationContent}>
         <AlertTriangle color="#F59E0B" size={24} />
         <View style={styles.verificationText}>
-          <Text style={styles.verificationTitle}>Account Not Verified</Text>
-          <Text style={styles.verificationSubtitle}>
-            Complete verification to gain trust and get more matches
-          </Text>
+          <Text style={styles.verificationTitle}>{title}</Text>
+          <Text style={styles.verificationSubtitle}>{description}</Text>
         </View>
       </View>
       <PrimaryButton
-        title="Complete Verification"
+        title={buttonTitle}
         onPress={handleVerification}
         backgroundColor={Colors.alertColor}
         fontSize={14}

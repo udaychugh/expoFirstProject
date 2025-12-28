@@ -287,20 +287,43 @@ class ApiService {
   async submitVerification(data: {
     idCardImage: string;
     selfieImage: string;
+    idType: string;
+    fullName: string;
   }): Promise<ApiResponse> {
     const formData = new FormData();
-    formData.append('idCard', {
-      uri: data.idCardImage,
-      type: 'image/jpeg',
-      name: 'id-card.jpg',
-    } as any);
-    formData.append('selfie', {
-      uri: data.selfieImage,
-      type: 'image/jpeg',
-      name: 'selfie.jpg',
-    } as any);
+    const sanitizedName = data.fullName.toLowerCase().replace(/\s+/g, '-');
 
-    return this.makeRequest('/verification/submit', {
+    const getFileDetails = (uri: string, name: string) => {
+      const extension = uri.split('.').pop()?.toLowerCase() || 'jpg';
+      const mimeType =
+        extension === 'png'
+          ? 'image/png'
+          : extension === 'webp'
+          ? 'image/webp'
+          : 'image/jpeg';
+
+      return {
+        uri: uri,
+        type: mimeType,
+        name: `${sanitizedName}-${name}.${extension}`,
+      };
+    };
+
+    formData.append(
+      'idCard',
+      getFileDetails(data.idCardImage, 'id-card') as any
+    );
+
+    if (data.selfieImage) {
+      formData.append(
+        'selfie',
+        getFileDetails(data.selfieImage, 'selfie') as any
+      );
+    }
+
+    formData.append('idType', data.idType);
+
+    return this.makeRequest('/verification', {
       method: 'POST',
       headers: {
         'Content-Type': 'multipart/form-data',
