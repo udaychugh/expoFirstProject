@@ -477,6 +477,49 @@ class ApiService {
       body: JSON.stringify({ currentPassword, newPassword }),
     });
   }
+
+  async getShortlistedProfiles(): Promise<ApiResponse<UserProfile[]>> {
+    return this.makeRequest('/shortlist');
+  }
+
+  async removeShortlistedProfile(profileId: string): Promise<ApiResponse> {
+    return this.makeRequest(`/shortlist/${profileId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Connection APIs
+  async getSentConnections(): Promise<ApiResponse<UserProfile[]>> {
+    return this.makeRequest('/profile/sent-connections');
+  }
+
+  async getReceivedConnections(): Promise<ApiResponse<UserProfile[]>> {
+    return this.makeRequest('/profile/received-connections');
+  }
+
+  async respondToConnection(
+    connectionId: string,
+    status: 'accepted' | 'rejected'
+  ): Promise<ApiResponse> {
+    return this.makeRequest(`/profile/connections/${connectionId}/respond`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async acceptConnection(connectionId: string): Promise<ApiResponse> {
+    return this.respondToConnection(connectionId, 'accepted');
+  }
+
+  async rejectConnection(connectionId: string): Promise<ApiResponse> {
+    return this.respondToConnection(connectionId, 'rejected');
+  }
+
+  async cancelConnection(connectionId: string): Promise<ApiResponse> {
+    return this.makeRequest(`/profile/connections/${connectionId}/cancel`, {
+      method: 'POST',
+    });
+  }
 }
 
 export default ApiService.getInstance();

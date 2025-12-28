@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   MapPin,
@@ -10,95 +17,89 @@ import {
   PinOff,
 } from 'lucide-react-native';
 import AppImage from '@/components/AppImage';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { ShowAlert } from '@/components/Alert';
+import ApiService from '@/services/api';
+import { UserProfile } from '@/contexts/model/userProfile';
+import { calculateAge } from '@/utils/helper';
 
-interface ShortlistProfile {
-  id: string;
-  name: string;
-  age: number;
-  location: string;
-  occupation: string;
-  education: string;
-  image: string;
-  isPinned: boolean;
+interface ShortlistProfile extends UserProfile {
+  isPinned?: boolean;
 }
 
 export default function Shortlisted() {
   const router = useRouter();
-  const [profiles, setProfiles] = useState<ShortlistProfile[]>([
-    {
-      id: '1',
-      name: 'Priya Sharma',
-      age: 26,
-      location: 'Mumbai, Maharashtra',
-      occupation: 'Software Engineer',
-      education: 'B.Tech in Computer Science',
-      image:
-        'https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=400',
-      isPinned: true,
-    },
-    {
-      id: '2',
-      name: 'Ananya Reddy',
-      age: 24,
-      location: 'Bangalore, Karnataka',
-      occupation: 'Product Manager',
-      education: 'MBA from IIM',
-      image:
-        'https://images.pexels.com/photos/3762800/pexels-photo-3762800.jpeg?auto=compress&cs=tinysrgb&w=400',
-      isPinned: true,
-    },
-    {
-      id: '3',
-      name: 'Meera Patel',
-      age: 25,
-      location: 'Ahmedabad, Gujarat',
-      occupation: 'Marketing Specialist',
-      education: 'BBA in Marketing',
-      image:
-        'https://images.pexels.com/photos/3763152/pexels-photo-3763152.jpeg?auto=compress&cs=tinysrgb&w=400',
-      isPinned: false,
-    },
-    {
-      id: '4',
-      name: 'Kavya Nair',
-      age: 27,
-      location: 'Kochi, Kerala',
-      occupation: 'Doctor',
-      education: 'MBBS',
-      image:
-        'https://images.pexels.com/photos/3763690/pexels-photo-3763690.jpeg?auto=compress&cs=tinysrgb&w=400',
-      isPinned: false,
-    },
-    {
-      id: '5',
-      name: 'Riya Singh',
-      age: 23,
-      location: 'Delhi NCR',
-      occupation: 'Interior Designer',
-      education: 'B.Des from NIFT',
-      image:
-        'https://images.pexels.com/photos/3764011/pexels-photo-3764011.jpeg?auto=compress&cs=tinysrgb&w=400',
-      isPinned: false,
-    },
-  ]);
+  const [profiles, setProfiles] = useState<ShortlistProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadShortlistedProfiles();
+    }, [])
+  );
+
+  const loadShortlistedProfiles = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await ApiService.getShortlistedProfiles();
+      if (response.success && response.data) {
+        // Preserve pinned state if possible, or just reset
+        // For now, valid profiles from API
+        const newProfiles = response.data.map((p) => ({
+          ...p,
+          isPinned: false, // Default to false unless we persist it elsewhere
+        }));
+        setProfiles(newProfiles);
+      } else {
+        setError(response.error || 'Failed to load shortlisted profiles');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const pinnedProfiles = profiles.filter((p) => p.isPinned);
   const unpinnedProfiles = profiles.filter((p) => !p.isPinned);
   const sortedProfiles = [...pinnedProfiles, ...unpinnedProfiles];
 
-  const handleUnmark = (id: string) => {
-    // Remove the profile immediately and show success message
+  const handleUnmark = async (id: string) => {
+    // Optimistic update
     const profileToRemove = profiles.find((p) => p.id === id);
+    if (!profileToRemove) return;
+
+    // Temporarily remove from state
     setProfiles((prev) => prev.filter((profile) => profile.id !== id));
 
-    if (profileToRemove) {
+    try {
+      const response = await ApiService.removeShortlistedProfile(id);
+      
+      if (response.success) {
+        ShowAlert({
+          type: 'success',
+          title: 'Removed from Shortlist',
+          message: `${profileToRemove.fullName} has been removed from your shortlist.`,
+        });
+      } else {
+         // Revert on API failure
+         setProfiles((prev) => [...prev, profileToRemove]);
+         ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to remove profile from shortlist',
+        });
+      }
+    } catch (e) {
+      // Revert on network error
+      setProfiles((prev) => [...prev, profileToRemove]);
       ShowAlert({
-        type: 'success',
-        title: 'Removed from Shortlist',
-        message: `${profileToRemove.name} has been removed from your shortlist.`,
-      });
+         type: 'error',
+         title: 'Error',
+         message: 'Network error. Please try again.',
+       });
     }
   };
 
@@ -150,19 +151,19 @@ export default function Shortlisted() {
 
       {/* Profile Image */}
       <View style={styles.imageContainer}>
-        <AppImage src={item.image} style={styles.profileImage} />
+        <AppImage src={item.mainImage} style={styles.profileImage} />
       </View>
 
       {/* Profile Info */}
       <View style={styles.infoContainer}>
         <Text style={styles.name}>
-          {item.name}, {item.age}
+          {item.fullName}, {item.age || calculateAge(item.dateOfBirth)}
         </Text>
 
         <View style={styles.detailRow}>
           <MapPin size={14} color="#6B7280" />
           <Text style={styles.detailText} numberOfLines={1}>
-            {item.location}
+            {item.location?.city}, {item.location?.state}
           </Text>
         </View>
 
@@ -231,6 +232,16 @@ export default function Shortlisted() {
     </View>
   );
 
+  if (loading && profiles.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#E11D48" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -253,6 +264,8 @@ export default function Shortlisted() {
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
+        refreshing={loading}
+        onRefresh={loadShortlistedProfiles}
       />
     </SafeAreaView>
   );
@@ -262,6 +275,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F9FAFB',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     paddingHorizontal: 24,

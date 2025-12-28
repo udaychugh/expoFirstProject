@@ -1,37 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Pressable,
-  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MessageCircle, MapPin, Clock } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import { MapPin, Check, X, Ban } from 'lucide-react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import ApiService from '@/services/api';
+import AppImage from '@/components/AppImage';
+import { ShowAlert } from '@/components/Alert';
+import { UserProfile } from '@/contexts/model/userProfile';
+import { calculateAge } from '@/utils/helper';
 
 export default function Matches() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'Sent' | 'Received'>('Sent');
-  const [matches, setMatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'Sent' | 'Received'>('Received');
+  const [sentConnections, setSentConnections] = useState<UserProfile[]>([]);
+  const [receivedConnections, setReceivedConnections] = useState<UserProfile[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadMatches();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadConnections();
+    }, [activeTab])
+  );
 
-  const loadMatches = async () => {
+  const loadConnections = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await ApiService.getMatches();
-      if (response.success && response.data) {
-        setMatches(response.data);
+      if (activeTab === 'Sent') {
+        const response = await ApiService.getSentConnections();
+        if (response.success && response.data) {
+          setSentConnections(response.data);
+        } else {
+          setError(response.error || 'Failed to load sent connections');
+        }
       } else {
-        setError(response.error || 'Failed to load matches');
+        const response = await ApiService.getReceivedConnections();
+        if (response.success && response.data) {
+          setReceivedConnections(response.data);
+        } else {
+          setError(response.error || 'Failed to load received connections');
+        }
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -40,58 +58,136 @@ export default function Matches() {
     }
   };
 
-  const newMatches = matches.filter((match) => match.unread);
-  const allMatches = matches;
+  const handleAccept = async (id: string, name: string) => {
+    // Optimistic update
+    const connection = receivedConnections.find((c) => c._id === id); // Use _id or id depending on API
+    setReceivedConnections((prev) => prev.filter((c) => c._id !== id));
 
-  const handleChatPress = (matchId: string) => {
-    router.push(`/chat/${matchId}`);
+    try {
+      const response = await ApiService.acceptConnection(id);
+      if (response.success) {
+        ShowAlert({
+          type: 'success',
+          title: 'Connection Accepted',
+          message: `You are now connected with ${name}`,
+        });
+        // Optionally refresh or move to chat
+      } else {
+        // Revert
+        if (connection) setReceivedConnections((prev) => [...prev, connection]);
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to accept',
+        });
+      }
+    } catch (error) {
+      if (connection) setReceivedConnections((prev) => [...prev, connection]);
+      ShowAlert({ type: 'error', title: 'Error', message: 'Network error' });
+    }
   };
 
-  const renderMatch = (match: any) => (
-    <Pressable
-      key={match.id}
-      style={({ pressed }) => [
-        styles.matchCard,
-        match.unread && styles.unreadMatch,
-        pressed && { opacity: 0.7 },
-      ]}
-      onPress={() => handleChatPress(match.id)}
-    >
-      <Image source={{ uri: match.image }} style={styles.matchImage} />
+  const handleReject = async (id: string) => {
+    // Optimistic update
+    const connection = receivedConnections.find((c) => c._id === id);
+    setReceivedConnections((prev) => prev.filter((c) => c._id !== id));
 
-      <View style={styles.matchInfo}>
-        <View style={styles.matchHeader}>
-          <Text style={styles.matchName}>
-            {match.name}, {match.age}
-          </Text>
-          {match.unread && <View style={styles.unreadDot} />}
-        </View>
+    try {
+      const response = await ApiService.rejectConnection(id);
+      if (!response.success) {
+        if (connection) setReceivedConnections((prev) => [...prev, connection]);
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to reject',
+        });
+      }
+    } catch (error) {
+      if (connection) setReceivedConnections((prev) => [...prev, connection]);
+      ShowAlert({ type: 'error', title: 'Error', message: 'Network error' });
+    }
+  };
 
-        <View style={styles.locationRow}>
-          <MapPin color="#6B7280" size={14} />
-          <Text style={styles.locationText}>{match.location}</Text>
-        </View>
+  const handleCancel = async (id: string) => {
+    // Optimistic update
+    const connection = sentConnections.find((c) => c._id === id);
+    setSentConnections((prev) => prev.filter((c) => c._id !== id));
 
-        <Text style={styles.lastMessage} numberOfLines={1}>
-          {match.lastMessage}
-        </Text>
+    try {
+      const response = await ApiService.cancelConnection(id);
+      if (response.success) {
+        ShowAlert({
+          type: 'success',
+          title: 'Request Cancelled',
+          message: 'Connection request cancelled successfully',
+        });
+      } else {
+        if (connection) setSentConnections((prev) => [...prev, connection]);
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to cancel',
+        });
+      }
+    } catch (error) {
+      if (connection) setSentConnections((prev) => [...prev, connection]);
+      ShowAlert({ type: 'error', title: 'Error', message: 'Network error' });
+    }
+  };
 
-        <View style={styles.timeRow}>
-          <Clock color="#9CA3AF" size={12} />
-          <Text style={styles.timeText}>{match.matchedAt}</Text>
-        </View>
-      </View>
-
+  const renderConnectionItem = (item: UserProfile) => (
+    <View key={item._id || item.id} style={styles.connectionCard}>
       <Pressable
-        style={({ pressed }) => [
-          styles.chatButton,
-          pressed && { opacity: 0.6, transform: [{ scale: 0.95 }] },
-        ]}
-        onPress={() => handleChatPress(match.id)}
+        onPress={() => router.push(`/profile-details/${item._id || item.id}`)}
+        style={styles.profileContainer}
       >
-        <MessageCircle color="#E11D48" size={20} />
+        <AppImage src={item.mainImage} style={styles.profileImage} />
+        <View style={styles.infoContainer}>
+          <Text style={styles.name}>
+            {item.fullName}, {item.age || calculateAge(item.dateOfBirth)}
+          </Text>
+          <View style={styles.locationRow}>
+            <MapPin color="#6B7280" size={14} />
+            <Text style={styles.locationText}>
+              {item.location?.city}, {item.location?.state}
+            </Text>
+          </View>
+          <Text style={styles.occupation} numberOfLines={1}>
+            {item.occupation}
+          </Text>
+        </View>
       </Pressable>
-    </Pressable>
+
+      <View style={styles.actionContainer}>
+        {activeTab === 'Received' ? (
+          <>
+            <Pressable
+              style={[styles.actionButton, styles.rejectButton]}
+              onPress={() => handleReject(item._id || item.id)}
+            >
+              <X color="#EF4444" size={20} />
+              <Text style={styles.rejectText}>Reject</Text>
+            </Pressable>
+
+            <Pressable
+              style={[styles.actionButton, styles.acceptButton]}
+              onPress={() => handleAccept(item._id || item.id, item.fullName)}
+            >
+              <Check color="#FFFFFF" size={20} />
+              <Text style={styles.acceptText}>Accept</Text>
+            </Pressable>
+          </>
+        ) : (
+          <Pressable
+            style={[styles.actionButton, styles.cancelButton]}
+            onPress={() => handleCancel(item._id || item.id)}
+          >
+            <Ban color="#6B7280" size={20} />
+            <Text style={styles.cancelText}>Cancel Request</Text>
+          </Pressable>
+        )}
+      </View>
+    </View>
   );
 
   return (
@@ -99,29 +195,11 @@ export default function Matches() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Connections</Text>
         <Text style={styles.headerSubtitle}>
-          People you have connected with
+          Manage your connection requests
         </Text>
       </View>
 
       <View style={styles.tabs}>
-        <Pressable
-          style={({ pressed }) => [
-            styles.tab,
-            activeTab === 'Sent' && styles.activeTab,
-            pressed && { opacity: 0.8 },
-          ]}
-          onPress={() => setActiveTab('Sent')}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === 'Sent' && styles.activeTabText,
-            ]}
-          >
-            Sent ({newMatches.length})
-          </Text>
-        </Pressable>
-
         <Pressable
           style={({ pressed }) => [
             styles.tab,
@@ -136,15 +214,38 @@ export default function Matches() {
               activeTab === 'Received' && styles.activeTabText,
             ]}
           >
-            Received ({allMatches.length})
+            Received
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.tab,
+            activeTab === 'Sent' && styles.activeTab,
+            pressed && { opacity: 0.8 },
+          ]}
+          onPress={() => setActiveTab('Sent')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === 'Sent' && styles.activeTabText,
+            ]}
+          >
+            Sent
           </Text>
         </Pressable>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {loading ? (
           <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading matches...</Text>
+            <ActivityIndicator size="large" color="#E11D48" />
+            <Text style={styles.loadingText}>Loading connections...</Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
@@ -154,30 +255,34 @@ export default function Matches() {
                 styles.retryButton,
                 pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
               ]}
-              onPress={loadMatches}
+              onPress={loadConnections}
             >
               <Text style={styles.retryButtonText}>Retry</Text>
             </Pressable>
           </View>
-        ) : activeTab === 'Sent' ? (
-          newMatches.length > 0 ? (
-            newMatches.map(renderMatch)
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>No connections sent</Text>
-              <Text style={styles.emptyText}>
-                Keep swiping to send more connections!
-              </Text>
-            </View>
-          )
-        ) : allMatches.length > 0 ? (
-          allMatches.map(renderMatch)
         ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No connections received</Text>
-            <Text style={styles.emptyText}>
-              Start exploring profiles to receive more connections!
-            </Text>
+          <View>
+            {activeTab === 'Received' ? (
+              receivedConnections.length > 0 ? (
+                receivedConnections.map(renderConnectionItem)
+              ) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>No received requests</Text>
+                  <Text style={styles.emptyText}>
+                    You haven't received any connection requests yet.
+                  </Text>
+                </View>
+              )
+            ) : sentConnections.length > 0 ? (
+              sentConnections.map(renderConnectionItem)
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>No sent requests</Text>
+                <Text style={styles.emptyText}>
+                  You haven't sent any connection requests yet.
+                </Text>
+              </View>
+            )}
           </View>
         )}
       </ScrollView>
@@ -240,7 +345,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   loadingContainer: {
     flex: 1,
@@ -249,7 +357,8 @@ const styles = StyleSheet.create({
     paddingVertical: 64,
   },
   loadingText: {
-    fontSize: 18,
+    marginTop: 12,
+    fontSize: 16,
     color: '#6B7280',
   },
   errorContainer: {
@@ -257,7 +366,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 64,
-    paddingHorizontal: 24,
   },
   errorText: {
     fontSize: 16,
@@ -276,8 +384,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  matchCard: {
-    flexDirection: 'row',
+  connectionCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
@@ -291,85 +398,94 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  unreadMatch: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#E11D48',
+  profileContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
   },
-  matchImage: {
+  profileImage: {
     width: 64,
     height: 64,
     borderRadius: 32,
   },
-  matchInfo: {
+  infoContainer: {
     flex: 1,
     marginLeft: 16,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
-  matchHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  matchName: {
+  name: {
     fontSize: 18,
     fontWeight: '600',
     color: '#1F2937',
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#E11D48',
+    marginBottom: 4,
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 4,
+    marginBottom: 4,
   },
   locationText: {
     fontSize: 14,
     color: '#6B7280',
   },
-  lastMessage: {
+  occupation: {
     fontSize: 14,
-    color: '#374151',
-    marginTop: 4,
+    color: '#4B5563',
   },
-  timeRow: {
+  actionContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
-  },
-  timeText: {
-    fontSize: 12,
-    color: '#9CA3AF',
-  },
-  chatButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FEF2F2',
-    alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center',
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 8,
+  },
+  acceptButton: {
+    backgroundColor: '#E11D48',
+  },
+  acceptText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  rejectButton: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  rejectText: {
+    color: '#EF4444',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  cancelButton: {
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  cancelText: {
+    color: '#6B7280',
+    fontWeight: '600',
+    fontSize: 14,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 64,
-    paddingHorizontal: 32,
+    paddingVertical: 48,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 8,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 24,
   },
 });
