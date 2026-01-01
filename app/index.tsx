@@ -6,7 +6,7 @@ import Brand from '@/components/Brand';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function AppStartLayout() {
+export default function AppStart() {
   const router = useRouter();
   const auth = useAuth();
 

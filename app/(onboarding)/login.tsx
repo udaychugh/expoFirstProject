@@ -52,23 +52,24 @@ export default function Login() {
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      router.replace('../(appstart)');
+      router.replace('/');
     } else {
       setError(result.error || 'Login failed');
       ShowAlert({
         type: 'error',
         title: 'Error',
-        message: result.error || 'Please check your credentials and try again'
-      })
+        message: result.error || 'Please check your credentials and try again',
+      });
     }
   };
 
   return (
     <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Brand 
-          title={"Welcome Back"} 
-          message={"Sign in to find your perfect match"} />
+        <Brand
+          title={'Welcome Back'}
+          message={'Sign in to find your perfect match'}
+        />
 
         <View style={styles.formContainer}>
           <InputBox
