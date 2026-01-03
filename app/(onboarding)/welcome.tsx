@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Users, MessageCircle, Shield } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -18,46 +18,54 @@ export default function Welcome() {
       colors={Colors.backgroundGradient}
       style={GlobalStyles.container}
     >
-      <Brand />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Brand />
 
-      <View style={styles.features}>
-        <Info
-          title="Verified Profiles"
-          text="Connect with genuine people looking for marriage"
-          icon={<Users color={Colors.pink} size={32} />}
-        />
+        <View style={styles.features}>
+          <Info
+            title="Verified Profiles"
+            text="Connect with genuine people looking for marriage"
+            icon={<Users color={Colors.pink} size={32} />}
+          />
 
-        <Info
-          title="Secure Messaging"
-          text="Chat safely with your matches"
-          icon={<MessageCircle color={Colors.purple} size={32} />}
-        />
+          <Info
+            title="Secure Messaging"
+            text="Chat safely with your matches"
+            icon={<MessageCircle color={Colors.purple} size={32} />}
+          />
 
-        <Info
-          title="Privacy First"
-          text="Your data is secure and private"
-          icon={<Shield color={Colors.green} size={32} />}
-        />
-      </View>
-
-      <View style={styles.buttons}>
-        <PrimaryButton
-          title="Get Started"
-          onPress={() => router.push('/(onboarding)/register')}
-        />
-
-        <View style={styles.secondaryButtonContainer}>
-          <SecondaryButton
-            title="I already have an account"
-            onPress={() => router.push('/(onboarding)/login')}
+          <Info
+            title="Privacy First"
+            text="Your data is secure and private"
+            icon={<Shield color={Colors.green} size={32} />}
           />
         </View>
-      </View>
+
+        <View style={styles.buttons}>
+          <PrimaryButton
+            title="Get Started"
+            onPress={() => router.push('/(onboarding)/register')}
+          />
+
+          <View style={styles.secondaryButtonContainer}>
+            <SecondaryButton
+              title="I already have an account"
+              onPress={() => router.push('/(onboarding)/login')}
+            />
+          </View>
+        </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+  },
   features: {
     flex: 1,
     justifyContent: 'center',
@@ -69,6 +77,6 @@ const styles = StyleSheet.create({
   },
   secondaryButtonContainer: {
     alignItems: 'center',
-    width: '100%'
+    width: '100%',
   },
 });

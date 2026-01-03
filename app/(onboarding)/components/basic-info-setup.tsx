@@ -117,6 +117,7 @@ export default function BasicInfoSetup({
       const response = await ApiService.updatePersonalDetails({
         dateOfBirth: apiDate,
         timeOfBirth: rememberBirthTime ? apiTime : undefined,
+        placeOfBirth: placeOfBirth,
         gender: gender,
         manglik: manglik,
         religion: religion,

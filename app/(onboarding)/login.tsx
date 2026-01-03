@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock } from 'lucide-react-native';
@@ -67,61 +74,72 @@ export default function Login() {
   return (
     <LinearGradient colors={Colors.backgroundGradient} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <Brand
-          title={'Welcome Back'}
-          message={'Sign in to find your perfect match'}
-        />
-
-        <View style={styles.formContainer}>
-          <InputBox
-            label="Email Address"
-            icon={<Mail color={Colors.placeholderGray} size={20} />}
-            value={formData.email}
-            onChangeText={(value) => handleInputChange('email', value)}
-            placeholder="Enter your email"
-            keyboardType="email-address"
-            enabled={!isLoading}
-          />
-
-          <Spacer space={20} />
-
-          <InputBox
-            label="Password"
-            icon={<Lock color={Colors.placeholderGray} size={20} />}
-            value={formData.password}
-            onChangeText={(value) => handleInputChange('password', value)}
-            placeholder="Enter your password"
-            isPassword={true}
-            enabled={!isLoading}
-          />
-
-          <View style={{ alignItems: 'flex-end' }}>
-            <SecondaryButton
-              title="Forget Password?"
-              onPress={() => router.push('/(onboarding)/forgot-password')}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Brand
+              title={'Welcome Back'}
+              message={'Sign in to find your perfect match'}
             />
-          </View>
 
-          {error ? <ErrorBox error={error} /> : null}
+            <View style={styles.formContainer}>
+              <InputBox
+                label="Email Address"
+                icon={<Mail color={Colors.placeholderGray} size={20} />}
+                value={formData.email}
+                onChangeText={(value) => handleInputChange('email', value)}
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                enabled={!isLoading}
+              />
 
-          <PrimaryButton
-            title={'Sign In'}
-            onPress={handleLogin}
-            enabled={!isLoading}
-            isLoading={isLoading}
-          />
+              <Spacer space={20} />
 
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
+              <InputBox
+                label="Password"
+                icon={<Lock color={Colors.placeholderGray} size={20} />}
+                value={formData.password}
+                onChangeText={(value) => handleInputChange('password', value)}
+                placeholder="Enter your password"
+                isPassword={true}
+                enabled={!isLoading}
+              />
 
-          <OutlineButton
-            title="Create New Account"
-            onPress={() => router.push('/(onboarding)/register')}
-          />
-        </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <SecondaryButton
+                  title="Forget Password?"
+                  onPress={() => router.push('/(onboarding)/forgot-password')}
+                />
+              </View>
+
+              {error ? <ErrorBox error={error} /> : null}
+
+              <PrimaryButton
+                title={'Sign In'}
+                onPress={handleLogin}
+                enabled={!isLoading}
+                isLoading={isLoading}
+              />
+
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <OutlineButton
+                title="Create New Account"
+                onPress={() => router.push('/(onboarding)/register')}
+              />
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -133,28 +151,15 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: 24,
-  },
-  header: {
-    alignItems: 'center',
-    marginTop: 60,
-    marginBottom: 40,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginTop: 16,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.placeholderGray,
-    marginTop: 8,
-    textAlign: 'center',
   },
   formContainer: {
     flex: 1,
     justifyContent: 'center',
+    paddingVertical: 20,
   },
   inputGroup: {
     marginBottom: 20,

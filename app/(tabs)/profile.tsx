@@ -61,8 +61,8 @@ export default function Profile() {
 
         {/* Profile Images */}
         <ActionImages
-          imageOne={profile?.images[0].url}
-          imageTwo={profile?.images[1].url}
+          imageOne={profile?.images[0]?.url}
+          imageTwo={profile?.images[1]?.url}
         />
 
         {/* Basic Info */}
@@ -153,13 +153,13 @@ export default function Profile() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Family Details</Text>
           <UserFamilyInfo
-            fatherName={profile?.family?.fatherName}
-            fatherOccupation={profile?.family?.fatherOccupation}
-            motherName={profile?.family?.motherName}
-            motherOccupation={profile?.family?.motherOccupation}
-            familyIncome={profile?.family?.familyIncome}
-            siblings={profile?.family?.siblings}
-            createdBy={profile?.family?.createdBy}
+            fatherName={profile?.familyDetails?.fatherName}
+            fatherOccupation={profile?.familyDetails?.fatherOccupation}
+            motherName={profile?.familyDetails?.motherName}
+            motherOccupation={profile?.familyDetails?.motherOccupation}
+            familyIncome={profile?.familyDetails?.familyIncome}
+            siblings={profile?.familyDetails?.siblings}
+            createdBy={profile?.familyDetails?.createdBy}
           />
         </View>
 

@@ -33,7 +33,7 @@ export default function ProfileSetup() {
     if (currentStep < MAX_STEP) {
       setCurrentStep(currentStep + 1);
     } else {
-      router.push('/(tabs)');
+      router.push('/');
     }
   };
 
@@ -47,7 +47,7 @@ export default function ProfileSetup() {
 
   const handleDoLater = () => {
     setShowSkipModal(false);
-    router.replace('/(tabs)');
+    router.replace('/');
   };
 
   // Handle hardware back button

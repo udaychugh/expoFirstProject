@@ -2,8 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 interface Sibling {
+  id: string;
   name: string;
-  occupation: string;
+  maritalStatus: string;
 }
 
 export default function UserFamilyInfo({
@@ -58,7 +59,7 @@ export default function UserFamilyInfo({
           {siblings.map((sibling, index) => (
             <View key={index} style={styles.siblingRow}>
               <Text style={styles.siblingName}>{sibling.name}</Text>
-              <Text style={styles.siblingOccupation}>{sibling.occupation}</Text>
+              <Text style={styles.siblingOccupation}>{sibling.maritalStatus}</Text>
             </View>
           ))}
         </View>

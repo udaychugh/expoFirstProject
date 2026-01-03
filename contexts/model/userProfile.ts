@@ -92,15 +92,16 @@ export interface UserProfile {
 
   mainImage: string;
 
-  family?: {
+  familyDetails?: {
     fatherName: string;
     fatherOccupation: string;
     motherName: string;
     motherOccupation: string;
     familyIncome: string;
     siblings: {
+      id: string;
       name: string;
-      occupation: string;
+      maritalStatus: string;
     }[];
     createdBy: string;
   };

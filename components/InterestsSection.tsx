@@ -19,18 +19,8 @@ export default function InterestsSection({
   items,
   dataSource,
 }: InterestsSectionProps) {
-  // If no items, don't render the section
-  if (!items || items.length === 0) {
-    return null;
-  }
-
   // Filter dataSource to only show items that are in the items array
   const filteredItems = dataSource.filter((item) => items.includes(item.name));
-
-  // If no matching items found, don't render
-  if (filteredItems.length === 0) {
-    return null;
-  }
 
   return (
     <View style={styles.section}>

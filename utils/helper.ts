@@ -1,6 +1,16 @@
 // Helper function to calculate age from dateOfBirth
-export const calculateAge = (dateOfBirth: string): number => {
+export const calculateAge = (
+  dateOfBirth: string | undefined | null
+): string => {
+  if (!dateOfBirth) return '';
+
   const birthDate = new Date(dateOfBirth);
+
+  // Check if date is valid
+  if (isNaN(birthDate.getTime())) {
+    return '';
+  }
+
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
@@ -13,5 +23,9 @@ export const calculateAge = (dateOfBirth: string): number => {
     age--;
   }
 
-  return age;
+  if (isNaN(age)) {
+    return '';
+  }
+
+  return age.toString();
 };
