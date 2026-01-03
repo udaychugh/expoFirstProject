@@ -13,6 +13,7 @@ import InputBox from '@/components/InputBox';
 import SecondaryButton from '@/components/SecondaryButton';
 import { ShowAlert } from '@/components/Alert';
 import Brand from '@/components/Brand';
+import Spacer from '@/components/Spacer';
 
 export default function Login() {
   const router = useRouter();
@@ -79,7 +80,10 @@ export default function Login() {
             onChangeText={(value) => handleInputChange('email', value)}
             placeholder="Enter your email"
             keyboardType="email-address"
+            enabled={!isLoading}
           />
+
+          <Spacer space={20} />
 
           <InputBox
             label="Password"
@@ -88,6 +92,7 @@ export default function Login() {
             onChangeText={(value) => handleInputChange('password', value)}
             placeholder="Enter your password"
             isPassword={true}
+            enabled={!isLoading}
           />
 
           <View style={{ alignItems: 'flex-end' }}>
@@ -100,9 +105,10 @@ export default function Login() {
           {error ? <ErrorBox error={error} /> : null}
 
           <PrimaryButton
-            title={isLoading ? 'Signing In...' : 'Sign In'}
+            title={'Sign In'}
             onPress={handleLogin}
             enabled={!isLoading}
+            isLoading={isLoading}
           />
 
           <View style={styles.divider}>

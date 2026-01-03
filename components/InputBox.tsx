@@ -4,10 +4,10 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
 } from 'react-native';
-import { User, Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
+import Clickable from './Clickable';
 
 export default function InputBox({
   label,
@@ -16,7 +16,9 @@ export default function InputBox({
   onChangeText,
   placeholder,
   keyboardType,
+  enabled = true,
   isPassword = false,
+  error
 }: {
   label: string;
   icon: any;
@@ -24,7 +26,9 @@ export default function InputBox({
   onChangeText: (text: string) => void;
   placeholder: string;
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
+  enabled?: boolean;
   isPassword?: boolean;
+  error?: string;
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -40,27 +44,32 @@ export default function InputBox({
           placeholder={placeholder}
           keyboardType={keyboardType}
           autoCapitalize="none"
+          editable={enabled}
           placeholderTextColor={Colors.placeholderGray}
           secureTextEntry={isPassword && !showPassword}
         />
 
-        {isPassword && (
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+        {isPassword && enabled && (
+          <Clickable onPress={() => setShowPassword(!showPassword)}>
             {showPassword ? (
               <EyeOff color={Colors.placeholderGray} size={20} />
             ) : (
               <Eye color={Colors.placeholderGray} size={20} />
             )}
-          </TouchableOpacity>
+          </Clickable>
         )}
       </View>
+
+      {error && (
+        <Text style={styles.errorText}>{error}</Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   inputGroup: {
-    marginBottom: 20,
+    
   },
   label: {
     fontSize: 16,
@@ -89,5 +98,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#1F2937',
+  },
+  errorText: {
+    fontSize: 12,
+    color: Colors.primaryPressed,
+    marginTop: 4,
   },
 });

@@ -3,26 +3,20 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  Phone,
-  User,
-} from 'lucide-react-native';
+import { ArrowLeft, Mail, Lock, Phone, User } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { ShowAlert } from '@/components/Alert';
 import PrimaryButton from '@/components/PrimaryButton';
 import SecondaryButton from '@/components/SecondaryButton';
+import InputBox from '@/components/InputBox';
+import Clickable from '@/components/Clickable';
+import Spacer from '@/components/Spacer';
 
 export default function Register() {
   const router = useRouter();
@@ -34,17 +28,56 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState({
+    global: '',
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const getPasswordError = (password: string): string => {
+    const errors: string[] = [];
+
+    if (password.length < 6) {
+      errors.push('• At least 6 characters');
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push('• One uppercase letter');
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push('• One lowercase letter');
+    }
+    if (!/[0-9]/.test(password)) {
+      errors.push('• One number');
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      errors.push('• One special character');
+    }
+
+    return errors.join('\n');
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
-    if (error) setError('');
+    if (error) {
+      setError((prev) => ({
+        ...prev,
+        [field]: '',
+        global: '',
+      }));
+    }
+
+    if (field === 'password') {
+      const passwordError = getPasswordError(value);
+      setError((prev) => ({ ...prev, password: passwordError }));
+    }
   };
 
   const handleRegister = async () => {
+    let isError = false;
     if (
       !formData.fullName ||
       !formData.email ||
@@ -56,49 +89,49 @@ export default function Register() {
         title: 'Error',
         message: 'Please fill in all fields',
       });
-      return;
+      setError((prev) => ({ ...prev, global: 'Please fill in all fields' }));
+      isError = true;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      ShowAlert({
-        type: 'error',
-        title: 'Error',
-        message: 'Please enter a valid email address',
-      });
-      return;
+      setError((prev) => ({
+        ...prev,
+        email: 'Please enter a valid email address',
+      }));
+      isError = true;
     }
 
     // Password strength validation
-    if (formData.password.length < 6) {
-      ShowAlert({
-        type: 'error',
-        title: 'Error',
-        message: 'Password must be at least 6 characters long',
-      });
-      return;
+    const passwordError = getPasswordError(formData.password);
+    if (passwordError.length > 0) {
+      setError((prev) => ({
+        ...prev,
+        password: passwordError,
+      }));
+      isError = true;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      ShowAlert({
-        type: 'error',
-        title: 'Error',
-        message: 'Passwords do not match',
-      });
-      return;
+      setError((prev) => ({
+        ...prev,
+        confirmPassword: 'Passwords do not match',
+      }));
+      isError = true;
     }
 
     // Phone number validation (basic)
     const phoneRegex = /^[+]?[\d\s\-\(\)]{10,}$/;
     if (!phoneRegex.test(formData.phone)) {
-      ShowAlert({
-        type: 'error',
-        title: 'Error',
-        message: 'Please enter a valid phone number',
-      });
-      return;
+      setError((prev) => ({
+        ...prev,
+        phone: 'Please enter a valid phone number',
+      }));
+      isError = true;
     }
+
+    if (isError) return;
 
     const result = await register({
       fullName: formData.fullName,
@@ -116,7 +149,10 @@ export default function Register() {
       });
       router.replace('/(onboarding)/profile-setup');
     } else {
-      setError(result.error || 'Registration failed');
+      setError((prev) => ({
+        ...prev,
+        global: result.error || 'Registration failed',
+      }));
       ShowAlert({
         type: 'error',
         title: 'Registration Failed',
@@ -132,9 +168,9 @@ export default function Register() {
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ArrowLeft color="#1F2937" size={24} />
-          </TouchableOpacity>
+          <Clickable onPress={() => router.back()}>
+            <ArrowLeft color={isLoading ? '#rgba(31, 41, 55, 0)' : '#1F2937'} size={24} />
+          </Clickable>
           <Text style={styles.title}>Create Account</Text>
           <View style={{ width: 24 }} />
         </View>
@@ -145,105 +181,66 @@ export default function Register() {
           </Text>
 
           <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Full Name</Text>
-              <View style={styles.inputContainer}>
-                <User color="#9CA3AF" size={20} />
-                <TextInput
-                  style={styles.input}
-                  value={formData.fullName}
-                  onChangeText={(value) => handleInputChange('fullName', value)}
-                  placeholder="Enter your full name"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </View>
+            <InputBox
+              icon={<User color="#9CA3AF" size={20} />}
+              label="Full Name"
+              value={formData.fullName}
+              onChangeText={(value) => handleInputChange('fullName', value)}
+              placeholder="Enter your full name"
+              enabled={!isLoading}
+              error={error.fullName}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email Address</Text>
-              <View style={styles.inputContainer}>
-                <Mail color="#9CA3AF" size={20} />
-                <TextInput
-                  style={styles.input}
-                  value={formData.email}
-                  onChangeText={(value) => handleInputChange('email', value)}
-                  placeholder="Enter your email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </View>
+            <InputBox
+              icon={<Mail color="#9CA3AF" size={20} />}
+              label="Email Address"
+              value={formData.email}
+              onChangeText={(value) => handleInputChange('email', value)}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              enabled={!isLoading}
+              error={error.email}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Phone Number</Text>
-              <View style={styles.inputContainer}>
-                <Phone color="#9CA3AF" size={20} />
-                <TextInput
-                  style={styles.input}
-                  value={formData.phone}
-                  onChangeText={(value) => handleInputChange('phone', value)}
-                  placeholder="Enter your phone number"
-                  keyboardType="phone-pad"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-            </View>
+            <InputBox
+              icon={<Phone color="#9CA3AF" size={20} />}
+              label="Phone Number"
+              value={formData.phone}
+              onChangeText={(value) => handleInputChange('phone', value)}
+              placeholder="Enter your phone number"
+              keyboardType="phone-pad"
+              enabled={!isLoading}
+              error={error.phone}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.inputContainer}>
-                <Lock color="#9CA3AF" size={20} />
-                <TextInput
-                  style={styles.input}
-                  value={formData.password}
-                  onChangeText={(value) => handleInputChange('password', value)}
-                  placeholder="Create a password"
-                  secureTextEntry={!showPassword}
-                  placeholderTextColor="#9CA3AF"
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff color="#9CA3AF" size={20} />
-                  ) : (
-                    <Eye color="#9CA3AF" size={20} />
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
+            <InputBox
+              icon={<Lock color="#9CA3AF" size={20} />}
+              label="Password"
+              value={formData.password}
+              onChangeText={(value) => handleInputChange('password', value)}
+              placeholder="Create a password"
+              isPassword={true}
+              enabled={!isLoading}
+              error={error.password}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Confirm Password</Text>
-              <View style={styles.inputContainer}>
-                <Lock color="#9CA3AF" size={20} />
-                <TextInput
-                  style={styles.input}
-                  value={formData.confirmPassword}
-                  onChangeText={(value) =>
-                    handleInputChange('confirmPassword', value)
-                  }
-                  placeholder="Confirm your password"
-                  secureTextEntry={!showConfirmPassword}
-                  placeholderTextColor="#9CA3AF"
-                />
-                <TouchableOpacity
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff color="#9CA3AF" size={20} />
-                  ) : (
-                    <Eye color="#9CA3AF" size={20} />
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
+            <InputBox
+              icon={<Lock color="#9CA3AF" size={20} />}
+              label="Confirm Password"
+              value={formData.confirmPassword}
+              onChangeText={(value) =>
+                handleInputChange('confirmPassword', value)
+              }
+              placeholder="Confirm your password"
+              isPassword={true}
+              enabled={!isLoading}
+              error={error.confirmPassword}
+            />
           </View>
 
-          {error ? (
+          {error.global ? (
             <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
+              <Text style={styles.errorText}>{error.global}</Text>
             </View>
           ) : null}
 
@@ -251,6 +248,7 @@ export default function Register() {
             title="Continue"
             onPress={handleRegister}
             enabled={!isLoading}
+            isLoading={isLoading}
           />
 
           {__DEV__ && (

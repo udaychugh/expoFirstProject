@@ -1,16 +1,18 @@
 import { Colors } from '@/assets/colors/colors';
 import React from 'react';
-import { Text, StyleSheet, Pressable } from 'react-native';
+import { Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 
 export default function PrimaryButton({
   title,
   enabled = true,
+  isLoading = false,
   backgroundColor,
   fontSize,
   onPress,
 }: {
   title: string;
   enabled?: boolean;
+  isLoading?: boolean;
   backgroundColor?: string;
   fontSize?: number;
   onPress: () => void;
@@ -26,14 +28,18 @@ export default function PrimaryButton({
       onPress={onPress}
       disabled={!enabled}
     >
-      <Text
-        style={[
-          styles.primaryButtonText,
-          { fontSize: fontSize ? fontSize : 18 },
-        ]}
-      >
-        {title}
-      </Text>
+      {isLoading ? (
+        <ActivityIndicator color={Colors.white} size="small" />
+      ) : (
+        <Text
+          style={[
+            styles.primaryButtonText,
+            { fontSize: fontSize ? fontSize : 18 },
+          ]}
+        >
+          {title}
+        </Text>
+      )}
     </Pressable>
   );
 }
