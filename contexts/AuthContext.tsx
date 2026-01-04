@@ -113,6 +113,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const deleteAccount = async (reason: string) => {
+    setIsLoading(true);
+    try {
+      await AuthService.deleteAccount(reason);
+      await clearAllData();
+      setUser(null);
+    } catch (error) {
+      console.error('Delete account error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const updateUser = (userData: Partial<User>) => {
     if (user) {
       setUser({ ...user, ...userData });
@@ -175,6 +188,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     forgotPassword,
     verifyResetOTP,
     resetPassword,
+    deleteAccount,
     logout,
     updateUser,
     updateProfile,

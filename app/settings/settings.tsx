@@ -12,16 +12,22 @@ import { ArrowLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import AccountSettings from './components/AccountSettings';
-import NotificationSettings from './components/NotificationSettings';
-import PrivacySettings from './components/PrivacySettings';
 import PreferencesSettings from './components/PreferencesSettings';
 import SupportSettings from './components/SupportSettings';
 import AccountActions from './components/AccountActions';
+import DeleteAccountModal from './components/DeleteAccountModal';
+import LogoutModal from './components/LogoutModal';
 
 export default function Settings() {
   const router = useRouter();
 
-  const { logout } = useAuth();
+  const { logout, deleteAccount } = useAuth();
+
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const [settings, setSettings] = useState({
     notifications: {
@@ -52,32 +58,39 @@ export default function Settings() {
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-          router.push('/(onboarding)/login');
-        },
-      },
-    ]);
+    setLogoutModalVisible(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+      setLogoutModalVisible(false);
+      router.push('/(onboarding)/login');
+    } catch (error) {
+      console.error('Logout failed', error);
+      Alert.alert('Error', 'Failed to logout. Please try again.');
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. All your data will be permanently deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => console.log('Account deleted'),
-        },
-      ]
-    );
+    setDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async (reason: string) => {
+    try {
+      setIsDeleting(true);
+      await deleteAccount(reason);
+      setDeleteModalVisible(false);
+      router.replace('/(onboarding)/login');
+    } catch (error) {
+      console.error('Delete account failed', error);
+      Alert.alert('Error', 'Failed to delete account. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -115,6 +128,20 @@ export default function Settings() {
           onDeleteAccount={handleDeleteAccount}
         />
       </ScrollView>
+
+      <DeleteAccountModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        onDelete={handleConfirmDelete}
+        loading={isDeleting}
+      />
+
+      <LogoutModal
+        visible={logoutModalVisible}
+        onClose={() => setLogoutModalVisible(false)}
+        onLogout={handleConfirmLogout}
+        loading={isLoggingOut}
+      />
     </SafeAreaView>
   );
 }

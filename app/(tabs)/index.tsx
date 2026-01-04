@@ -36,6 +36,7 @@ const CARD_HEIGHT = height * 0.65;
 export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { profile } = useAuth();
   const pan = useRef(new Animated.ValueXY()).current;
@@ -78,11 +79,17 @@ export default function Home() {
     }
   };
 
+  // Flag to control swipe animation
+  const SWIPE_ANIMATION_ENABLED = false;
+
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => false, // Don't capture on initial touch
     onMoveShouldSetPanResponder: (evt, gestureState) => {
-      // Only capture if there's actual movement (swipe gesture)
-      return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+      // Only capture if there's actual movement (swipe gesture) AND animation is enabled
+      return (
+        SWIPE_ANIMATION_ENABLED &&
+        (Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5)
+      );
     },
     onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
       useNativeDriver: false,
@@ -94,13 +101,17 @@ export default function Home() {
         // Swipe threshold reached
         const direction = dx > 0 ? 'right' : 'left';
 
-        Animated.timing(pan, {
-          toValue: { x: direction === 'right' ? width : -width, y: 0 },
-          duration: 200,
-          useNativeDriver: false,
-        }).start(() => {
+        if (SWIPE_ANIMATION_ENABLED) {
+          Animated.timing(pan, {
+            toValue: { x: direction === 'right' ? width : -width, y: 0 },
+            duration: 200,
+            useNativeDriver: false,
+          }).start(() => {
+            handleSwipe(direction);
+          });
+        } else {
           handleSwipe(direction);
-        });
+        }
       } else {
         // Return to center
         Animated.spring(pan, {
@@ -111,24 +122,51 @@ export default function Home() {
     },
   });
 
+  const onSuccessAction = () => {
+    const currentId = profiles[currentIndex]?.id;
+    if (!currentId) return;
+
+    // Remove from local state
+    const newProfiles = profiles.filter((p) => p.id !== currentId);
+    setProfiles(newProfiles);
+
+    // Reset pan position
+    pan.setValue({ x: 0, y: 0 });
+
+    // Check if we need to load more or adjust index
+    if (newProfiles.length === 0) {
+      loadProfiles();
+      setCurrentIndex(0);
+    } else if (currentIndex >= newProfiles.length) {
+      setCurrentIndex(0);
+    }
+    // If currentIndex is valid for new array, it points to the Next item automatically
+  };
+
   const handleSwipe = async (direction: 'left' | 'right') => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
 
     // Call API for swipe action
     try {
+      setActionLoading(true);
       const action = direction === 'right' ? 'like' : 'pass';
       const response = await ApiService.swipeProfile({
         profileId: currentProfile.id,
         action,
       });
-      if (response.success && response.data?.isMatch && direction === 'right') {
-        // Show match notification or navigate to match screen
-        console.log("It's a match!", response.data);
-        // You can show a match modal here
+
+      if (response.success) {
+        if (response.data?.isMatch && direction === 'right') {
+          console.log("It's a match!", response.data);
+        }
+        // Remove profile on success
+        onSuccessAction();
       }
     } catch (error) {
       console.error('Swipe error:', error);
+    } finally {
+      setActionLoading(false);
     }
 
     if (direction === 'right') {
@@ -136,26 +174,12 @@ export default function Home() {
     } else {
       console.log('Passed profile');
     }
-
-    // Move to next profile
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= profiles.length) {
-      // Load more profiles or show end message
-      //loadProfiles();
-      setCurrentIndex(0);
-    } else {
-      setCurrentIndex(nextIndex);
-    }
-    pan.setValue({ x: 0, y: 0 });
   };
 
   const handleLike = () => {
-    Animated.timing(pan, {
-      toValue: { x: width, y: 0 },
-      duration: 200,
-      useNativeDriver: false,
-    }).start(async () => {
+    const likeAction = async () => {
       try {
+        setActionLoading(true);
         const currentProfile = profiles[currentIndex];
         if (!currentProfile) return;
         const response = await ApiService.sendConnectionRequest(
@@ -168,7 +192,7 @@ export default function Home() {
             title: 'Success',
             message: 'Connection request sent successfully',
           });
-          changeIndex();
+          onSuccessAction();
         } else {
           ShowAlert({
             type: 'error',
@@ -183,38 +207,44 @@ export default function Home() {
           title: 'Error',
           message: 'Connection request failed',
         });
+      } finally {
+        setActionLoading(false);
       }
-    });
+    };
+
+    if (SWIPE_ANIMATION_ENABLED) {
+      Animated.timing(pan, {
+        toValue: { x: width, y: 0 },
+        duration: 200,
+        useNativeDriver: false,
+      }).start(likeAction);
+    } else {
+      likeAction();
+    }
   };
 
   const handlePass = () => {
-    Animated.timing(pan, {
-      toValue: { x: -width, y: 0 },
-      duration: 200,
-      useNativeDriver: false,
-    }).start(() => {
-      handleSwipe('left');
-    });
-  };
-
-  const changeIndex = () => {
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= profiles.length) {
-      setCurrentIndex(0);
+    if (SWIPE_ANIMATION_ENABLED) {
+      Animated.timing(pan, {
+        toValue: { x: -width, y: 0 },
+        duration: 200,
+        useNativeDriver: false,
+      }).start(() => {
+        handleSwipe('left');
+      });
     } else {
-      setCurrentIndex(nextIndex);
+      handleSwipe('left');
     }
-    pan.setValue({ x: 0, y: 0 });
   };
 
   const handleShortlist = async () => {
     const currentProfile = profiles[currentIndex];
     if (!currentProfile) return;
 
-    // TODO: Call API to add profile to shortlist
     console.log('Shortlisted profile:', currentProfile.id);
 
     try {
+      setActionLoading(true);
       const response = await ApiService.shortListUser(currentProfile.id);
       if (response.success) {
         console.log('Profile shortlisted successfully');
@@ -223,7 +253,7 @@ export default function Home() {
           title: 'Success',
           message: 'Profile shortlisted successfully',
         });
-        changeIndex();
+        onSuccessAction();
       } else {
         ShowAlert({
           type: 'error',
@@ -238,6 +268,8 @@ export default function Home() {
         title: 'Error',
         message: 'Profile shortlisted failed',
       });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -430,12 +462,18 @@ export default function Home() {
         </Animated.View>
       </View>
 
-      <SwipeHandler
-        handlePass={handlePass}
-        handleShortlist={handleShortlist}
-        handleLike={handleLike}
-        isShortlisted={false}
-      />
+      {actionLoading ? (
+        <View style={styles.loadingContainer2}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      ) : (
+        <SwipeHandler
+          handlePass={handlePass}
+          handleShortlist={handleShortlist}
+          handleLike={handleLike}
+          isShortlisted={false}
+        />
+      )}
 
       <FilterBottomSheet
         visible={filterModalVisible}
@@ -505,6 +543,11 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 18,
     color: '#6B7280',
+  },
+  loadingContainer2: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 100
   },
   errorContainer: {
     flex: 1,

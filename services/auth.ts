@@ -108,9 +108,30 @@ class AuthService {
       console.error('Logout error:', error);
     } finally {
       this.unsetTokens();
-      // Clear stored tokens
-      // await SecureStore.deleteItemAsync('auth_token');
-      // await SecureStore.deleteItemAsync('refresh_token');
+    }
+  }
+
+  async deleteAccount(reason: string): Promise<void> {
+    try {
+      if (this.token) {
+        console.log('Delete account token:', this.token);
+        const response = await fetch(`${API_BASE_URL}/auth/delete-account`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reason }),
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        console.log('Delete account response:', response.json());
+      }
+    } catch (error) {
+      console.error('Delete account error:', error);
+    } finally {
+      this.unsetTokens();
     }
   }
 
