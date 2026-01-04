@@ -76,7 +76,7 @@ export default function Shortlisted() {
 
     try {
       const response = await ApiService.removeShortlistedProfile(id);
-      
+
       if (response.success) {
         ShowAlert({
           type: 'success',
@@ -84,9 +84,9 @@ export default function Shortlisted() {
           message: `${profileToRemove.fullName} has been removed from your shortlist.`,
         });
       } else {
-         // Revert on API failure
-         setProfiles((prev) => [...prev, profileToRemove]);
-         ShowAlert({
+        // Revert on API failure
+        setProfiles((prev) => [...prev, profileToRemove]);
+        ShowAlert({
           type: 'error',
           title: 'Error',
           message: response.error || 'Failed to remove profile from shortlist',
@@ -96,10 +96,10 @@ export default function Shortlisted() {
       // Revert on network error
       setProfiles((prev) => [...prev, profileToRemove]);
       ShowAlert({
-         type: 'error',
-         title: 'Error',
-         message: 'Network error. Please try again.',
-       });
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
     }
   };
 
@@ -130,7 +130,7 @@ export default function Shortlisted() {
   };
 
   const handleProfilePress = (id: string) => {
-    router.push(`/profile-details/${id}`);
+    router.push(`/profile-details/${id}?hideButton=false&isShortlisted=true`);
   };
 
   const renderProfileCard = ({ item }: { item: ShortlistProfile }) => (

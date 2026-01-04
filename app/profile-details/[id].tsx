@@ -29,7 +29,7 @@ const { width } = Dimensions.get('window');
 
 export default function ProfileDetails() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, hideButton, isShortlisted } = useLocalSearchParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +51,6 @@ export default function ProfileDetails() {
       );
       if (response.success && response.data) {
         setProfile(response.data);
-        // Track profile view
-        //await ApiService.viewProfile(id as string);
       } else {
         setError(response.error || 'Failed to load profile');
       }
@@ -187,7 +185,11 @@ export default function ProfileDetails() {
             }}
           >
             {profile.images?.map((image: any, index: number) => (
-              <AppImage key={index} src={image.url} style={styles.profileImage} />
+              <AppImage
+                key={index}
+                src={image.url}
+                style={styles.profileImage}
+              />
             ))}
           </ScrollView>
           {renderImageIndicators()}
@@ -235,6 +237,8 @@ export default function ProfileDetails() {
           </View>
 
           <UserFirstDetail
+            phone={profile.phone}
+            email={profile.email}
             city={profile.location.city}
             state={profile.location.state}
             country={profile.location.country}
@@ -280,17 +284,17 @@ export default function ProfileDetails() {
         ) : null}
 
         {/* Family Details */}
-        {profile.family && (
+        {profile.familyDetails && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Family Details</Text>
             <UserFamilyInfo
-              fatherName={profile.family?.fatherName}
-              fatherOccupation={profile.family?.fatherOccupation}
-              motherName={profile.family?.motherName}
-              motherOccupation={profile.family?.motherOccupation}
-              familyIncome={profile.family?.familyIncome}
-              siblings={profile.family?.siblings}
-              createdBy={profile.family?.createdBy}
+              fatherName={profile.familyDetails?.fatherName}
+              fatherOccupation={profile.familyDetails?.fatherOccupation}
+              motherName={profile.familyDetails?.motherName}
+              motherOccupation={profile.familyDetails?.motherOccupation}
+              familyIncome={profile.familyDetails?.familyIncome}
+              siblings={profile.familyDetails?.siblings}
+              createdBy={profile.familyDetails?.createdBy}
             />
           </View>
         )}
@@ -346,11 +350,14 @@ export default function ProfileDetails() {
       </ScrollView>
 
       {/* Action Buttons */}
-      <SwipeHandler
-        handlePass={handlePass}
-        handleShortlist={handleShortlist}
-        handleLike={handleLike}
-      />
+      {hideButton !== 'true' && (
+        <SwipeHandler
+          handlePass={handlePass}
+          handleShortlist={handleShortlist}
+          handleLike={handleLike}
+          isShortlisted={isShortlisted === 'true'}
+        />
+      )}
     </SafeAreaView>
   );
 }

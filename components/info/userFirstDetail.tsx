@@ -1,14 +1,19 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Linking } from 'react-native';
 import {
   MapPin,
   Briefcase,
   GraduationCap,
   Users,
   Moon,
+  Phone,
+  Mail,
 } from 'lucide-react-native';
+import Clickable from '../Clickable';
 
 export default function UserFirstDetail({
+  phone = undefined,
+  email = undefined,
   city,
   state,
   country,
@@ -18,6 +23,8 @@ export default function UserFirstDetail({
   maritalStatus,
   manglik,
 }: {
+  phone?: string;
+  email?: string;
   city?: string;
   state?: string;
   country?: string;
@@ -27,8 +34,30 @@ export default function UserFirstDetail({
   maritalStatus?: string;
   manglik?: boolean;
 }) {
+  const handlePhonePress = () => {
+    Linking.openURL(`tel:${phone}`);
+  };
+
+  const handleEmailPress = () => {
+    Linking.openURL(`mailto:${email}`);
+  };
+
   return (
     <View style={styles.infoGrid}>
+      {phone && (
+        <Clickable style={styles.infoRow} onPress={handlePhonePress}>
+          <Phone color="#6B7280" size={16} />
+          <Text style={styles.infoText}>{phone}</Text>
+        </Clickable>
+      )}
+
+      {email && (
+        <Clickable style={styles.infoRow} onPress={handleEmailPress}>
+          <Mail color="#6B7280" size={16} />
+          <Text style={styles.infoText}>{email}</Text>
+        </Clickable>
+      )}
+
       <View style={styles.infoRow}>
         <MapPin color="#6B7280" size={16} />
         <Text style={styles.infoText}>

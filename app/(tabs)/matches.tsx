@@ -8,7 +8,16 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MapPin, Check, X, Ban } from 'lucide-react-native';
+import {
+  MapPin,
+  Check,
+  X,
+  Ban,
+  Briefcase,
+  GraduationCap,
+  Mail,
+  Phone,
+} from 'lucide-react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import ApiService from '@/services/api';
 import AppImage from '@/components/AppImage';
@@ -69,11 +78,7 @@ export default function Matches() {
     return connection.from || connection.to;
   };
 
-  const handleAccept = async (id: string, name: string) => {
-    // Optimistic update
-    const connection = receivedConnections.find((c) => c.id === id);
-    setReceivedConnections((prev) => prev.filter((c) => c.id !== id));
-
+  const handleAccept = async (id: string, name: string, profileId: string) => {
     try {
       const response = await ApiService.acceptConnection(id);
       if (response.success) {
@@ -82,9 +87,8 @@ export default function Matches() {
           title: 'Connection Accepted',
           message: `You are now connected with ${name}`,
         });
+        router.push(`/profile-details/${profileId}?hideButton=true`);
       } else {
-        // Revert
-        if (connection) setReceivedConnections((prev) => [...prev, connection]);
         ShowAlert({
           type: 'error',
           title: 'Error',
@@ -92,7 +96,6 @@ export default function Matches() {
         });
       }
     } catch (error) {
-      if (connection) setReceivedConnections((prev) => [...prev, connection]);
       ShowAlert({ type: 'error', title: 'Error', message: 'Network error' });
     }
   };
@@ -151,10 +154,15 @@ export default function Matches() {
     // Ensure profile exists to avoid crashes
     if (!profile) return null;
 
+    const isAccepted = item.status === 'accepted';
+    const isSentRejected = item.status === 'rejected';
+
     return (
       <View key={item.id} style={styles.connectionCard}>
         <Pressable
-          onPress={() => router.push(`/profile-details/${profile.id}`)}
+          onPress={() =>
+            router.push(`/profile-details/${profile.id}?hideButton=true`)
+          }
           style={styles.profileContainer}
         >
           <AppImage
@@ -166,6 +174,18 @@ export default function Matches() {
               {profile.fullName},{' '}
               {profile.dateOfBirth ? calculateAge(profile.dateOfBirth) : 'N/A'}
             </Text>
+            {profile.email && (
+              <View style={styles.locationRow}>
+                <Mail color="#6B7280" size={14} />
+                <Text style={styles.locationText}>{profile.email}</Text>
+              </View>
+            )}
+            {profile.phone && (
+              <View style={styles.locationRow}>
+                <Phone color="#6B7280" size={14} />
+                <Text style={styles.locationText}>{profile.phone}</Text>
+              </View>
+            )}
             <View style={styles.locationRow}>
               <MapPin color="#6B7280" size={14} />
               <Text style={styles.locationText}>
@@ -173,41 +193,64 @@ export default function Matches() {
                 {profile.location?.state || ''}
               </Text>
             </View>
-            <Text style={styles.occupation} numberOfLines={1}>
-              {profile.occupation || 'Not specified'}
-            </Text>
+            <View style={styles.locationRow}>
+              <Briefcase color="#6B7280" size={14} />
+              <Text style={styles.occupation} numberOfLines={1}>
+                {profile.occupation || 'Not specified'}
+              </Text>
+            </View>
+            <View style={styles.locationRow}>
+              <GraduationCap color="#6B7280" size={14} />
+              <Text style={styles.occupation} numberOfLines={1}>
+                {profile.education || 'Not specified'}
+              </Text>
+            </View>
           </View>
         </Pressable>
 
-        <View style={styles.actionContainer}>
-          {activeTab === 'Received' ? (
-            <>
-              <Pressable
-                style={[styles.actionButton, styles.rejectButton]}
-                onPress={() => handleReject(item.id)}
-              >
-                <X color="#EF4444" size={20} />
-                <Text style={styles.rejectText}>Reject</Text>
-              </Pressable>
+        {isAccepted ? (
+          <View style={[styles.actionContainer, styles.statusContainer]}>
+            <Check color="#10B981" size={20} />
+            <Text style={styles.statusTextAccepted}>Accepted</Text>
+          </View>
+        ) : isSentRejected ? (
+          <View style={[styles.actionContainer, styles.statusContainer]}>
+            <X color="#EF4444" size={20} />
+            <Text style={styles.statusTextRejected}>Rejected</Text>
+          </View>
+        ) : (
+          <View style={styles.actionContainer}>
+            {activeTab === 'Received' ? (
+              <>
+                <Pressable
+                  style={[styles.actionButton, styles.rejectButton]}
+                  onPress={() => handleReject(item.id)}
+                >
+                  <X color="#EF4444" size={20} />
+                  <Text style={styles.rejectText}>Reject</Text>
+                </Pressable>
 
+                <Pressable
+                  style={[styles.actionButton, styles.acceptButton]}
+                  onPress={() =>
+                    handleAccept(item.id, profile.fullName, profile.id)
+                  }
+                >
+                  <Check color="#FFFFFF" size={20} />
+                  <Text style={styles.acceptText}>Accept</Text>
+                </Pressable>
+              </>
+            ) : (
               <Pressable
-                style={[styles.actionButton, styles.acceptButton]}
-                onPress={() => handleAccept(item.id, profile.fullName)}
+                style={[styles.actionButton, styles.cancelButton]}
+                onPress={() => handleCancel(item.id)}
               >
-                <Check color="#FFFFFF" size={20} />
-                <Text style={styles.acceptText}>Accept</Text>
+                <Ban color="#6B7280" size={20} />
+                <Text style={styles.cancelText}>Cancel Request</Text>
               </Pressable>
-            </>
-          ) : (
-            <Pressable
-              style={[styles.actionButton, styles.cancelButton]}
-              onPress={() => handleCancel(item.id)}
-            >
-              <Ban color="#6B7280" size={20} />
-              <Text style={styles.cancelText}>Cancel Request</Text>
-            </Pressable>
-          )}
-        </View>
+            )}
+          </View>
+        )}
       </View>
     );
   };
@@ -501,5 +544,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  statusContainer: {
+    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 12,
+  },
+  statusTextAccepted: {
+    color: '#10B981',
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  statusTextRejected: {
+    color: '#EF4444',
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: 8,
   },
 });

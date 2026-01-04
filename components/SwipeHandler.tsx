@@ -1,15 +1,17 @@
 import React from 'react';
 import { View, Pressable, Text, StyleSheet } from 'react-native';
-import { Heart, X, Star } from 'lucide-react-native';
+import { Heart, X, Star, StarOff } from 'lucide-react-native';
 
 export default function SwipeHandler({
   handlePass,
   handleShortlist,
   handleLike,
+  isShortlisted,
 }: {
   handlePass: () => void;
   handleShortlist: () => void;
   handleLike: () => void;
+  isShortlisted: boolean;
 }) {
   return (
     <View style={styles.actions}>
@@ -39,12 +41,18 @@ export default function SwipeHandler({
       >
         {({ pressed }) => (
           <>
-            <Star
-              color="#F59E0B"
-              size={24}
-              fill={pressed ? '#F59E0B' : 'none'}
-            />
-            <Text style={styles.actionLabel}>Shortlist</Text>
+            {isShortlisted ? (
+              <StarOff color="#F59E0B" size={24} />
+            ) : (
+              <Star
+                color="#F59E0B"
+                size={24}
+                fill={pressed ? '#F59E0B' : 'none'}
+              />
+            )}
+            <Text style={styles.actionLabel}>
+              {isShortlisted ? 'Remove' : 'Shortlist'}
+            </Text>
           </>
         )}
       </Pressable>

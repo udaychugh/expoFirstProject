@@ -419,7 +419,9 @@ export default function Home() {
                   'Info button clicked! Profile ID:',
                   profiles[currentIndex]._id
                 );
-                router.push(`/profile-details/${profiles[currentIndex].id}`);
+                router.push(
+                  `/profile-details/${profiles[currentIndex].id}?hideButton=false&isShortlisted=false`
+                );
               }}
             >
               <Info color="#FFFFFF" size={20} />
@@ -429,9 +431,10 @@ export default function Home() {
       </View>
 
       <SwipeHandler
-        handlePass={() => handlePass()}
-        handleShortlist={() => handleShortlist()}
-        handleLike={() => handleLike()}
+        handlePass={handlePass}
+        handleShortlist={handleShortlist}
+        handleLike={handleLike}
+        isShortlisted={false}
       />
 
       <FilterBottomSheet
