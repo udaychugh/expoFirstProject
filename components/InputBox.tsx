@@ -1,10 +1,5 @@
 import { Colors } from '@/assets/colors/colors';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-} from 'react-native';
+import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
 import Clickable from './Clickable';
@@ -18,7 +13,10 @@ export default function InputBox({
   keyboardType,
   enabled = true,
   isPassword = false,
-  error
+  error,
+  returnKeyType,
+  onSubmitEditing,
+  inputRef,
 }: {
   label: string;
   icon: any;
@@ -29,6 +27,9 @@ export default function InputBox({
   enabled?: boolean;
   isPassword?: boolean;
   error?: string;
+  returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
+  onSubmitEditing?: () => void;
+  inputRef?: React.RefObject<TextInput | null>;
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -36,8 +37,9 @@ export default function InputBox({
     <View style={styles.inputGroup}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputWithIcon}>
-       {icon}
+        {icon}
         <TextInput
+          ref={inputRef}
           style={styles.inputText}
           value={value}
           onChangeText={onChangeText}
@@ -47,6 +49,8 @@ export default function InputBox({
           editable={enabled}
           placeholderTextColor={Colors.placeholderGray}
           secureTextEntry={isPassword && !showPassword}
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
         />
 
         {isPassword && enabled && (
@@ -60,17 +64,13 @@ export default function InputBox({
         )}
       </View>
 
-      {error && (
-        <Text style={styles.errorText}>{error}</Text>
-      )}
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  inputGroup: {
-    
-  },
+  inputGroup: {},
   label: {
     fontSize: 16,
     fontWeight: '500',

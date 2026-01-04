@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,6 +31,8 @@ export default function Login() {
     password: '',
   });
   const [error, setError] = useState('');
+
+  const passwordInputRef = useRef<TextInput>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -97,6 +100,8 @@ export default function Login() {
                 placeholder="Enter your email"
                 keyboardType="email-address"
                 enabled={!isLoading}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
               />
 
               <Spacer space={20} />
@@ -109,6 +114,8 @@ export default function Login() {
                 placeholder="Enter your password"
                 isPassword={true}
                 enabled={!isLoading}
+                inputRef={passwordInputRef}
+                returnKeyType="done"
               />
 
               <View style={{ alignItems: 'flex-end' }}>
