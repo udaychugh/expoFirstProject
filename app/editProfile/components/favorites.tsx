@@ -29,7 +29,7 @@ export default function Favorites() {
     setter: React.Dispatch<React.SetStateAction<string[]>>,
     value: string[]
   ) => {
-    setAction('save');
+    setAction('Save');
     setter(value);
   };
 

@@ -5,7 +5,7 @@ import {
   ScrollView,
   Pressable,
   Platform,
-  StyleSheet
+  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -17,6 +17,7 @@ import InterestsAndHobbies from './components/interestNHobbies';
 import Favorites from './components/favorites';
 import FamilyAndPersonal from './components/familyNPersonal';
 import EditImages from './components/editImages';
+import Spacer from '@/components/Spacer';
 
 export default function EditProfile() {
   return (
@@ -53,7 +54,7 @@ export default function EditProfile() {
 
         <Favorites />
 
-        <View style={styles.bottomSpacing} />
+        <Spacer space={40} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -154,8 +155,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  bottomSpacing: {
-    height: 40,
   },
 });

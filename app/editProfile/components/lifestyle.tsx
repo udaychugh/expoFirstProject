@@ -19,7 +19,7 @@ export default function LifeStyle() {
   const [smokingHabit, setSmokingHabit] = useState(profile?.smokingHabit ?? '');
 
   const handleInputChange = (field: string, value: string) => {
-    setAction('save');
+    setAction('Save');
     switch (field) {
       case 'diet':
         setDiet(value);

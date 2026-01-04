@@ -14,19 +14,19 @@ export default function PhysicalAttr() {
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [dob, setDob] = useState(profile?.dateOfBirth?.split('T')[0]);
-  const [timeOfBirth, setTimeOfBirth] = useState(profile?.timeOfBirth);
-  const [placeOfBirth, setPlaceOfBirth] = useState(profile?.placeOfBirth);
-  const [gender, setGender] = useState(profile?.gender);
-  const [religion, setReligion] = useState(profile?.religion);
-  const [caste, setCaste] = useState(profile?.caste);
-  const [height, setHeight] = useState(profile?.height);
-  const [manglik, setManglik] = useState(profile?.manglik);
-  const [maritalStatus, setMaritalStatus] = useState(profile?.maritalStatus);
-  const [bloodGroup, setBloodGroup] = useState(profile?.bloodGroup);
+  const [dob, setDob] = useState(profile?.dateOfBirth?.split('T')[0] ?? '');
+  const [timeOfBirth, setTimeOfBirth] = useState(profile?.timeOfBirth ?? '');
+  const [placeOfBirth, setPlaceOfBirth] = useState(profile?.placeOfBirth ?? '');
+  const [gender, setGender] = useState(profile?.gender ?? '');
+  const [religion, setReligion] = useState(profile?.religion ?? '');
+  const [caste, setCaste] = useState(profile?.caste ?? '');
+  const [height, setHeight] = useState(profile?.height ?? '');
+  const [manglik, setManglik] = useState(profile?.manglik ?? false);
+  const [maritalStatus, setMaritalStatus] = useState(profile?.maritalStatus ?? '');
+  const [bloodGroup, setBloodGroup] = useState(profile?.bloodGroup ?? '');
 
   const handleInputChange = (field: string, value: string) => {
-    setAction('save');
+    setAction('Save');
     switch (field) {
       case 'dob':
         setDob(value);
@@ -114,21 +114,21 @@ export default function PhysicalAttr() {
         <ProfileInput
           label="Date of Birth"
           placeholder="dd/mm/yyyy"
-          presetValue={profile?.dateOfBirth?.split('T')[0]}
+          presetValue={dob}
           onChange={(value) => handleInputChange('dob', value)}
         />
 
         <ProfileInput
           label="Time of Birth"
           placeholder="hh:mm:ss"
-          presetValue={profile?.timeOfBirth}
+          presetValue={timeOfBirth}
           onChange={(value) => handleInputChange('timeOfBirth', value)}
         />
 
         <ProfileInput
           label="Place of Birth"
           placeholder="eg. Karnal, Haryana"
-          presetValue={profile?.placeOfBirth}
+          presetValue={placeOfBirth}
           onChange={(value) => handleInputChange('placeOfBirth', value)}
         />
 
@@ -138,28 +138,28 @@ export default function PhysicalAttr() {
             { id: 'Male', name: 'Male', image: '' },
             { id: 'Female', name: 'Female', image: '' },
           ]}
-          selectedValue={profile?.gender ?? 'Male'}
+          selectedValue={gender}
           onSelectionChange={(value) => handleInputChange('gender', value)}
         />
 
         <SelectField
           label="Religion"
           options={RELIGIONS}
-          selectedValue={profile?.religion ?? 'Hindu'}
-          onSelectionChange={(value) => handleInputChange('gender', value)}
+          selectedValue={religion}
+          onSelectionChange={(value) => handleInputChange('religion', value)}
         />
 
         <ProfileInput
           label="Caste"
           placeholder="caste/community"
-          presetValue={profile?.caste}
+          presetValue={caste}
           onChange={(value) => handleInputChange('caste', value)}
         />
 
         <ProfileInput
           label="Height"
           placeholder="e.g., 5'6"
-          presetValue={profile?.height}
+          presetValue={height}
           onChange={(value) => handleInputChange('height', value)}
         />
 
@@ -169,7 +169,7 @@ export default function PhysicalAttr() {
             { id: 'Yes', name: 'Yes', image: '' },
             { id: 'No', name: 'No', image: '' },
           ]}
-          selectedValue={profile?.manglik ? 'Yes' : 'No'}
+          selectedValue={manglik ? 'Yes' : 'No'}
           onSelectionChange={(value) => handleInputChange('manglik', value)}
         />
 
@@ -181,8 +181,8 @@ export default function PhysicalAttr() {
             { id: 'Widowed', name: 'Widowed', image: '' },
             { id: 'Divorced', name: 'Divorced', image: '' },
           ]}
-          selectedValue={profile?.maritalStatus ?? ''}
-          onSelectionChange={(value) => handleInputChange('bloodGroup', value)}
+          selectedValue={maritalStatus}
+          onSelectionChange={(value) => handleInputChange('maritalStatus', value)}
         />
 
         <SelectField
@@ -197,7 +197,7 @@ export default function PhysicalAttr() {
             { id: 'O+', name: 'O+', image: '' },
             { id: 'O-', name: 'O-', image: '' },
           ]}
-          selectedValue={profile?.bloodGroup ?? ''}
+          selectedValue={bloodGroup}
           onSelectionChange={(value) => handleInputChange('bloodGroup', value)}
         />
       </>

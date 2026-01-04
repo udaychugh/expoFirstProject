@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,14 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { ChevronDown, ChevronUp } from 'lucide-react-native';
+import { ChevronDown } from 'lucide-react-native'; // Only import ChevronDown here too
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
 
 interface RenderSectionProps {
   title: string;
@@ -27,6 +34,32 @@ export default function RenderSection({
   onActionClick,
 }: RenderSectionProps) {
   const [toggle, setToggle] = useState(isExpanded);
+  const expandProgress = useSharedValue(0);
+  const listHeight = useSharedValue(0);
+
+  useEffect(() => {
+    expandProgress.value = withTiming(toggle ? 1 : 0, { duration: 300 });
+  }, [toggle]);
+
+  const bodyStyle = useAnimatedStyle(() => {
+    return {
+      height: listHeight.value * expandProgress.value,
+      overflow: 'hidden',
+      width: '100%',
+    };
+  });
+
+  const iconStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(
+      expandProgress.value,
+      [0, 1],
+      [0, 180],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [{ rotate: `${rotate}deg` }],
+    };
+  });
 
   return (
     <View style={styles.section}>
@@ -43,15 +76,33 @@ export default function RenderSection({
           <ActivityIndicator size="small" color="#E11D48" />
         ) : action ? (
           <Pressable onPress={onActionClick}>
-            <Text>{action}</Text>
+            <Text style={{ color: '#E11D48', fontWeight: 'bold' }}>
+              {action}
+            </Text>
           </Pressable>
-        ) : toggle ? (
-          <ChevronUp size={24} color="#E11D48" />
         ) : (
-          <ChevronDown size={24} color="#E11D48" />
+          <Animated.View style={iconStyle}>
+            <ChevronDown size={24} color="#E11D48" />
+          </Animated.View>
         )}
       </Pressable>
-      {toggle && <View style={styles.sectionContent}>{children}</View>}
+      <Animated.View style={bodyStyle}>
+        <View
+          collapsable={false}
+          style={[
+            styles.sectionContent,
+            { width: '100%', position: 'absolute' },
+          ]}
+          onLayout={(event) => {
+            const height = event.nativeEvent.layout.height;
+            if (height > 0) {
+              listHeight.value = height;
+            }
+          }}
+        >
+          {children}
+        </View>
+      </Animated.View>
     </View>
   );
 }

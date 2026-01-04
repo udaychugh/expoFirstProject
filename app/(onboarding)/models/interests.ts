@@ -2,62 +2,74 @@ export const HOBBIES = [
   {
     id: 'Reading',
     name: 'Reading',
-    image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521304/reading_c2ces4.webp',
   },
   {
     id: 'Photography',
     name: 'Photography',
-    image: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521303/photography_fbc9p4.webp',
   },
   {
     id: 'Traveling',
     name: 'Traveling',
-    image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521305/travelling_ajueic.webp',
   },
   {
     id: 'Cooking',
     name: 'Cooking',
-    image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521299/cooking_bl3lro.webp',
   },
   {
     id: 'Music',
     name: 'Music',
-    image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521301/music_mwwenz.webp',
   },
   {
     id: 'Dancing',
     name: 'Dancing',
-    image: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521299/dancing_ijz5bj.webp',
   },
   {
     id: 'Gaming',
     name: 'Gaming',
-    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521299/gaming_wkthin.webp',
   },
   {
     id: 'Painting',
     name: 'Painting',
-    image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521302/painting_xaexdy.webp',
   },
   {
     id: 'Gardening',
     name: 'Gardening',
-    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521300/gardening_wer3cb.webp',
   },
   {
     id: 'Writing',
     name: 'Writing',
-    image: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521307/writing_tawuxa.webp',
   },
   {
     id: 'Blogging',
     name: 'Blogging',
-    image: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521306/blogging_kg6lxd.webp',
   },
   {
     id: 'Movies',
     name: 'Movies',
-    image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767521301/movies_cznjtx.webp',
   },
 ];
 
@@ -65,52 +77,62 @@ export const SPORTS_FITNESS = [
   {
     id: 'Gym',
     name: 'Gym',
-    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522438/gym_aqaov8.webp',
   },
   {
     id: 'Running',
     name: 'Running',
-    image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522438/running_onzv50.webp',
   },
   {
     id: 'Cricket',
     name: 'Cricket',
-    image: 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522445/cricket_lq4jjj.webp',
   },
   {
     id: 'Football',
     name: 'Football',
-    image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522437/football_c0daws.webp',
   },
   {
     id: 'Yoga',
     name: 'Yoga',
-    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522440/yoga_ipcduy.webp',
   },
   {
     id: 'Swimming',
     name: 'Swimming',
-    image: 'https://images.unsplash.com/photo-1519315901367-f34ff9154487?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522441/swimming_atnoj0.webp',
   },
   {
     id: 'Cycling',
     name: 'Cycling',
-    image: 'https://images.unsplash.com/photo-1571333250630-f0230c320b6d?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522444/cycling_t8bjdd.webp',
   },
   {
     id: 'Badminton',
     name: 'Badminton',
-    image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522442/badmiton_swq4ql.webp',
   },
   {
     id: 'Basketball',
     name: 'Basketball',
-    image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522443/basketball_qanb6v.webp',
   },
   {
     id: 'Tennis',
     name: 'Tennis',
-    image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767522439/tennis_kftnk1.webp',
   },
 ];
 
@@ -118,46 +140,55 @@ export const LANGUAGES = [
   {
     id: 'English',
     name: 'English',
-    image: 'https://images.unsplash.com/photo-1526666923127-b2970f64b422?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526498/ennglish_ljmavc.webp',
   },
   {
     id: 'Hindi',
     name: 'Hindi',
-    image: 'https://images.unsplash.com/photo-1548690596-b24753f6b0be?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526485/hindi_ntdixp.webp',
   },
   {
     id: 'Punjabi',
     name: 'Punjabi',
-    image: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526491/punjabi_ldgh4a.webp',
   },
   {
     id: 'Tamil',
     name: 'Tamil',
-    image: 'https://images.unsplash.com/photo-1509909756405-be0199881695?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526495/tmail_l6fs07.webp',
   },
   {
     id: 'Telugu',
     name: 'Telugu',
-    image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526493/telugu_bmewc2.webp',
   },
   {
     id: 'Marathi',
     name: 'Marathi',
-    image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526487/marathi_paqju9.webp',
   },
   {
     id: 'Bengali',
     name: 'Bengali',
-    image: 'https://images.unsplash.com/photo-1467043153537-a4fba2cd39ef?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526497/bengali_lx7sey.webp',
   },
   {
     id: 'Gujarati',
     name: 'Gujarati',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526485/Gujarati_efdt3m.webp',
   },
   {
     id: 'Other',
     name: 'Other',
-    image: 'https://images.unsplash.com/photo-1547941126-3d5322b218b0?w=400',
+    image:
+      'https://res.cloudinary.com/diffv7wup/image/upload/v1767526489/other_l8ga92.webp',
   },
 ];

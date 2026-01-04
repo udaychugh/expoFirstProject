@@ -30,7 +30,7 @@ export default function FamilyAndPersonal() {
   const [createdBy, setCreatedBy] = useState(profile?.familyDetails?.createdBy);
 
   const handleInputChange = (field: string, value: string) => {
-    setAction('save');
+    setAction('Save');
     switch (field) {
       case 'fatherName':
         setFatherName(value);

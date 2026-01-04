@@ -15,7 +15,7 @@ export default function EditImages() {
 
   const handleImageChange = (newImages: string[]) => {
     setImages(newImages);
-    setAction('Save Changes');
+    setAction('Save');
   };
 
   const handleSaveButton = () => {};

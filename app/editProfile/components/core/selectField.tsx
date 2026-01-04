@@ -1,6 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
-import { ChevronDown, ChevronUp } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  Platform,
+  StyleSheet
+} from 'react-native';
+import { ChevronDown } from 'lucide-react-native'; // Only import ChevronDown, we'll rotate it
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  Extrapolation,
+} from 'react-native-reanimated';
 
 export const SelectField = ({
   label,
@@ -14,6 +27,56 @@ export const SelectField = ({
   onSelectionChange: (value: string) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const expandProgress = useSharedValue(0);
+
+  useEffect(() => {
+    expandProgress.value = withTiming(isExpanded ? 1 : 0, { duration: 300 });
+  }, [isExpanded]);
+
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleSelect = (name: string) => {
+    onSelectionChange(name);
+    setIsExpanded(false);
+  };
+
+  // Estimate height: roughly 50px per item
+  const estimatedHeight = options.length * 50;
+
+  const dropdownStyle = useAnimatedStyle(() => {
+    const height = interpolate(
+      expandProgress.value,
+      [0, 1],
+      [0, estimatedHeight],
+      Extrapolation.CLAMP
+    );
+    const opacity = interpolate(
+      expandProgress.value,
+      [0, 0.5, 1],
+      [0, 0, 1],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      height,
+      opacity,
+      overflow: 'hidden',
+    };
+  });
+
+  const iconStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(
+      expandProgress.value,
+      [0, 1],
+      [0, 180],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [{ rotate: `${rotate}deg` }],
+    };
+  });
 
   return (
     <View style={styles.fieldContainer}>
@@ -23,21 +86,19 @@ export const SelectField = ({
           styles.selectHeader,
           Platform.OS === 'ios' && pressed && { opacity: 0.7 },
         ]}
-        onPress={() => setIsExpanded(!isExpanded)}
+        onPress={toggleExpand}
         android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
       >
         <Text style={[styles.selectText, !selectedValue && styles.placeholder]}>
           {selectedValue || 'Select option'}
         </Text>
-        {isExpanded ? (
-          <ChevronUp size={20} color="#6B7280" />
-        ) : (
+        <Animated.View style={iconStyle}>
           <ChevronDown size={20} color="#6B7280" />
-        )}
+        </Animated.View>
       </Pressable>
 
-      {isExpanded && (
-        <View style={styles.selectOptions}>
+      <Animated.View style={[styles.selectOptionsContainer, dropdownStyle]}>
+        <View style={styles.selectOptionsContent}>
           {options.map((option) => (
             <Pressable
               key={option.id}
@@ -46,10 +107,7 @@ export const SelectField = ({
                 selectedValue === option.name && styles.selectedOption,
                 Platform.OS === 'ios' && pressed && { opacity: 0.7 },
               ]}
-              onPress={() => {
-                onSelectionChange(option.name);
-                setIsExpanded(false);
-              }}
+              onPress={() => handleSelect(option.name)}
               android_ripple={{ color: 'rgba(225, 29, 72, 0.1)' }}
             >
               <Text
@@ -63,7 +121,7 @@ export const SelectField = ({
             </Pressable>
           ))}
         </View>
-      )}
+      </Animated.View>
     </View>
   );
 };
@@ -88,6 +146,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
+    zIndex: 1, // Keep header above
   },
   selectText: {
     fontSize: 16,
@@ -96,14 +155,20 @@ const styles = StyleSheet.create({
   placeholder: {
     color: '#9CA3AF',
   },
-  selectOptions: {
+  selectOptionsContainer: {
+    // Container for the animated height
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+    // Borders will be tricky with height 0, maybe handle in content or inner view
+  },
+  selectOptionsContent: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
     borderTopWidth: 0,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     backgroundColor: '#FFFFFF',
-    maxHeight: 200,
   },
   selectOption: {
     paddingHorizontal: 16,
