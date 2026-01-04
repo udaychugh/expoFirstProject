@@ -5,6 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { RELIGIONS } from '@/app/(onboarding)/models/religions';
 import { SelectField } from './core/selectField';
 
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
+
 export default function PhysicalAttr() {
   const { profile } = useAuth();
 
@@ -58,8 +61,45 @@ export default function PhysicalAttr() {
     }
   };
 
-  const handleSaveAction = () => {
+  const handleSaveAction = async () => {
     setLoading(true);
+    try {
+      const response = await ApiService.updatePersonalDetails({
+        dateOfBirth: dob,
+        timeOfBirth: timeOfBirth,
+        placeOfBirth: placeOfBirth,
+        gender: gender,
+        manglik: manglik,
+        religion: religion,
+        caste: caste,
+        maritalStatus: maritalStatus,
+        height: height,
+        bloodGroup: bloodGroup,
+      });
+
+      if (response.success) {
+        setAction('');
+        ShowAlert({
+          type: 'success',
+          title: 'Success',
+          message: 'Personal details updated successfully',
+        });
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to update personal details',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

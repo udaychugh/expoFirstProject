@@ -3,24 +3,31 @@ import RenderSection from './core/renderSection';
 import ProfileInput from './core/ProfileInput';
 import { useAuth } from '@/contexts/AuthContext';
 
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
+
 export default function FamilyAndPersonal() {
   const { profile } = useAuth();
 
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [fatherName, setFatherName] = useState(profile?.family?.fatherName);
-  const [fatherOccupation, setFatherOccupation] = useState(
-    profile?.family?.fatherOccupation
+  const [fatherName, setFatherName] = useState(
+    profile?.familyDetails?.fatherName
   );
-  const [motherName, setMotherName] = useState(profile?.family?.motherName);
+  const [fatherOccupation, setFatherOccupation] = useState(
+    profile?.familyDetails?.fatherOccupation
+  );
+  const [motherName, setMotherName] = useState(
+    profile?.familyDetails?.motherName
+  );
   const [motherOccupation, setMotherOccupation] = useState(
-    profile?.family?.motherOccupation
+    profile?.familyDetails?.motherOccupation
   );
   const [familyIncome, setFamilyIncome] = useState(
-    profile?.family?.familyIncome
+    profile?.familyDetails?.familyIncome
   );
-  const [createdBy, setCreatedBy] = useState(profile?.family?.createdBy);
+  const [createdBy, setCreatedBy] = useState(profile?.familyDetails?.createdBy);
 
   const handleInputChange = (field: string, value: string) => {
     setAction('save');
@@ -46,8 +53,41 @@ export default function FamilyAndPersonal() {
     }
   };
 
-  const handleSaveAction = () => {
+  const handleSaveAction = async () => {
     setLoading(true);
+    try {
+      const response = await ApiService.updateFamilyDetails({
+        fatherName: fatherName,
+        motherName: motherName,
+        fatherOccupation: fatherOccupation,
+        motherOccupation: motherOccupation,
+        familyIncome: familyIncome,
+        createdBy: createdBy,
+      });
+
+      if (response.success) {
+        setAction('');
+        ShowAlert({
+          type: 'success',
+          title: 'Success',
+          message: 'Family details updated successfully',
+        });
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to update family details',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,42 +102,42 @@ export default function FamilyAndPersonal() {
         <ProfileInput
           label="Father's Name"
           placeholder="Father's Name"
-          presetValue={profile?.family?.fatherName}
+          presetValue={profile?.familyDetails?.fatherName}
           onChange={(value) => handleInputChange('description', value)}
         />
 
         <ProfileInput
           label="Father's Occupation"
           placeholder="Father's Occupation"
-          presetValue={profile?.family?.fatherOccupation}
+          presetValue={profile?.familyDetails?.fatherOccupation}
           onChange={(value) => handleInputChange('description', value)}
         />
 
         <ProfileInput
           label="Mother's Name"
           placeholder="Mother's Name"
-          presetValue={profile?.family?.motherName}
+          presetValue={profile?.familyDetails?.motherName}
           onChange={(value) => handleInputChange('description', value)}
         />
 
         <ProfileInput
           label="Mother's Occupation"
           placeholder="Mother's Occupation"
-          presetValue={profile?.family?.motherOccupation}
+          presetValue={profile?.familyDetails?.motherOccupation}
           onChange={(value) => handleInputChange('description', value)}
         />
 
         <ProfileInput
           label="Family Income"
           placeholder="Family Income"
-          presetValue={profile?.family?.familyIncome}
+          presetValue={profile?.familyDetails?.familyIncome}
           onChange={(value) => handleInputChange('description', value)}
         />
 
         <ProfileInput
           label="Created By"
           placeholder="Created By"
-          presetValue={profile?.family?.createdBy}
+          presetValue={profile?.familyDetails?.createdBy}
           onChange={(value) => handleInputChange('description', value)}
         />
       </>

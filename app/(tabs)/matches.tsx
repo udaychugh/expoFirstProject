@@ -87,7 +87,9 @@ export default function Matches() {
           title: 'Connection Accepted',
           message: `You are now connected with ${name}`,
         });
-        router.push(`/profile-details/${profileId}?hideButton=true`);
+        router.push(
+          `/profile-details/${profileId}?hideButton=true&isShortlisted=false`
+        );
       } else {
         ShowAlert({
           type: 'error',
@@ -161,7 +163,9 @@ export default function Matches() {
       <View key={item.id} style={styles.connectionCard}>
         <Pressable
           onPress={() =>
-            router.push(`/profile-details/${profile.id}?hideButton=true`)
+            router.push(
+              `/profile-details/${profile.id}?hideButton=true&isShortlisted=false`
+            )
           }
           style={styles.profileContainer}
         >

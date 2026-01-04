@@ -24,7 +24,7 @@ export default function SelectList({
     image: string;
   }[];
   preSelectedData?: string[];
-  setItemData: React.Dispatch<React.SetStateAction<string[]>>;
+  setItemData: (value: string[]) => void;
 }) {
   const [value, setValue] = useState<string[]>([]);
 

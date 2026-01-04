@@ -3,6 +3,9 @@ import RenderSection from './core/renderSection';
 import ProfileInput from './core/ProfileInput';
 import { useAuth } from '@/contexts/AuthContext';
 
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
+
 export default function BasicInfo() {
   const { profile } = useAuth();
 
@@ -36,8 +39,51 @@ export default function BasicInfo() {
     }
   }
 
-  const handleSaveAction = () => {
+  const handleSaveAction = async () => {
     setLoading(true);
+    try {
+      const response = await ApiService.updateBasicInfo({
+        name: name,
+        location: {
+          city: city || '',
+          state: state || '',
+          country: country || '',
+          coordinates: (profile?.location as any)?.coordinates || {
+            latitude: 0,
+            longitude: 0,
+          },
+        },
+        jobLocation: jobLocation,
+        permanentLocation: permanentAddress,
+        occupation: occupation,
+        annualSalary: annualSalary,
+        education: education,
+        bio: bio,
+      });
+
+      if (response.success) {
+        setAction('');
+        ShowAlert({
+          type: 'success',
+          title: 'Success',
+          message: 'Basic information updated successfully',
+        });
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to update basic information',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

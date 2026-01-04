@@ -3,6 +3,9 @@ import RenderSection from './core/renderSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { SelectField } from './core/selectField';
 
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
+
 export default function LifeStyle() {
   const { profile } = useAuth();
 
@@ -30,8 +33,38 @@ export default function LifeStyle() {
     }
   };
 
-  const handleSaveAction = () => {
+  const handleSaveAction = async () => {
     setLoading(true);
+    try {
+      const response = await ApiService.updateLifestyle({
+        diet: diet,
+        drinkingHabit: drinkingHabit,
+        smokingHabit: smokingHabit,
+      });
+
+      if (response.success) {
+        setAction('');
+        ShowAlert({
+          type: 'success',
+          title: 'Success',
+          message: 'Lifestyle details updated successfully',
+        });
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to update lifestyle details',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

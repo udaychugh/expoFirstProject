@@ -8,6 +8,9 @@ import {
   SPORTS_FITNESS,
 } from '@/app/(onboarding)/models/interests';
 
+import ApiService from '@/services/api';
+import { ShowAlert } from '@/components/Alert';
+
 export default function InterestsAndHobbies() {
   const { profile } = useAuth();
 
@@ -22,8 +25,46 @@ export default function InterestsAndHobbies() {
     profile?.languagesSpoken || []
   );
 
-  const handleSaveAction = () => {
+  const updateState = (
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    value: string[]
+  ) => {
+    setAction('save');
+    setter(value);
+  };
+
+  const handleSaveAction = async () => {
     setLoading(true);
+    try {
+      const response = await ApiService.updateInterests({
+        hobbies: hobbies,
+        sportsAndFitness: sportsAndFitness,
+        languagesSpoken: languagesSpoken,
+      });
+
+      if (response.success) {
+        setAction('');
+        ShowAlert({
+          type: 'success',
+          title: 'Success',
+          message: 'Interests and hobbies updated successfully',
+        });
+      } else {
+        ShowAlert({
+          type: 'error',
+          title: 'Error',
+          message: response.error || 'Failed to update interests',
+        });
+      }
+    } catch (error) {
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Network error. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,21 +79,21 @@ export default function InterestsAndHobbies() {
         <SelectList
           title="Hobbies & Interests"
           listData={HOBBIES}
-          setItemData={setHobbies}
+          setItemData={(value) => updateState(setHobbies, value)}
           preSelectedData={hobbies}
         />
 
         <SelectList
           title="Sports & Fitness"
           listData={SPORTS_FITNESS}
-          setItemData={setSportsAndFitness}
+          setItemData={(value) => updateState(setSportsAndFitness, value)}
           preSelectedData={sportsAndFitness}
         />
 
         <SelectList
           title="Languages Spoken"
           listData={LANGUAGES}
-          setItemData={setLanguagesSpoken}
+          setItemData={(value) => updateState(setLanguagesSpoken, value)}
           preSelectedData={languagesSpoken}
         />
       </>
