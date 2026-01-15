@@ -507,7 +507,7 @@ class ApiService {
     currentPassword: string,
     newPassword: string
   ): Promise<ApiResponse> {
-    return this.makeRequest('/account/change-password', {
+    return this.makeRequest('/profile/change-password', {
       method: 'PUT',
       body: JSON.stringify({ currentPassword, newPassword }),
     });

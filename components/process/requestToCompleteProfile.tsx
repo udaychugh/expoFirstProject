@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
+import Clickable from '../Clickable';
 
 export default function RequestToProcess({
     title,
@@ -21,12 +22,12 @@ export default function RequestToProcess({
           <Text style={[styles.emptyText, { fontSize: 14, marginBottom: 24 }]}>
             {description}
           </Text>
-          <TouchableOpacity
+          <Clickable
             style={styles.retryButton}
             onPress={() => router.push(route as any)}
           >
             <Text style={styles.retryButtonText}>{buttonTitle}</Text>
-          </TouchableOpacity>
+          </Clickable>
         </View>
     );
 }

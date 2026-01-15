@@ -15,7 +15,7 @@ export default function AccountSettings() {
           icon={<User color="#6B7280" size={20} />}
           title="Edit Profile"
           subtitle="Update your personal information"
-          onPress={() => router.push('/edit-profile')}
+          onPress={() => router.push('/editProfile/edit-profile')}
         />
         <SettingItem
           icon={<Shield color="#6B7280" size={20} />}
@@ -27,12 +27,7 @@ export default function AccountSettings() {
           icon={<Lock color="#6B7280" size={20} />}
           title="Change Password"
           subtitle="Update your password"
-          onPress={() =>
-            Alert.alert(
-              'Change Password',
-              'Password change functionality would be implemented here'
-            )
-          }
+          onPress={() => router.push('./change-password')}
         />
         <SettingItem
           icon={<Pause color="#6B7280" size={20} />}

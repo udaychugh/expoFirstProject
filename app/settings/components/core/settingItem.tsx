@@ -3,12 +3,11 @@ import {
   Text,
   View,
   StyleSheet,
-  TouchableOpacity,
   Switch,
-  Alert,
 } from 'react-native';
 
 import { ChevronRight } from 'lucide-react-native';
+import Clickable from '@/components/Clickable';
 
 export default function SettingItem({
   icon,
@@ -32,7 +31,7 @@ export default function SettingItem({
   danger?: boolean;
 }) {
   return (
-    <TouchableOpacity
+    <Clickable
       style={styles.settingItem}
       onPress={onPress}
       disabled={showToggle}
@@ -62,7 +61,7 @@ export default function SettingItem({
           <ChevronRight color="#9CA3AF" size={20} />
         ) : null}
       </View>
-    </TouchableOpacity>
+    </Clickable>
   );
 }
 

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +29,12 @@ export default function Register() {
     password: '',
     confirmPassword: '',
   });
+
+  const emailRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
+
   const [error, setError] = useState({
     global: '',
     fullName: '',
@@ -169,7 +176,10 @@ export default function Register() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Clickable onPress={() => router.back()}>
-            <ArrowLeft color={isLoading ? '#rgba(31, 41, 55, 0)' : '#1F2937'} size={24} />
+            <ArrowLeft
+              color={isLoading ? '#rgba(31, 41, 55, 0)' : '#1F2937'}
+              size={24}
+            />
           </Clickable>
           <Text style={styles.title}>Create Account</Text>
           <View style={{ width: 24 }} />
@@ -189,6 +199,8 @@ export default function Register() {
               placeholder="Enter your full name"
               enabled={!isLoading}
               error={error.fullName}
+              returnKeyType="next"
+              onSubmitEditing={() => emailRef.current?.focus()}
             />
 
             <InputBox
@@ -200,6 +212,9 @@ export default function Register() {
               keyboardType="email-address"
               enabled={!isLoading}
               error={error.email}
+              inputRef={emailRef}
+              returnKeyType="next"
+              onSubmitEditing={() => phoneRef.current?.focus()}
             />
 
             <InputBox
@@ -211,6 +226,9 @@ export default function Register() {
               keyboardType="phone-pad"
               enabled={!isLoading}
               error={error.phone}
+              inputRef={phoneRef}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
             />
 
             <InputBox
@@ -222,6 +240,9 @@ export default function Register() {
               isPassword={true}
               enabled={!isLoading}
               error={error.password}
+              inputRef={passwordRef}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             />
 
             <InputBox
@@ -235,6 +256,9 @@ export default function Register() {
               isPassword={true}
               enabled={!isLoading}
               error={error.confirmPassword}
+              inputRef={confirmPasswordRef}
+              returnKeyType="done"
+              onSubmitEditing={handleRegister}
             />
           </View>
 

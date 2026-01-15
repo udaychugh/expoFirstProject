@@ -285,7 +285,7 @@ export default function Home() {
           title="Incomplete Profile"
           description="Please complete your profile to start discovering profiles."
           buttonTitle="Complete Profile"
-          route="/edit-profile"
+          route="/editProfile/edit-profile"
         />
       </SafeAreaView>
     );
@@ -345,8 +345,11 @@ export default function Home() {
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No more profiles to show</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => {}}>
-            <Text style={styles.retryButtonText}>Load More</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => loadProfiles(appliedFilters)}
+          >
+            <Text style={styles.retryButtonText}>Check Again</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -547,7 +550,7 @@ const styles = StyleSheet.create({
   loadingContainer2: {
     justifyContent: 'center',
     alignItems: 'center',
-    height: 100
+    height: 100,
   },
   errorContainer: {
     flex: 1,
