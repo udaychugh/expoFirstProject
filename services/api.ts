@@ -503,6 +503,19 @@ class ApiService {
     });
   }
 
+  async pauseAccount(reason: string): Promise<ApiResponse> {
+    return this.makeRequest('/profile/pause-account', {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async unpauseAccount(): Promise<ApiResponse> {
+    return this.makeRequest('/profile/unpause-account', {
+      method: 'POST',
+    });
+  }
+
   async changePassword(
     currentPassword: string,
     newPassword: string

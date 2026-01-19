@@ -6,8 +6,6 @@ import {
   Dimensions,
   PanResponder,
   Animated,
-  TouchableOpacity,
-  Image,
   Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,6 +27,7 @@ import { calculateAge } from '@/utils/helper';
 import SwipeHandler from '@/components/SwipeHandler';
 import RequestToProcess from '@/components/process/requestToCompleteProfile';
 import { ShowAlert } from '@/components/Alert';
+import Clickable from '@/components/Clickable';
 
 const { width, height } = Dimensions.get('window');
 const CARD_HEIGHT = height * 0.65;
@@ -278,6 +277,7 @@ export default function Home() {
     loadProfiles(filters);
   };
 
+  // Incomplete Profile
   if (profile && !profile.profileComplete) {
     return (
       <SafeAreaView style={styles.container}>
@@ -291,6 +291,7 @@ export default function Home() {
     );
   }
 
+  // Verification Required
   if (profile && !profile.isVerified) {
     const description =
       profile.verificationStatus == 'pending'
@@ -317,6 +318,21 @@ export default function Home() {
     );
   }
 
+  // Profile Paused
+  if (profile && profile.isPaused) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <RequestToProcess
+          title="Profile Paused"
+          description={`You paused your profile. \n\nReason: ${profile.pauseReason}`}
+          buttonTitle="More Details"
+          route="/settings/settings"
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // Loading State
   if (loading && profiles.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
@@ -327,30 +343,35 @@ export default function Home() {
     );
   }
 
+  // Error
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={() => {}}>
+          <Clickable
+            style={styles.retryButton}
+            onPress={() => loadProfiles(appliedFilters)}
+          >
             <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
+          </Clickable>
         </View>
       </SafeAreaView>
     );
   }
 
+  // No More Profiles
   if (!profiles || profiles.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No more profiles to show</Text>
-          <TouchableOpacity
+          <Clickable
             style={styles.retryButton}
             onPress={() => loadProfiles(appliedFilters)}
           >
             <Text style={styles.retryButtonText}>Check Again</Text>
-          </TouchableOpacity>
+          </Clickable>
         </View>
       </SafeAreaView>
     );

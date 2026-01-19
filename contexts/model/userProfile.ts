@@ -92,6 +92,10 @@ export interface UserProfile {
 
   mainImage: string;
 
+  isPaused: boolean;
+  pauseReason: string;
+  pausedAt: string;
+
   familyDetails?: {
     fatherName: string;
     fatherOccupation: string;
