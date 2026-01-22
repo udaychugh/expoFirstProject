@@ -65,8 +65,9 @@ export default function AddImages({ handleNext }: { handleNext: () => void }) {
         </View>
       </ScrollView>
       <PrimaryButton
-        title={isLoading ? 'Saving...' : 'Complete Profile'}
+        title={'Complete Profile'}
         enabled={!isLoading}
+        isLoading={isLoading}
         onPress={handleSaveButton}
       />
     </>

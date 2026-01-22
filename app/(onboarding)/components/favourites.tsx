@@ -118,8 +118,9 @@ export default function Favourites({ handleNext }: { handleNext: () => void }) {
       </ScrollView>
       <PrimaryButton
         title={
-          isLoading ? 'Saving...' : hasSelections ? 'Complete Profile' : 'Skip'
+         hasSelections ? 'Save Info' : 'Skip'
         }
+        isLoading={isLoading}
         enabled={!isLoading}
         onPress={handleSaveButton}
       />

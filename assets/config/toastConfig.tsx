@@ -12,11 +12,11 @@ export const toastConfig = {
       {...props}
       style={{ borderLeftColor: Colors.success }}
       text1Style={{
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: 'bold',
       }}
       text2Style={{
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: 'normal',
         color: Colors.black,
       }}
@@ -31,11 +31,11 @@ export const toastConfig = {
       {...props}
       style={{ borderLeftColor: Colors.primary }}
       text1Style={{
-        fontSize: 20,
+        fontSize: 14,
         fontWeight: 'bold',
       }}
       text2Style={{
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: 'normal',
         color: Colors.black,
       }}

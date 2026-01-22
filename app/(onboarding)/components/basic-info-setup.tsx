@@ -419,8 +419,9 @@ export default function BasicInfoSetup({
         </View>
       </ScrollView>
       <PrimaryButton
-        title={isLoading ? 'Saving...' : 'Save Info'}
+        title={'Save Info'}
         enabled={!isLoading}
+        isLoading={isLoading}
         onPress={handleSaveButton}
       />
 

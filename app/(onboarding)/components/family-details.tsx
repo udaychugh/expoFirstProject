@@ -264,8 +264,9 @@ export default function FamilyDetail({
         </View>
       </ScrollView>
       <PrimaryButton
-        title={isLoading ? 'Saving...' : 'Save & Continue'}
+        title={'Save Info'}
         enabled={!isLoading}
+        isLoading={isLoading}
         onPress={handleSaveButton}
       />
     </>

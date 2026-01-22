@@ -17,7 +17,6 @@ import PrimaryButton from '@/components/PrimaryButton';
 import SecondaryButton from '@/components/SecondaryButton';
 import InputBox from '@/components/InputBox';
 import Clickable from '@/components/Clickable';
-import Spacer from '@/components/Spacer';
 
 export default function Register() {
   const router = useRouter();

@@ -446,8 +446,9 @@ export default function ProfessionalPersonaInfo({
       </ScrollView>
 
       <PrimaryButton
-        title={btnLoading ? 'Saving...' : 'Save Info'}
+        title={'Save Info'}
         enabled={!btnLoading}
+        isLoading={btnLoading}
         onPress={handleSaveButton}
       />
 

@@ -117,8 +117,9 @@ export default function LifeStyle({ handleNext }: { handleNext: () => void }) {
         </View>
       </ScrollView>
       <PrimaryButton
-        title={isLoading ? 'Saving...' : 'Save & Continue'}
+        title={'Save Info'}
         enabled={!isLoading}
+        isLoading={isLoading}
         onPress={handleSaveButton}
       />
     </>

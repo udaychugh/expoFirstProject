@@ -114,8 +114,9 @@ export default function InterestSkills({
       </ScrollView>
       <PrimaryButton
         title={
-          isLoading ? 'Saving...' : hasSelections ? 'Save & Continue' : 'Skip'
+          hasSelections ? 'Save Info' : 'Skip'
         }
+        isLoading={isLoading}
         enabled={!isLoading}
         onPress={handleSaveButton}
       />

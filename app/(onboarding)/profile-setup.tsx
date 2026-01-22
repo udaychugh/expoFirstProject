@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Modal,
   BackHandler,
 } from 'react-native';
@@ -19,6 +18,9 @@ import Favourites from './components/favourites';
 import AddImages from './components/add-images';
 import { Colors } from '@/assets/colors/colors';
 import FamilyDetail from './components/family-details';
+import Clickable from '@/components/Clickable';
+import PrimaryButton from '@/components/PrimaryButton';
+import Spacer from '@/components/Spacer';
 
 export default function ProfileSetup() {
   const MAX_STEP = 7;
@@ -33,7 +35,8 @@ export default function ProfileSetup() {
     if (currentStep < MAX_STEP) {
       setCurrentStep(currentStep + 1);
     } else {
-      router.push('/');
+      router.dismissAll();
+      router.replace('/');
     }
   };
 
@@ -47,6 +50,7 @@ export default function ProfileSetup() {
 
   const handleDoLater = () => {
     setShowSkipModal(false);
+    router.dismissAll();
     router.replace('/');
   };
 
@@ -59,7 +63,7 @@ export default function ProfileSetup() {
 
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
-      backAction
+      backAction,
     );
 
     return () => backHandler.remove();
@@ -97,16 +101,16 @@ export default function ProfileSetup() {
     <SafeAreaView style={profileStyles.container}>
       <View style={profileStyles.header}>
         {__DEV__ ? (
-          <TouchableOpacity onPress={handleNext}>
+          <Clickable onPress={handleNext}>
             <Text style={styles.devNextText}>Next</Text>
-          </TouchableOpacity>
+          </Clickable>
         ) : (
           <View style={{ width: 24 }} />
         )}
         <Text style={profileStyles.title}>Profile Setup</Text>
-        <TouchableOpacity onPress={handleSkip}>
+        <Clickable onPress={handleSkip}>
           <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+        </Clickable>
       </View>
 
       <View style={profileStyles.progressBar}>
@@ -139,19 +143,18 @@ export default function ProfileSetup() {
               better matches. Are you sure you want to skip?
             </Text>
 
-            <TouchableOpacity
-              style={styles.primaryButton}
+            <PrimaryButton
+              title="Complete Profile Now"
               onPress={handleCompleteNow}
-            >
-              <Text style={styles.primaryButtonText}>Complete Profile Now</Text>
-            </TouchableOpacity>
+              fontSize={16}
+              width='100%'
+            />
 
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={handleDoLater}
-            >
+            <Spacer space={15} />
+
+            <Clickable style={styles.secondaryButton} onPress={handleDoLater}>
               <Text style={styles.secondaryButtonText}>I'll Do It Later</Text>
-            </TouchableOpacity>
+            </Clickable>
           </View>
         </View>
       </Modal>
