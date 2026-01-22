@@ -6,28 +6,39 @@ import { useAuth } from '@/contexts/AuthContext';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 
+interface Sibling {
+  id: string;
+  name: string;
+  maritalStatus: string;
+}
+
 export default function FamilyAndPersonal() {
-  const { profile } = useAuth();
+  const { profile, updateProfile } = useAuth();
 
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [fatherName, setFatherName] = useState(
-    profile?.familyDetails?.fatherName
+    profile?.familyDetails?.fatherName ?? '',
   );
   const [fatherOccupation, setFatherOccupation] = useState(
-    profile?.familyDetails?.fatherOccupation
+    profile?.familyDetails?.fatherOccupation ?? '',
   );
   const [motherName, setMotherName] = useState(
-    profile?.familyDetails?.motherName
+    profile?.familyDetails?.motherName ?? '',
   );
   const [motherOccupation, setMotherOccupation] = useState(
-    profile?.familyDetails?.motherOccupation
+    profile?.familyDetails?.motherOccupation ?? '',
   );
   const [familyIncome, setFamilyIncome] = useState(
-    profile?.familyDetails?.familyIncome
+    profile?.familyDetails?.familyIncome ?? '',
   );
-  const [createdBy, setCreatedBy] = useState(profile?.familyDetails?.createdBy);
+  const [createdBy, setCreatedBy] = useState(
+    profile?.familyDetails?.createdBy ?? '',
+  );
+  const [siblings, setSiblings] = useState<Sibling[]>(
+    profile?.familyDetails?.siblings ?? [],
+  );
 
   const handleInputChange = (field: string, value: string) => {
     setAction('Save');
@@ -56,17 +67,20 @@ export default function FamilyAndPersonal() {
   const handleSaveAction = async () => {
     setLoading(true);
     try {
-      const response = await ApiService.updateFamilyDetails({
+      const updateData = {
         fatherName: fatherName,
         motherName: motherName,
         fatherOccupation: fatherOccupation,
         motherOccupation: motherOccupation,
         familyIncome: familyIncome,
         createdBy: createdBy,
-      });
+        siblings: profile?.familyDetails?.siblings ?? [],
+      };
+      const response = await ApiService.updateFamilyDetails(updateData);
 
       if (response.success) {
         setAction('');
+        updateProfile({ familyDetails: updateData });
         ShowAlert({
           type: 'success',
           title: 'Success',

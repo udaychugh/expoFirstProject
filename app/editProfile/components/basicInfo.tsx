@@ -7,7 +7,7 @@ import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 
 export default function BasicInfo() {
-  const { profile } = useAuth();
+  const { profile, updateProfile } = useAuth();
 
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export default function BasicInfo() {
   const [annualSalary, setAnnualSalary] = useState(profile?.annualSalary);
   const [jobLocation, setJobLocation] = useState(profile?.jobLocation);
   const [permanentAddress, setPermanentAddress] = useState(
-    profile?.permanentLocation
+    profile?.permanentLocation,
   );
   const [bio, setBio] = useState(profile?.bio);
 
@@ -42,7 +42,7 @@ export default function BasicInfo() {
   const handleSaveAction = async () => {
     setLoading(true);
     try {
-      const response = await ApiService.updateBasicInfo({
+      const updateData = {
         name: name,
         location: {
           city: city || '',
@@ -59,10 +59,13 @@ export default function BasicInfo() {
         annualSalary: annualSalary,
         education: education,
         bio: bio,
-      });
+      };
+
+      const response = await ApiService.updateBasicInfo(updateData);
 
       if (response.success) {
         setAction('');
+        updateProfile(updateData);
         ShowAlert({
           type: 'success',
           title: 'Success',

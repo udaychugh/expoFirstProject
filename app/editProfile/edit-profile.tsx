@@ -18,45 +18,48 @@ import Favorites from './components/favorites';
 import FamilyAndPersonal from './components/familyNPersonal';
 import EditImages from './components/editImages';
 import Spacer from '@/components/Spacer';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function EditProfile() {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => router.back()}
-          android_ripple={{
-            color: 'rgba(0, 0, 0, 0.1)',
-            borderless: true,
-            radius: 24,
-          }}
-          style={({ pressed }) => [
-            Platform.OS === 'ios' && pressed && { opacity: 0.6 },
-          ]}
-        >
-          <ArrowLeft size={24} color="#1F2937" />
-        </Pressable>
-        <Text style={styles.headerTitle}>Edit Profile</Text>
-      </View>
+    <GestureHandlerRootView>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => router.back()}
+            android_ripple={{
+              color: 'rgba(0, 0, 0, 0.1)',
+              borderless: true,
+              radius: 24,
+            }}
+            style={({ pressed }) => [
+              Platform.OS === 'ios' && pressed && { opacity: 0.6 },
+            ]}
+          >
+            <ArrowLeft size={24} color="#1F2937" />
+          </Pressable>
+          <Text style={styles.headerTitle}>Edit Profile</Text>
+        </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <EditImages />
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <EditImages />
 
-        <BasicInfo />
+          <BasicInfo />
 
-        <PhysicalAttr />
+          <PhysicalAttr />
 
-        <FamilyAndPersonal />
+          <FamilyAndPersonal />
 
-        <LifeStyle />
+          <LifeStyle />
 
-        <InterestsAndHobbies />
+          <InterestsAndHobbies />
 
-        <Favorites />
+          <Favorites />
 
-        <Spacer space={40} />
-      </ScrollView>
-    </SafeAreaView>
+          <Spacer space={40} />
+        </ScrollView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 

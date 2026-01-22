@@ -118,11 +118,7 @@ export default function ProfessionalPersonaInfo({
       return;
     }
 
-    let isNRI = false;
-
-    if (location.country.toLowerCase() != 'india') {
-      isNRI = true;
-    }
+    let isNRI = location.country.toLowerCase() != 'india';
 
     try {
       const response = await ApiService.updateBasicInfo({

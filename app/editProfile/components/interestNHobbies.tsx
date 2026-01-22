@@ -12,7 +12,7 @@ import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 
 export default function InterestsAndHobbies() {
-  const { profile } = useAuth();
+  const { profile, updateProfile } = useAuth();
 
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,14 +36,16 @@ export default function InterestsAndHobbies() {
   const handleSaveAction = async () => {
     setLoading(true);
     try {
-      const response = await ApiService.updateInterests({
+      const updateData = {
         hobbies: hobbies,
         sportsAndFitness: sportsAndFitness,
         languagesSpoken: languagesSpoken,
-      });
+      }
+      const response = await ApiService.updateInterests(updateData);
 
       if (response.success) {
         setAction('');
+        updateProfile(updateData);
         ShowAlert({
           type: 'success',
           title: 'Success',

@@ -9,7 +9,7 @@ import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 
 export default function PhysicalAttr() {
-  const { profile } = useAuth();
+  const { profile, updateProfile } = useAuth();
 
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function PhysicalAttr() {
   const [height, setHeight] = useState(profile?.height ?? '');
   const [manglik, setManglik] = useState(profile?.manglik ?? false);
   const [maritalStatus, setMaritalStatus] = useState(profile?.maritalStatus ?? '');
-  const [bloodGroup, setBloodGroup] = useState(profile?.bloodGroup ?? '');
+  const [bloodGroup, setBloodGroup] = useState<string | undefined>(profile?.bloodGroup ?? undefined);
 
   const handleInputChange = (field: string, value: string) => {
     setAction('Save');
@@ -64,7 +64,7 @@ export default function PhysicalAttr() {
   const handleSaveAction = async () => {
     setLoading(true);
     try {
-      const response = await ApiService.updatePersonalDetails({
+      const updateData = {
         dateOfBirth: dob,
         timeOfBirth: timeOfBirth,
         placeOfBirth: placeOfBirth,
@@ -75,10 +75,12 @@ export default function PhysicalAttr() {
         maritalStatus: maritalStatus,
         height: height,
         bloodGroup: bloodGroup,
-      });
+      }
+      const response = await ApiService.updatePersonalDetails(updateData);
 
       if (response.success) {
         setAction('');
+        updateProfile(updateData);
         ShowAlert({
           type: 'success',
           title: 'Success',
@@ -197,7 +199,7 @@ export default function PhysicalAttr() {
             { id: 'O+', name: 'O+', image: '' },
             { id: 'O-', name: 'O-', image: '' },
           ]}
-          selectedValue={bloodGroup}
+          selectedValue={bloodGroup ?? ''}
           onSelectionChange={(value) => handleInputChange('bloodGroup', value)}
         />
       </>

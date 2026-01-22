@@ -13,7 +13,7 @@ import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 
 export default function Favorites() {
-  const { profile } = useAuth();
+  const { profile, updateProfile } = useAuth();
 
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,15 +36,17 @@ export default function Favorites() {
   const handleSaveAction = async () => {
     setLoading(true);
     try {
-      const response = await ApiService.updateFavorites({
+      const updateData = {
         favoriteBooks: books,
         favoriteSongs: songs,
         favoriteMovies: movies,
         vacationDestination: vacationDestinations,
-      });
+      }
+      const response = await ApiService.updateFavorites(updateData);
 
       if (response.success) {
         setAction('');
+        updateProfile(updateData);
         ShowAlert({
           type: 'success',
           title: 'Success',

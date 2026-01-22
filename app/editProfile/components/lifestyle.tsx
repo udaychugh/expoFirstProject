@@ -7,14 +7,14 @@ import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 
 export default function LifeStyle() {
-  const { profile } = useAuth();
+  const { profile, updateProfile } = useAuth();
 
   const [action, setAction] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [diet, setDiet] = useState(profile?.diet ?? '');
   const [drinkingHabit, setDrinkingHabit] = useState(
-    profile?.drinkingHabit ?? ''
+    profile?.drinkingHabit ?? '',
   );
   const [smokingHabit, setSmokingHabit] = useState(profile?.smokingHabit ?? '');
 
@@ -36,14 +36,16 @@ export default function LifeStyle() {
   const handleSaveAction = async () => {
     setLoading(true);
     try {
-      const response = await ApiService.updateLifestyle({
+      const updateData = {
         diet: diet,
         drinkingHabit: drinkingHabit,
         smokingHabit: smokingHabit,
-      });
+      };
+      const response = await ApiService.updateLifestyle(updateData);
 
       if (response.success) {
         setAction('');
+        updateProfile(updateData);
         ShowAlert({
           type: 'success',
           title: 'Success',

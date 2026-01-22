@@ -42,7 +42,7 @@ export default function BasicInfoSetup({
   const [caste, setCaste] = useState('');
   const [height, setHeight] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
-  const [bloodGroup, setBloodGroup] = useState('');
+  const [bloodGroup, setBloodGroup] = useState<string | undefined>(undefined);
   const [placeOfBirth, setPlaceOfBirth] = useState('');
 
   const [isLoading, setLoading] = useState(false);
