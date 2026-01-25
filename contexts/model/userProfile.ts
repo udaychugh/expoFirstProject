@@ -33,6 +33,7 @@ export interface UserProfile {
     location: string[];
     maritalStatus: string[];
     maxDistance: number;
+    heightRange: { min: string; max: string };
   };
 
   _id: string;

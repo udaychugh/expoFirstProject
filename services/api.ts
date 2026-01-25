@@ -21,7 +21,7 @@ class ApiService {
   // Function to make api requests with token handling
   private async makeRequest<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<ApiResponse<T>> {
     try {
       const token = AuthService.getToken();
@@ -81,7 +81,7 @@ class ApiService {
   async getMe(): Promise<ApiResponse<{ user: UserProfile }>> {
     try {
       const response = await this.makeRequest<{ user: UserProfile }>(
-        '/auth/me'
+        '/auth/me',
       );
       if (response.success && response.data) {
         return response;
@@ -111,11 +111,27 @@ class ApiService {
   }
 
   async updateUserProfile(
-    profileData: Partial<UserProfile>
+    profileData: Partial<UserProfile>,
   ): Promise<ApiResponse<UserProfile>> {
     return this.makeRequest('/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
+    });
+  }
+
+  async updateUserPreferences(preferences: {
+    ageRange?: { min?: number; max?: number };
+    heightRange?: { min?: string; max?: string };
+    religion?: string[];
+    education?: string[];
+    occupation?: string[];
+    location?: string[];
+    maritalStatus?: string[];
+    maxDistance?: number;
+  }): Promise<ApiResponse<UserProfile>> {
+    return this.makeRequest('/profile/update-user-preference', {
+      method: 'PUT',
+      body: JSON.stringify(preferences),
     });
   }
 
@@ -262,8 +278,8 @@ class ApiService {
         extension === 'png'
           ? 'image/png'
           : extension === 'webp'
-          ? 'image/webp'
-          : 'image/jpeg';
+            ? 'image/webp'
+            : 'image/jpeg';
       formData.append('images', {
         uri: uri,
         type: mimeType,
@@ -301,8 +317,8 @@ class ApiService {
         extension === 'png'
           ? 'image/png'
           : extension === 'webp'
-          ? 'image/webp'
-          : 'image/jpeg';
+            ? 'image/webp'
+            : 'image/jpeg';
 
       return {
         uri: uri,
@@ -313,13 +329,13 @@ class ApiService {
 
     formData.append(
       'idCard',
-      getFileDetails(data.idCardImage, 'id-card') as any
+      getFileDetails(data.idCardImage, 'id-card') as any,
     );
 
     if (data.selfieImage) {
       formData.append(
         'selfie',
-        getFileDetails(data.selfieImage, 'selfie') as any
+        getFileDetails(data.selfieImage, 'selfie') as any,
       );
     }
 
@@ -356,8 +372,8 @@ class ApiService {
             Object.entries(filters).map(([key, value]) => [
               key,
               value !== undefined ? String(value) : '',
-            ])
-          )
+            ]),
+          ),
         ).toString()}`
       : '';
     return this.makeRequest(`/discovery/profiles${queryParams}`);
@@ -365,7 +381,7 @@ class ApiService {
 
   // Get Profile Detail
   async getDiscoveredProfileDetails(
-    profileId: string
+    profileId: string,
   ): Promise<ApiResponse<UserProfile>> {
     return this.makeRequest(`/discovery/profiles/${profileId}`);
   }
@@ -399,7 +415,7 @@ class ApiService {
 
   async sendConnectionRequest(
     profileId: string,
-    message?: string
+    message?: string,
   ): Promise<ApiResponse> {
     return this.makeRequest('/profile/send-connection', {
       method: 'POST',
@@ -424,7 +440,7 @@ class ApiService {
   // Search APIs
   async searchProfiles(
     query: string,
-    filters?: any
+    filters?: any,
   ): Promise<ApiResponse<UserProfile[]>> {
     const params = new URLSearchParams({ q: query, ...filters });
     return this.makeRequest(`/search/profiles?${params.toString()}`);
@@ -474,7 +490,7 @@ class ApiService {
 
   async sendMessage(
     conversationId: string,
-    message: string
+    message: string,
   ): Promise<ApiResponse> {
     return this.makeRequest(`/chat/conversations/${conversationId}/messages`, {
       method: 'POST',
@@ -518,7 +534,7 @@ class ApiService {
 
   async changePassword(
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
   ): Promise<ApiResponse> {
     return this.makeRequest('/profile/change-password', {
       method: 'PUT',
@@ -554,7 +570,7 @@ class ApiService {
 
   async respondToConnection(
     connectionId: string,
-    status: 'accepted' | 'rejected'
+    status: 'accepted' | 'rejected',
   ): Promise<ApiResponse> {
     return this.makeRequest(`/profile/connections/${connectionId}/respond`, {
       method: 'POST',

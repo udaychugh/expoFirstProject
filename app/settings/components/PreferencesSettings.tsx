@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Alert } from 'react-native';
-import { Moon, Globe } from 'lucide-react-native';
+import { Moon, Globe, Presentation } from 'lucide-react-native';
 import SettingItem from './core/settingItem';
+import { useRouter } from 'expo-router';
 
 interface PreferencesSettingsProps {
   settings: {
@@ -15,6 +16,8 @@ export default function PreferencesSettings({
   settings,
   onToggle,
 }: PreferencesSettingsProps) {
+  const router = useRouter();
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Preferences</Text>
@@ -28,13 +31,19 @@ export default function PreferencesSettings({
           onToggle={() => onToggle('darkMode')}
         /> */}
         <SettingItem
+          icon={<Presentation color="#6B7280" size={20} />}
+          title="Match Preferences"
+          subtitle="Update your match preferences"
+          onPress={() => router.push('/match-preferences/match-preferences')}
+        />
+        <SettingItem
           icon={<Globe color="#6B7280" size={20} />}
           title="Language"
           subtitle={settings.language}
           onPress={() =>
             Alert.alert(
               'Language',
-              'Currently English is the only language available'
+              'Currently English is the only language available',
             )
           }
         />
