@@ -7,6 +7,7 @@ import {
   PanResponder,
   Animated,
   Pressable,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -49,18 +50,19 @@ export default function Home() {
 
   // Load profiles on component mount
   useEffect(() => {
+    console.log('profile reload = ', profile);
     if (profile?.profileComplete && profile?.isVerified) {
       loadProfiles();
     }
   }, [profile]);
 
-  useEffect(() => {
-    setIsShortlisted(
-      profile?.shortlisted
-        .map((item) => item.user)
-        .includes(profiles[currentIndex].id) ?? false,
-    );
-  }, [currentIndex]);
+  // useEffect(() => {
+  //   setIsShortlisted(
+  //     profile?.shortlisted
+  //       .map((item) => item.user)
+  //       .includes(profiles[currentIndex].id) ?? false,
+  //   );
+  // }, [currentIndex]);
 
   const loadProfiles = async (filters?: FilterOptions) => {
     setLoading(true);
@@ -131,8 +133,7 @@ export default function Home() {
     },
   });
 
-  const onSuccessAction = () => {
-    const currentId = profiles[currentIndex]?.id;
+  const onSuccessAction = (currentId?: string) => {
     if (!currentId) return;
 
     // Remove from local state
@@ -170,7 +171,7 @@ export default function Home() {
           console.log("It's a match!", response.data);
         }
         // Remove profile on success
-        onSuccessAction();
+        onSuccessAction(currentProfile.id);
       }
     } catch (error) {
       console.error('Swipe error:', error);
@@ -201,7 +202,7 @@ export default function Home() {
             title: 'Success',
             message: 'Connection request sent successfully',
           });
-          onSuccessAction();
+          onSuccessAction(currentProfile.id);
         } else {
           ShowAlert({
             type: 'error',
@@ -281,7 +282,7 @@ export default function Home() {
             title: 'Success',
             message: 'Profile shortlisted successfully',
           });
-          onSuccessAction();
+          onSuccessAction(currentProfile.id);
         } else {
           ShowAlert({
             type: 'error',
@@ -407,36 +408,8 @@ export default function Home() {
     );
   }
 
-  const renderProfileCardItem = () => {};
-
-  return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View>
-            <Text style={styles.headerTitle}>Discover</Text>
-            <Text style={styles.headerSubtitle}>
-              Find your perfect life partner
-            </Text>
-          </View>
-          <Pressable
-            style={styles.filterButton}
-            onPress={() => setFilterModalVisible(true)}
-          >
-            <Filter color="#E11D48" size={24} />
-            {Object.keys(appliedFilters).length > 0 && (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>
-                  {Object.keys(appliedFilters).length}
-                </Text>
-              </View>
-            )}
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Card Container */}
+  const RenderProfileCardItem = ({ profile }: { profile: any }) => {
+    return (
       <View style={styles.cardContainer}>
         <Animated.View
           style={[
@@ -458,7 +431,7 @@ export default function Home() {
           {...panResponder.panHandlers}
         >
           <AppImage
-            src={profiles[currentIndex].mainImage}
+            src={profile.mainImage}
             style={styles.profileImage}
             disableFullScreen={true}
           />
@@ -466,57 +439,89 @@ export default function Home() {
           <View style={styles.overlay} pointerEvents="box-none">
             <View style={styles.profileInfo} pointerEvents="none">
               <Text style={styles.name}>
-                {profiles[currentIndex].fullName},{' '}
-                {calculateAge(profiles[currentIndex].dateOfBirth)}
+                {profile?.fullName}, {calculateAge(profile?.dateOfBirth)}
               </Text>
 
               <View style={styles.infoRow}>
                 <MapPin color="#FFFFFF" size={16} />
                 <Text style={styles.infoText}>
-                  {profiles[currentIndex].location.city},{' '}
-                  {profiles[currentIndex].location.state}
+                  {profile?.location?.city}, {profile?.location?.state}
                 </Text>
               </View>
 
               <View style={styles.infoRow}>
                 <Briefcase color="#FFFFFF" size={16} />
-                <Text style={styles.infoText}>
-                  {profiles[currentIndex].occupation}
-                </Text>
+                <Text style={styles.infoText}>{profile?.occupation}</Text>
               </View>
 
               <View style={styles.infoRow}>
                 <GraduationCap color="#FFFFFF" size={16} />
-                <Text style={styles.infoText}>
-                  {profiles[currentIndex].education}
-                </Text>
+                <Text style={styles.infoText}>{profile?.education}</Text>
               </View>
 
               <Text style={styles.bio} numberOfLines={2}>
-                {profiles[currentIndex].bio}
+                {profile?.bio}
               </Text>
             </View>
 
-            <Pressable
-              style={({ pressed }) => [
-                styles.infoButton,
-                pressed && styles.infoPressedEffect,
-              ]}
+            <Clickable
+              style={styles.infoButton}
               onPress={() => {
-                console.log(
-                  'Info button clicked! Profile ID:',
-                  profiles[currentIndex]._id,
-                );
+                console.log('Info button clicked! Profile ID:', profile._id);
                 router.push(
-                  `/profile-details/${profiles[currentIndex].id}?hideButton=false&isShortlisted=${isShortlisted}`,
+                  `/profile-details/${profile.id}?hideButton=false&isShortlisted=${isShortlisted}`,
                 );
               }}
             >
               <Info color="#FFFFFF" size={20} />
-            </Pressable>
+            </Clickable>
           </View>
         </Animated.View>
       </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.headerTitle}>Discover</Text>
+            <Text style={styles.headerSubtitle}>
+              Find your perfect life partner
+            </Text>
+          </View>
+          <Clickable
+            style={styles.filterButton}
+            onPress={() => setFilterModalVisible(true)}
+          >
+            <Filter color="#E11D48" size={24} />
+            {Object.keys(appliedFilters).length > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>
+                  {Object.keys(appliedFilters).length}
+                </Text>
+              </View>
+            )}
+          </Clickable>
+        </View>
+      </View>
+
+      {/* Card Container */}
+      <FlatList
+        data={profiles}
+        renderItem={({ item }) => <RenderProfileCardItem profile={item} />}
+        keyExtractor={(item) => item.id}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => {
+          const index = Math.round(e.nativeEvent.contentOffset.x / CARD_HEIGHT);
+          console.log('index = ', index);
+          setCurrentIndex(index);
+        }}
+      />
 
       {actionLoading ? (
         <View style={styles.loadingContainer2}>
