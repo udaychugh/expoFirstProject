@@ -43,21 +43,21 @@ export default function Welcome() {
             icon={<Shield color={Colors.green} size={32} />}
           />
         </View>
-
-        <View style={styles.buttons}>
-          <PrimaryButton
-            title="Get Started"
-            onPress={() => router.push('/(onboarding)/register')}
-          />
-
-          <View style={styles.secondaryButtonContainer}>
-            <SecondaryButton
-              title="I already have an account"
-              onPress={() => router.push('/(onboarding)/login')}
-            />
-          </View>
-        </View>
       </ScrollView>
+
+      <View style={styles.buttons}>
+        <PrimaryButton
+          title="Get Started & Register"
+          onPress={() => router.push('/(onboarding)/register')}
+        />
+
+        <View style={styles.secondaryButtonContainer}>
+          <SecondaryButton
+            title="I already have an account"
+            onPress={() => router.push('/(onboarding)/login')}
+          />
+        </View>
+      </View>
     </LinearGradient>
   );
 }
@@ -69,14 +69,14 @@ const styles = StyleSheet.create({
   features: {
     flex: 1,
     justifyContent: 'center',
-    gap: 32,
+    marginVertical: 20,
   },
   buttons: {
-    gap: 16,
-    marginBottom: 32,
+    marginBottom: 12,
   },
   secondaryButtonContainer: {
     alignItems: 'center',
     width: '100%',
+    marginTop: 10,
   },
 });

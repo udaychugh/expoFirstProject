@@ -45,12 +45,22 @@ export default function Home() {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
 
+  const [isShortlisted, setIsShortlisted] = useState(false);
+
   // Load profiles on component mount
   useEffect(() => {
     if (profile?.profileComplete && profile?.isVerified) {
       loadProfiles();
     }
   }, [profile]);
+
+  useEffect(() => {
+    setIsShortlisted(
+      profile?.shortlisted
+        .map((item) => item.user)
+        .includes(profiles[currentIndex].id) ?? false,
+    );
+  }, [currentIndex]);
 
   const loadProfiles = async (filters?: FilterOptions) => {
     setLoading(true);
@@ -182,7 +192,7 @@ export default function Home() {
         const currentProfile = profiles[currentIndex];
         if (!currentProfile) return;
         const response = await ApiService.sendConnectionRequest(
-          currentProfile.id
+          currentProfile.id,
         );
         if (response.success) {
           console.log('Connection request sent successfully');
@@ -244,21 +254,41 @@ export default function Home() {
 
     try {
       setActionLoading(true);
-      const response = await ApiService.shortListUser(currentProfile.id);
-      if (response.success) {
-        console.log('Profile shortlisted successfully');
-        ShowAlert({
-          type: 'success',
-          title: 'Success',
-          message: 'Profile shortlisted successfully',
-        });
-        onSuccessAction();
+      if (isShortlisted) {
+        const response = await ApiService.removeShortlistedProfile(
+          currentProfile.id,
+        );
+        if (response.success) {
+          console.log('Profile removed from shortlist successfully');
+          ShowAlert({
+            type: 'success',
+            title: 'Success',
+            message: 'Profile removed from shortlist successfully',
+          });
+        } else {
+          ShowAlert({
+            type: 'error',
+            title: 'Error',
+            message: 'Profile removed from shortlist failed',
+          });
+        }
       } else {
-        ShowAlert({
-          type: 'error',
-          title: 'Error',
-          message: 'Profile shortlisted failed',
-        });
+        const response = await ApiService.shortListUser(currentProfile.id);
+        if (response.success) {
+          console.log('Profile shortlisted successfully');
+          ShowAlert({
+            type: 'success',
+            title: 'Success',
+            message: 'Profile shortlisted successfully',
+          });
+          onSuccessAction();
+        } else {
+          ShowAlert({
+            type: 'error',
+            title: 'Error',
+            message: 'Profile shortlisted failed',
+          });
+        }
       }
     } catch (error) {
       console.error('Error shortlisting profile:', error);
@@ -297,15 +327,15 @@ export default function Home() {
       profile.verificationStatus == 'pending'
         ? 'Please wait for admin to approve your account.'
         : profile.verificationStatus == 'rejected'
-        ? 'Go to more details to check what can be done now to fix the issue.'
-        : 'Please verify yourself to view profiles.';
+          ? 'Go to more details to check what can be done now to fix the issue.'
+          : 'Please verify yourself to view profiles.';
 
     const buttonText =
       profile.verificationStatus == 'pending'
         ? 'See Status'
         : profile.verificationStatus == 'rejected'
-        ? 'More Details'
-        : 'Verify Profile';
+          ? 'More Details'
+          : 'Verify Profile';
     return (
       <SafeAreaView style={styles.container}>
         <RequestToProcess
@@ -376,6 +406,8 @@ export default function Home() {
       </SafeAreaView>
     );
   }
+
+  const renderProfileCardItem = () => {};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -473,10 +505,10 @@ export default function Home() {
               onPress={() => {
                 console.log(
                   'Info button clicked! Profile ID:',
-                  profiles[currentIndex]._id
+                  profiles[currentIndex]._id,
                 );
                 router.push(
-                  `/profile-details/${profiles[currentIndex].id}?hideButton=false&isShortlisted=false`
+                  `/profile-details/${profiles[currentIndex].id}?hideButton=false&isShortlisted=${isShortlisted}`,
                 );
               }}
             >
@@ -495,7 +527,7 @@ export default function Home() {
           handlePass={handlePass}
           handleShortlist={handleShortlist}
           handleLike={handleLike}
-          isShortlisted={false}
+          isShortlisted={isShortlisted}
         />
       )}
 

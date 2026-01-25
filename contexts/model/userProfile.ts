@@ -21,6 +21,10 @@ export interface UserProfile {
     currency: string;
   };
 
+  shortlisted: {
+    user: string;
+  }[];
+
   preferences: {
     ageRange: { min: number; max: number };
     religion: string[];

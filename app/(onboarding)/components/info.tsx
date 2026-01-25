@@ -2,21 +2,21 @@ import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 
 export default function Info({
-    title,
-    text,
-    icon,
+  title,
+  text,
+  icon,
 }: {
-    title: string;
-    text: string;
-    icon: React.ReactNode;
+  title: string;
+  text: string;
+  icon: React.ReactNode;
 }) {
-    return (
-        <View style={styles.feature}>
-          {icon}
-          <Text style={styles.featureTitle}>{title}</Text>
-          <Text style={styles.featureText}>{text}</Text>
-        </View>
-    );
+  return (
+    <View style={styles.feature}>
+      {icon}
+      <Text style={styles.featureTitle}>{title}</Text>
+      <Text style={styles.featureText}>{text}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
   feature: {
     alignItems: 'center',
     paddingHorizontal: 24,
+    marginVertical: 20,
   },
   featureTitle: {
     fontSize: 20,
@@ -41,5 +42,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
     lineHeight: 24,
-  }
+  },
 });

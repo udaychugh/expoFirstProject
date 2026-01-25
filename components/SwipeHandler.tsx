@@ -15,7 +15,7 @@ export default function SwipeHandler({
 }) {
   return (
     <View style={styles.actions}>
-      <Pressable
+      {/* <Pressable
         style={({ pressed }) => [
           styles.baseButton,
           styles.passButton,
@@ -29,7 +29,7 @@ export default function SwipeHandler({
             <Text style={styles.actionLabel}>Not Interested</Text>
           </>
         )}
-      </Pressable>
+      </Pressable> */}
 
       <Pressable
         style={({ pressed }) => [
@@ -51,7 +51,7 @@ export default function SwipeHandler({
               />
             )}
             <Text style={styles.actionLabel}>
-              {isShortlisted ? 'Remove' : 'Shortlist'}
+              {isShortlisted ? 'Remove Profile' : 'Shortlist Profile'}
             </Text>
           </>
         )}
@@ -72,7 +72,7 @@ export default function SwipeHandler({
               size={24}
               fill={pressed ? '#E11D48' : 'none'}
             />
-            <Text style={styles.actionLabel}>Interested</Text>
+            <Text style={styles.actionLabel}>Send Request</Text>
           </>
         )}
       </Pressable>
@@ -90,11 +90,12 @@ const styles = StyleSheet.create({
   },
   baseButton: {
     flex: 1,
-    padding: 5,
+    flexDirection: 'row',
+    padding: 10,
     borderRadius: 12,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
-    justifyContent: 'center',
+    alignContent: 'center',
     shadowRadius: 4,
     elevation: 4,
     borderWidth: 1,
@@ -118,9 +119,10 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   actionLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 'normal',
     color: '#6B7280',
     marginTop: 4,
+    marginStart: 6,
   },
 });
