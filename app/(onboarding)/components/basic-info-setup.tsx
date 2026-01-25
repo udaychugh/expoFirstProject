@@ -156,7 +156,7 @@ export default function BasicInfoSetup({
     const maxDate = new Date(
       today.getFullYear() - 18,
       today.getMonth(),
-      today.getDate()
+      today.getDate(),
     );
     return maxDate;
   };
@@ -355,39 +355,13 @@ export default function BasicInfoSetup({
               }}
             />
 
-            <View style={profileStyles.inputGroup}>
-              <Text style={profileStyles.label}>Religion</Text>
-              <View style={profileStyles.religionGrid}>
-                {RELIGIONS.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={[
-                      profileStyles.religionCard,
-                      religion === item.name &&
-                        profileStyles.selectedReligionCard,
-                    ]}
-                    onPress={() => {
-                      setReligion(item.name);
-                    }}
-                  >
-                    <Image
-                      source={{ uri: item.image }}
-                      style={profileStyles.religionIcon}
-                      contentFit="contain"
-                    />
-                    <Text
-                      style={[
-                        profileStyles.religionText,
-                        religion === item.name &&
-                          profileStyles.selectedReligionText,
-                      ]}
-                    >
-                      {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
+            <SelectBtns
+              title="Religion"
+              list={RELIGIONS.map((item) => item.name)}
+              onPress={(value) => {
+                setReligion(value);
+              }}
+            />
 
             <View style={[profileStyles.inputGroup]}>
               <InputOutlineBox

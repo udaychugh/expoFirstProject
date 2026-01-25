@@ -122,7 +122,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'normal',
     color: '#6B7280',
-    marginTop: 4,
     marginStart: 6,
   },
 });

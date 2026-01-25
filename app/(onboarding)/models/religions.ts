@@ -2,31 +2,51 @@ export const RELIGIONS = [
   {
     id: 'Hindu',
     name: 'Hindu',
-    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533913.png',
+    image: '',
   },
   {
     id: 'Christian',
     name: 'Christian',
-    image: 'https://cdn-icons-png.flaticon.com/512/3004/3004024.png',
+    image: '',
   },
   {
     id: 'Sikh',
     name: 'Sikh',
-    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533924.png',
+    image: '',
+  },
+  {
+    id: 'Parsi',
+    name: 'Parsi',
+    image: '',
   },
   {
     id: 'Buddhist',
     name: 'Buddhist',
-    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533908.png',
+    image: '',
   },
   {
     id: 'Jain',
     name: 'Jain',
-    image: 'https://cdn-icons-png.flaticon.com/512/1533/1533918.png',
+    image: '',
+  },
+  {
+    id: 'Jewish',
+    name: 'Jewish',
+    image: '',
+  },
+  {
+    id: 'No-Religion',
+    name: 'No Religion',
+    image: '',
+  },
+  {
+    id: 'Spritual',
+    name: 'Spritual',
+    image: '',
   },
   {
     id: 'Other',
     name: 'Other',
-    image: 'https://cdn-icons-png.flaticon.com/512/10412/10412463.png',
+    image: '',
   },
 ];
