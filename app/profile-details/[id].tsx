@@ -9,7 +9,12 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
+  InfoIcon,
+} from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
@@ -24,17 +29,24 @@ import UserBio from '@/components/info/userBio';
 import UserPersonalDetails from '@/components/info/userPersonalDetails';
 import UserFamilyInfo from '@/components/info/userFamilyInfo';
 import UserLocationInfo from '@/components/info/userLocationInfo';
+import Clickable from '@/components/Clickable';
+import { useAuth } from '@/contexts/AuthContext';
+import CommonInfoModal from '@/components/CommonInfoModal';
 
 const { width } = Dimensions.get('window');
 
 export default function ProfileDetails() {
   const router = useRouter();
+
   const { id, hideButton, isShortlisted } = useLocalSearchParams();
+  const { profile } = useAuth();
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [uProfile, setUProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showCommonInfo, setShowCommonInfo] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -47,10 +59,10 @@ export default function ProfileDetails() {
     setError(null);
     try {
       const response = await ApiService.getDiscoveredProfileDetails(
-        id as string
+        id as string,
       );
       if (response.success && response.data) {
-        setProfile(response.data);
+        setUProfile(response.data);
       } else {
         setError(response.error || 'Failed to load profile');
       }
@@ -123,7 +135,14 @@ export default function ProfileDetails() {
           <ArrowLeft color="#1F2937" size={24} />
         </Pressable>
         <Text style={styles.headerTitle}>Profile Details</Text>
-        <View style={{ width: 24 }} />
+
+        <Clickable
+          onPress={() => {
+            setShowCommonInfo(true);
+          }}
+        >
+          <InfoIcon color="#1F2937" size={24} />
+        </Clickable>
       </View>
     );
   };
@@ -139,7 +158,7 @@ export default function ProfileDetails() {
     );
   }
 
-  if (error || !profile) {
+  if (error || !uProfile) {
     return (
       <SafeAreaView style={styles.container}>
         <HeaderSection />
@@ -154,7 +173,7 @@ export default function ProfileDetails() {
   }
   const renderImageIndicators = () => (
     <View style={styles.imageIndicators}>
-      {profile.images?.map((_, index) => (
+      {uProfile.images?.map((_, index) => (
         <View
           key={index}
           style={[
@@ -179,12 +198,12 @@ export default function ProfileDetails() {
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={(event) => {
               const index = Math.round(
-                event.nativeEvent.contentOffset.x / width
+                event.nativeEvent.contentOffset.x / width,
               );
               setCurrentImageIndex(index);
             }}
           >
-            {profile.images?.map((image: any, index: number) => (
+            {uProfile.images?.map((image: any, index: number) => (
               <AppImage
                 key={index}
                 src={image.url}
@@ -199,7 +218,7 @@ export default function ProfileDetails() {
         <View style={styles.section}>
           <View style={styles.nameContainer}>
             <Text style={styles.name}>
-              {profile.fullName}, {calculateAge(profile.dateOfBirth)}
+              {uProfile.fullName}, {calculateAge(uProfile.dateOfBirth)}
             </Text>
             <Pressable
               onPress={() => {
@@ -208,7 +227,7 @@ export default function ProfileDetails() {
               }}
               style={styles.verificationBadge}
             >
-              {profile.isVerified ? (
+              {uProfile.isVerified ? (
                 <CheckCircle2 size={20} fill="#3B82F6" />
               ) : (
                 <AlertCircle size={20} fill="#F59E0B" />
@@ -217,17 +236,17 @@ export default function ProfileDetails() {
                 <View
                   style={[
                     styles.tooltipContainer,
-                    !profile.isVerified && { backgroundColor: '#F59E0B' },
+                    !uProfile.isVerified && { backgroundColor: '#F59E0B' },
                   ]}
                 >
                   <View
                     style={[
                       styles.tooltipArrow,
-                      !profile.isVerified && { borderTopColor: '#F59E0B' },
+                      !uProfile.isVerified && { borderTopColor: '#F59E0B' },
                     ]}
                   />
                   <Text style={styles.tooltipText}>
-                    {profile.isVerified
+                    {uProfile.isVerified
                       ? 'User verified'
                       : 'User verification pending'}
                   </Text>
@@ -237,64 +256,64 @@ export default function ProfileDetails() {
           </View>
 
           <UserFirstDetail
-            phone={profile.phone}
-            email={profile.email}
-            city={profile.location.city}
-            state={profile.location.state}
-            country={profile.location.country}
-            isNRI={profile.isNRI}
-            occupation={profile.occupation}
-            education={profile.education}
-            maritalStatus={profile.maritalStatus}
-            manglik={profile.manglik}
+            phone={uProfile.phone}
+            email={uProfile.email}
+            city={uProfile.location.city}
+            state={uProfile.location.state}
+            country={uProfile.location.country}
+            isNRI={uProfile.isNRI}
+            occupation={uProfile.occupation}
+            education={uProfile.education}
+            maritalStatus={uProfile.maritalStatus}
+            manglik={uProfile.manglik}
           />
         </View>
 
         {/* About Section */}
-        <UserBio bio={profile.bio} />
+        <UserBio bio={uProfile.bio} />
 
         {/* Personal Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Details</Text>
           <UserPersonalDetails
-            religion={profile.religion}
-            caste={profile.caste}
-            height={profile.height}
-            diet={profile.diet}
-            smokingHabit={profile.smokingHabit}
-            drinkingHabit={profile.drinkingHabit}
-            bloodGroup={profile.bloodGroup}
+            religion={uProfile.religion}
+            caste={uProfile.caste}
+            height={uProfile.height}
+            diet={uProfile.diet}
+            smokingHabit={uProfile.smokingHabit}
+            drinkingHabit={uProfile.drinkingHabit}
+            bloodGroup={uProfile.bloodGroup}
             income={
-              profile.annualSalary
-                ? `${profile.annualSalary} ${profile.income.currency}`
+              uProfile.annualSalary
+                ? `${uProfile.annualSalary} ${uProfile.income.currency}`
                 : 'Not mentioned'
             }
           />
         </View>
 
         {/* Location Info */}
-        {profile.jobLocation || profile.permanentLocation ? (
+        {uProfile.jobLocation || uProfile.permanentLocation ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Location Details</Text>
             <UserLocationInfo
-              jobLocation={profile.jobLocation}
-              permanentLocation={profile.permanentLocation}
+              jobLocation={uProfile.jobLocation}
+              permanentLocation={uProfile.permanentLocation}
             />
           </View>
         ) : null}
 
         {/* Family Details */}
-        {profile.familyDetails && (
+        {uProfile.familyDetails && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Family Details</Text>
             <UserFamilyInfo
-              fatherName={profile.familyDetails?.fatherName}
-              fatherOccupation={profile.familyDetails?.fatherOccupation}
-              motherName={profile.familyDetails?.motherName}
-              motherOccupation={profile.familyDetails?.motherOccupation}
-              familyIncome={profile.familyDetails?.familyIncome}
-              siblings={profile.familyDetails?.siblings}
-              createdBy={profile.familyDetails?.createdBy}
+              fatherName={uProfile.familyDetails?.fatherName}
+              fatherOccupation={uProfile.familyDetails?.fatherOccupation}
+              motherName={uProfile.familyDetails?.motherName}
+              motherOccupation={uProfile.familyDetails?.motherOccupation}
+              familyIncome={uProfile.familyDetails?.familyIncome}
+              siblings={uProfile.familyDetails?.siblings}
+              createdBy={uProfile.familyDetails?.createdBy}
             />
           </View>
         )}
@@ -302,52 +321,59 @@ export default function ProfileDetails() {
         {/* Languages Spoken */}
         <InterestsSection
           title="Languages Spoken"
-          items={profile.languagesSpoken || []}
+          items={uProfile.languagesSpoken || []}
           dataSource={INTERESTS_DATA.languages}
         />
 
         {/* Hobbies */}
         <InterestsSection
           title="Hobbies"
-          items={profile.hobbies || []}
+          items={uProfile.hobbies || []}
           dataSource={INTERESTS_DATA.hobbies}
         />
 
         {/* Sports & Fitness */}
         <InterestsSection
           title="Sports & Fitness"
-          items={profile.sportsAndFitness || []}
+          items={uProfile.sportsAndFitness || []}
           dataSource={INTERESTS_DATA.sportsAndFitness}
         />
 
         {/* Favorite Books */}
         <InterestsSection
           title="Favorite Books"
-          items={profile.favoriteBooks || []}
+          items={uProfile.favoriteBooks || []}
           dataSource={INTERESTS_DATA.favoriteBooks}
         />
 
         {/* Favorite Movies */}
         <InterestsSection
           title="Favorite Movies"
-          items={profile.favoriteMovies || []}
+          items={uProfile.favoriteMovies || []}
           dataSource={INTERESTS_DATA.favoriteMovies}
         />
 
         {/* Favorite Songs */}
         <InterestsSection
           title="Favorite Songs"
-          items={profile.favoriteSongs || []}
+          items={uProfile.favoriteSongs || []}
           dataSource={INTERESTS_DATA.favoriteSongs}
         />
 
         {/* Vacation Destinations */}
         <InterestsSection
           title="Dream Vacation Destinations"
-          items={profile.vacationDestination || []}
+          items={uProfile.vacationDestination || []}
           dataSource={INTERESTS_DATA.vacationDestination}
         />
       </ScrollView>
+
+      <CommonInfoModal
+        visible={showCommonInfo}
+        onClose={() => setShowCommonInfo(false)}
+        currentUser={profile}
+        viewedUser={uProfile}
+      />
 
       {/* Action Buttons */}
       {hideButton !== 'true' && (
