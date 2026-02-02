@@ -5,8 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Image,
   Dimensions,
+  Share,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -14,8 +16,10 @@ import {
   CheckCircle2,
   AlertCircle,
   InfoIcon,
+  Share2,
 } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as FileSystem from 'expo-file-system';
 import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 import { UserProfile } from '@/contexts/model/userProfile';
@@ -47,6 +51,7 @@ export default function ProfileDetails() {
   const [error, setError] = useState<string | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [showCommonInfo, setShowCommonInfo] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -128,6 +133,57 @@ export default function ProfileDetails() {
     router.push(`/chat/${id}`);
   };
 
+  const handleShare = async () => {
+    if (!uProfile || isSharing) return;
+
+    try {
+      setIsSharing(true);
+
+      const basicDetails = [
+        uProfile.occupation,
+        `${uProfile.location.city}, ${uProfile.location.state}`,
+      ]
+        .filter(Boolean)
+        .join(' • ');
+
+      const message = `Check out this profile on Life Match!\n\n${uProfile.fullName}, ${calculateAge(uProfile.dateOfBirth)}\n${basicDetails}\n\nView full profile: https://lifematch.in/profile/${id}`;
+
+      let shareOptions: any = {
+        message,
+        title: 'Share Profile',
+      };
+
+      if (uProfile.images?.length > 0) {
+        try {
+          const imageUrl = uProfile.images[0].url;
+          // Use a fixed name or hash to avoid long filenames
+          const fileUri = FileSystem.cacheDirectory + `temp_share_${id}.jpg`;
+
+          // Download image
+          const downloadRes = await FileSystem.downloadAsync(imageUrl, fileUri);
+
+          if (Platform.OS === 'ios') {
+            // iOS supports extracting image from URL in Share logic mostly if it is local
+            shareOptions.url = downloadRes.uri;
+          } else {
+            shareOptions.url = downloadRes.uri;
+          }
+        } catch (e) {
+          console.warn(
+            'Failed to download image for sharing, falling back to text only',
+            e,
+          );
+        }
+      }
+
+      await Share.share(shareOptions);
+    } catch (error) {
+      console.error('Error sharing:', error);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   const HeaderSection = () => {
     return (
       <View style={styles.header}>
@@ -136,13 +192,22 @@ export default function ProfileDetails() {
         </Pressable>
         <Text style={styles.headerTitle}>Profile Details</Text>
 
-        <Clickable
-          onPress={() => {
-            setShowCommonInfo(true);
-          }}
-        >
-          <InfoIcon color="#1F2937" size={24} />
-        </Clickable>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          <Clickable onPress={handleShare} disabled={isSharing}>
+            {isSharing ? (
+              <ActivityIndicator size="small" color="#1F2937" />
+            ) : (
+              <Share2 color="#1F2937" size={24} />
+            )}
+          </Clickable>
+          <Clickable
+            onPress={() => {
+              setShowCommonInfo(true);
+            }}
+          >
+            <InfoIcon color="#1F2937" size={24} />
+          </Clickable>
+        </View>
       </View>
     );
   };
