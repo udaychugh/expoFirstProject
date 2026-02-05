@@ -9,7 +9,7 @@ import {
   Modal,
 } from 'react-native';
 import { profileStyles } from './styles';
-import { Calendar, X } from 'lucide-react-native';
+import { Calendar, X, ChevronDown } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from '@/assets/colors/colors';
 import { Image } from 'expo-image';
@@ -19,6 +19,48 @@ import ApiService from '@/services/api';
 import { ShowAlert } from '@/components/Alert';
 import { RELIGIONS } from '../models/religions';
 import SelectBtns from './selectBtn';
+import SelectionPicker from '@/components/SelectionPicker';
+import { MARITAL_STATUS } from '../models/height';
+
+const HEIGHTS = [
+  '4\'0"',
+  '4\'1"',
+  '4\'2"',
+  '4\'3"',
+  '4\'4"',
+  '4\'5"',
+  '4\'6"',
+  '4\'7"',
+  '4\'8"',
+  '4\'9"',
+  '4\'10"',
+  '4\'11"',
+  '5\'0"',
+  '5\'1"',
+  '5\'2"',
+  '5\'3"',
+  '5\'4"',
+  '5\'5"',
+  '5\'6"',
+  '5\'7"',
+  '5\'8"',
+  '5\'9"',
+  '5\'10"',
+  '5\'11"',
+  '6\'0"',
+  '6\'1"',
+  '6\'2"',
+  '6\'3"',
+  '6\'4"',
+  '6\'5"',
+  '6\'6"',
+  '6\'7"',
+  '6\'8"',
+  '6\'9"',
+  '6\'10"',
+  '6\'11"',
+  '7\'0"',
+];
 
 export default function BasicInfoSetup({
   handleNext,
@@ -41,6 +83,7 @@ export default function BasicInfoSetup({
   const [religion, setReligion] = useState('');
   const [caste, setCaste] = useState('');
   const [height, setHeight] = useState('');
+  const [showHeightPicker, setShowHeightPicker] = useState(false);
   const [maritalStatus, setMaritalStatus] = useState('');
   const [bloodGroup, setBloodGroup] = useState<string | undefined>(undefined);
   const [placeOfBirth, setPlaceOfBirth] = useState('');
@@ -333,14 +376,22 @@ export default function BasicInfoSetup({
             </View>
 
             <View style={profileStyles.inputGroup}>
-              <InputOutlineBox
-                label="Height"
-                value={height}
-                onChangeText={(value) => {
-                  setHeight(value);
-                }}
-                placeholder={`e.g., 5'6"`}
-              />
+              <Text style={profileStyles.label}>Height</Text>
+              <Pressable
+                style={profileStyles.inputWithIcon}
+                onPress={() => setShowHeightPicker(true)}
+              >
+                <Text
+                  style={[
+                    profileStyles.inputText,
+                    !height && profileStyles.placeholderText,
+                    { flex: 1 },
+                  ]}
+                >
+                  {height || `e.g., 5'6"`}
+                </Text>
+                <ChevronDown color="#9CA3AF" size={20} />
+              </Pressable>
             </View>
 
             <SelectBtns
@@ -376,7 +427,7 @@ export default function BasicInfoSetup({
 
             <SelectBtns
               title="Marital Status"
-              list={['Never Married', 'Divorced', 'Widowed', 'Separated']}
+              list={MARITAL_STATUS}
               onPress={(value) => {
                 setMaritalStatus(value);
               }}
@@ -397,6 +448,16 @@ export default function BasicInfoSetup({
         enabled={!isLoading}
         isLoading={isLoading}
         onPress={handleSaveButton}
+      />
+
+      {/* Height Selection Picker */}
+      <SelectionPicker
+        visible={showHeightPicker}
+        title="Select Height"
+        options={HEIGHTS}
+        selected={height}
+        onSelect={(value) => setHeight(value)}
+        onClose={() => setShowHeightPicker(false)}
       />
 
       {/* Custom Time Picker Bottom Sheet Modal */}

@@ -52,12 +52,20 @@ export default function ProfileDetails() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [showCommonInfo, setShowCommonInfo] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadProfile();
     }
   }, [id]);
+
+  const onSuccessAction = (id: string) => {
+    router.navigate({
+      pathname: '/(tabs)',
+      params: { processedProfileId: id },
+    });
+  };
 
   const loadProfile = async () => {
     setLoading(true);
@@ -80,30 +88,34 @@ export default function ProfileDetails() {
 
   const handleLike = async () => {
     try {
-      const response = await ApiService.likeProfile(id as string);
+      setActionLoading(true);
+      let userId = id as string;
+      if (!userId) return;
+      const response = await ApiService.sendConnectionRequest(userId);
       if (response.success) {
-        if (response.data?.isMatch) {
-          // Show match notification
-          ShowAlert({
-            type: 'success',
-            title: "It's a Match!",
-            message: 'You both liked each other!',
-          });
-        }
-        router.back();
+        console.log('Connection request sent successfully');
+        ShowAlert({
+          type: 'success',
+          title: 'Success',
+          message: 'Connection request sent successfully',
+        });
+        onSuccessAction(userId);
       } else {
         ShowAlert({
           type: 'error',
           title: 'Error',
-          message: response.error || 'Failed to like profile',
+          message: response.message,
         });
       }
     } catch (error) {
+      console.error('Connection request error:', error);
       ShowAlert({
         type: 'error',
         title: 'Error',
-        message: 'Network error. Please try again.',
+        message: 'Connection request failed',
       });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -128,9 +140,56 @@ export default function ProfileDetails() {
     }
   };
 
-  const handleShortlist = () => {
+  const handleShortlist = async () => {
     console.log('Connect with profile:', id);
-    router.push(`/chat/${id}`);
+    try {
+      setActionLoading(true);
+      let userId = id as string;
+      if (isShortlisted) {
+        const response = await ApiService.removeShortlistedProfile(userId);
+        if (response.success) {
+          console.log('Profile removed from shortlist successfully');
+          ShowAlert({
+            type: 'success',
+            title: 'Success',
+            message: 'Profile removed from shortlist successfully',
+          });
+          onSuccessAction(userId);
+        } else {
+          ShowAlert({
+            type: 'error',
+            title: 'Error',
+            message: 'Profile removed from shortlist failed',
+          });
+        }
+      } else {
+        const response = await ApiService.shortListUser(userId);
+        if (response.success) {
+          console.log('Profile shortlisted successfully');
+          ShowAlert({
+            type: 'success',
+            title: 'Success',
+            message: 'Profile shortlisted successfully',
+          });
+          onSuccessAction(userId);
+        } else {
+          ShowAlert({
+            type: 'error',
+            title: 'Error',
+            message: 'Profile shortlisted failed',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error shortlisting profile:', error);
+      ShowAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Profile shortlisted failed',
+      });
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleShare = async () => {
@@ -441,14 +500,19 @@ export default function ProfileDetails() {
       />
 
       {/* Action Buttons */}
-      {hideButton !== 'true' && (
-        <SwipeHandler
-          handlePass={handlePass}
-          handleShortlist={handleShortlist}
-          handleLike={handleLike}
-          isShortlisted={isShortlisted === 'true'}
-        />
-      )}
+      {hideButton !== 'true' &&
+        (actionLoading ? (
+          <View style={styles.loadingContainer2}>
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        ) : (
+          <SwipeHandler
+            handlePass={handlePass}
+            handleShortlist={handleShortlist}
+            handleLike={handleLike}
+            isShortlisted={isShortlisted === 'true'}
+          />
+        ))}
     </SafeAreaView>
   );
 }
@@ -477,6 +541,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingContainer2: {
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 100,
   },
   loadingText: {
     fontSize: 18,

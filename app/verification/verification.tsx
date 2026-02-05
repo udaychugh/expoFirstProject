@@ -149,8 +149,9 @@ export default function Verification() {
         profile?.verificationStatus === 'not_submitted') && (
         <View style={styles.footer}>
           <PrimaryButton
-            title={isSubmitting ? 'Submitting...' : 'Submit for Verification'}
+            title={'Submit for Verification'}
             onPress={handleSubmitVerification}
+            isLoading={isSubmitting}
             enabled={!isSubmitting && verificationData.idCard != undefined}
           />
         </View>

@@ -17,7 +17,7 @@ import {
   Info,
   Filter,
 } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import FilterBottomSheet, {
@@ -143,6 +143,15 @@ export default function Home() {
   const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
 
   const [isShortlisted, setIsShortlisted] = useState(false);
+  const { processedProfileId } = useLocalSearchParams();
+
+  // Handle processed profile from details screen
+  useEffect(() => {
+    if (processedProfileId) {
+      onSuccessAction(processedProfileId as string);
+      router.setParams({ processedProfileId: '' });
+    }
+  }, [processedProfileId]);
 
   // Load profiles on component mount
   useEffect(() => {

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Check, ChevronDown, ChevronUp } from 'lucide-react-native';
@@ -18,8 +17,7 @@ import PrimaryButton from '@/components/PrimaryButton';
 import { ShowAlert } from '@/components/Alert';
 import { RELIGIONS } from '@/app/(onboarding)/models/religions';
 import SelectionPicker from '@/components/SelectionPicker';
-
-const { width } = Dimensions.get('window');
+import { HEIGHTS, MARITAL_STATUS } from '../(onboarding)/models/height';
 
 const EDUCATION_LEVELS = [
   'High School',
@@ -39,48 +37,6 @@ const OCCUPATIONS = [
   'Lawyer',
   'Artist',
   'Other',
-];
-
-const MARITAL_STATUS = ['Never Married', 'Divorced', 'Widowed', 'Separated'];
-
-const HEIGHTS = [
-  '4\'0"',
-  '4\'1"',
-  '4\'2"',
-  '4\'3"',
-  '4\'4"',
-  '4\'5"',
-  '4\'6"',
-  '4\'7"',
-  '4\'8"',
-  '4\'9"',
-  '4\'10"',
-  '4\'11"',
-  '5\'0"',
-  '5\'1"',
-  '5\'2"',
-  '5\'3"',
-  '5\'4"',
-  '5\'5"',
-  '5\'6"',
-  '5\'7"',
-  '5\'8"',
-  '5\'9"',
-  '5\'10"',
-  '5\'11"',
-  '6\'0"',
-  '6\'1"',
-  '6\'2"',
-  '6\'3"',
-  '6\'4"',
-  '6\'5"',
-  '6\'6"',
-  '6\'7"',
-  '6\'8"',
-  '6\'9"',
-  '6\'10"',
-  '6\'11"',
-  '7\'0"',
 ];
 
 export default function MatchPreferences() {
