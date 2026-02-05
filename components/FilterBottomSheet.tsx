@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Check } from 'lucide-react-native';
 import Slider from '@react-native-community/slider';
+import { RELIGIONS } from '@/app/(onboarding)/models/religions';
 
 const { height } = Dimensions.get('window');
 
@@ -35,10 +36,10 @@ interface FilterBottomSheetProps {
 
 const FILTER_CATEGORIES = [
   { id: 'age', label: 'Age Range', icon: '🎂' },
-  { id: 'location', label: 'Location', icon: '📍' },
+  // { id: 'location', label: 'Location', icon: '📍' },
   { id: 'religion', label: 'Religion', icon: '🕉️' },
-  { id: 'education', label: 'Education', icon: '🎓' },
-  { id: 'occupation', label: 'Occupation', icon: '💼' },
+  // { id: 'education', label: 'Education', icon: '🎓' },
+  // { id: 'occupation', label: 'Occupation', icon: '💼' },
   { id: 'maritalStatus', label: 'Marital Status', icon: '💍' },
   { id: 'manglik', label: 'Manglik', icon: '✨' },
 ];
@@ -86,15 +87,6 @@ const LOCATIONS = [
   },
 ];
 
-const RELIGIONS = [
-  { id: 'hindu', name: 'Hindu' },
-  { id: 'christian', name: 'Christian' },
-  { id: 'sikh', name: 'Sikh' },
-  { id: 'buddhist', name: 'Buddhist' },
-  { id: 'jain', name: 'Jain' },
-  { id: 'other', name: 'Other' },
-];
-
 const EDUCATION_LEVELS = [
   { id: 'high-school', name: 'High School' },
   { id: 'bachelors', name: "Bachelor's Degree" },
@@ -135,23 +127,23 @@ export default function FilterBottomSheet({
 }: FilterBottomSheetProps) {
   const [selectedCategory, setSelectedCategory] = useState('age');
   const [filters, setFilters] = useState<FilterOptions>(initialFilters);
-  const [ageMin, setAgeMin] = useState(initialFilters.ageMin || 18);
-  const [ageMax, setAgeMax] = useState(initialFilters.ageMax || 50);
+  const [ageMin, setAgeMin] = useState(initialFilters.ageMin);
+  const [ageMax, setAgeMax] = useState(initialFilters.ageMax);
 
   const handleApply = () => {
     const appliedFilters: FilterOptions = {
       ...filters,
-      ageMin,
-      ageMax,
     };
+    if (ageMin) appliedFilters.ageMin = ageMin;
+    if (ageMax) appliedFilters.ageMax = ageMax;
     onApply(appliedFilters);
     onClose();
   };
 
   const handleReset = () => {
     setFilters({});
-    setAgeMin(18);
-    setAgeMax(50);
+    setAgeMin(undefined);
+    setAgeMax(undefined);
   };
 
   const renderRightContent = () => {
@@ -381,23 +373,30 @@ export default function FilterBottomSheet({
                   key={status.id}
                   style={({ pressed }) => [
                     styles.optionItem,
-                    filters.manglik === status.name && styles.optionItemActive,
+                    filters.manglik ===
+                      (status.id === 'manglik' ? 'true' : 'false') &&
+                      styles.optionItemActive,
                     pressed && styles.pressedEffect,
                   ]}
                   onPress={() =>
-                    setFilters({ ...filters, manglik: status.name })
+                    setFilters({
+                      ...filters,
+                      manglik: status.id === 'manglik' ? 'true' : 'false',
+                    })
                   }
                 >
                   <Text
                     style={[
                       styles.optionText,
-                      filters.manglik === status.name &&
+                      filters.manglik ===
+                        (status.id === 'manglik' ? 'true' : 'false') &&
                         styles.optionTextActive,
                     ]}
                   >
                     {status.name}
                   </Text>
-                  {filters.manglik === status.name && (
+                  {filters.manglik ===
+                    (status.id === 'manglik' ? 'true' : 'false') && (
                     <Check color="#E11D48" size={20} />
                   )}
                 </Pressable>

@@ -144,6 +144,8 @@ export default function Home() {
 
   const [isShortlisted, setIsShortlisted] = useState(false);
   const { processedProfileId } = useLocalSearchParams();
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   // Handle processed profile from details screen
   useEffect(() => {
@@ -156,7 +158,7 @@ export default function Home() {
   // Load profiles on component mount
   useEffect(() => {
     if (profile?.profileComplete && profile?.isVerified) {
-      loadProfiles();
+      loadProfiles(undefined, 0);
     }
   }, [profile]);
 
@@ -170,18 +172,33 @@ export default function Home() {
     }
   }, [currentIndex, profiles]);
 
-  const loadProfiles = async (filters?: FilterOptions) => {
+  const loadProfiles = async (
+    filters: FilterOptions = appliedFilters,
+    currentOffset: number = offset,
+  ) => {
+    if (!hasMore && currentOffset !== 0) return;
+
     setLoading(true);
     setError(null);
     try {
       const response = await ApiService.getDiscoveryProfiles({
         limit: 10,
+        offset: currentOffset,
         ...filters,
       });
       if (response.success && response.data) {
-        console.log('Profiles loaded:', response.data);
-        setProfiles(response.data);
-        setCurrentIndex(0); // Reset to first profile when loading new results
+        console.log('Profiles loaded:', response.data.length);
+        if (response.data.length < 10) {
+          setHasMore(false);
+        }
+
+        if (currentOffset === 0) {
+          setProfiles(response.data);
+          setCurrentIndex(0);
+        } else {
+          setProfiles((prev) => [...prev, ...(response.data || [])]);
+        }
+        setOffset(currentOffset + 10);
       } else {
         if (response.error?.startsWith('401')) {
           router.replace('/welcome');
@@ -249,14 +266,17 @@ export default function Home() {
     // Reset pan position
     pan.setValue({ x: 0, y: 0 });
 
-    // Check if we need to load more or adjust index
-    if (newProfiles.length === 0) {
-      loadProfiles();
-      setCurrentIndex(0);
+    // Check if we need to load more
+    if (newProfiles.length <= 2 && hasMore && !loading) {
+      loadProfiles(appliedFilters, offset);
+    }
+
+    // Check if we need to adjust index
+    if (newProfiles.length === 0 && !hasMore) {
+      // No more profiles
     } else if (currentIndex >= newProfiles.length) {
       setCurrentIndex(0);
     }
-    // If currentIndex is valid for new array, it points to the Next item automatically
   };
 
   const handleSwipe = async (direction: 'left' | 'right') => {
@@ -411,7 +431,9 @@ export default function Home() {
 
   const handleApplyFilters = (filters: FilterOptions) => {
     setAppliedFilters(filters);
-    loadProfiles(filters);
+    setOffset(0);
+    setHasMore(true);
+    loadProfiles(filters, 0);
   };
 
   // Incomplete Profile
@@ -509,6 +531,23 @@ export default function Home() {
           >
             <Text style={styles.retryButtonText}>Check Again</Text>
           </Clickable>
+
+          {Object.keys(appliedFilters).length > 0 && (
+            <Clickable
+              style={[
+                styles.retryButton,
+                { marginTop: 12, backgroundColor: '#6B7280' },
+              ]}
+              onPress={() => {
+                setAppliedFilters({});
+                setOffset(0);
+                setHasMore(true);
+                loadProfiles({}, 0);
+              }}
+            >
+              <Text style={styles.retryButtonText}>Clear Filters</Text>
+            </Clickable>
+          )}
         </View>
       </SafeAreaView>
     );
@@ -560,6 +599,12 @@ export default function Home() {
           const index = Math.round(e.nativeEvent.contentOffset.x / width);
           if (index !== currentIndex) {
             setCurrentIndex(index);
+
+            // Load more when reaching the second to last item
+            if (profiles.length - index <= 2 && hasMore && !loading) {
+              console.log('Loading more profiles from scroll...');
+              loadProfiles(appliedFilters, offset);
+            }
           }
         }}
       />
