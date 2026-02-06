@@ -67,7 +67,7 @@ class ApiService {
       }
 
       const data = await response.json();
-      console.log('Data of api call = ', JSON.stringify(data));
+      //console.log('Data of api call = ', JSON.stringify(data));
       return data;
     } catch (error) {
       console.error('API request error:', error);
@@ -249,6 +249,13 @@ class ApiService {
     return this.makeRequest('/profile/contact', {
       method: 'PUT',
       body: JSON.stringify(data),
+    });
+  }
+
+  async updateFcmToken(fcmToken: string): Promise<ApiResponse> {
+    return this.makeRequest('/profile/fcm-token', {
+      method: 'PUT',
+      body: JSON.stringify({ fcmToken }),
     });
   }
   async uploadProfileImage(imageUri: string): Promise<ApiResponse> {

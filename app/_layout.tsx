@@ -5,6 +5,12 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider } from '@/contexts/AuthContext';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '@/assets/config/toastConfig';
+import messaging from '@react-native-firebase/messaging';
+
+// Register background handler
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+  console.log('Message handled in the background!', remoteMessage);
+});
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -16,7 +22,10 @@ export default function RootLayout() {
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="chat/[id]" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="profile-details/[id]" options={{ presentation: 'modal' }} />
+        <Stack.Screen
+          name="profile-details/[id]"
+          options={{ presentation: 'modal' }}
+        />
         <Stack.Screen name="verification" options={{ presentation: 'modal' }} />
         <Stack.Screen name="edit-profile" options={{ presentation: 'modal' }} />
         <Stack.Screen name="settings" options={{ presentation: 'modal' }} />

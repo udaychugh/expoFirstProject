@@ -9,6 +9,7 @@ import { User } from '@/contexts/model/user';
 import { AuthContextType } from '@/contexts/model/authContextType';
 import { UserProfile } from '@/contexts/model/userProfile';
 import ApiService from '@/services/api';
+import { useNotification } from '@/hooks/useNotification';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -20,6 +21,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Initialize notification service
+  useNotification(!!user);
 
   const updateProfileInfo = async () => {
     if (profile == null) return;
@@ -159,7 +163,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const resetPassword = async (
     email: string,
     otp: string,
-    newPassword: string
+    newPassword: string,
   ) => {
     setIsLoading(true);
     try {
