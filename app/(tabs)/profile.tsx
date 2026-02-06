@@ -16,6 +16,7 @@ import {
   Users,
   MessageCircle,
   Download,
+  Bell,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Print from 'expo-print';
@@ -189,9 +190,14 @@ export default function Profile() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
-        <Clickable onPress={handleSettings}>
-          <Settings color="#6B7280" size={24} />
-        </Clickable>
+        <View style={{ flexDirection: 'row', gap: 15 }}>
+          <Clickable onPress={() => router.push('/notification/notifications')}>
+            <Bell color="#6B7280" size={24} />
+          </Clickable>
+          <Clickable onPress={handleSettings}>
+            <Settings color="#6B7280" size={24} />
+          </Clickable>
+        </View>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>

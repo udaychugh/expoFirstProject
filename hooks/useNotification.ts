@@ -2,7 +2,18 @@ import messaging from '@react-native-firebase/messaging';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import ApiService from '@/services/api';
-import Toast from 'react-native-toast-message';
+import * as Notifications from 'expo-notifications';
+
+// Configure how notifications should be handled when the app is in foreground
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 export const useNotification = (isAuthenticated: boolean) => {
   const requestUserPermission = async () => {
@@ -77,11 +88,13 @@ export const useNotification = (isAuthenticated: boolean) => {
 
         const { notification } = remoteMessage;
         if (notification) {
-          Toast.show({
-            type: 'success', // Using success or info depending on toast config
-            text1: notification.title,
-            text2: notification.body,
-            visibilityTime: 4000,
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: notification.title || 'New Notification',
+              body: notification.body || '',
+              data: remoteMessage.data,
+            },
+            trigger: null,
           });
         }
       },

@@ -252,6 +252,17 @@ class ApiService {
     });
   }
 
+  async getNotifications(
+    limit: number = 20,
+    offset: number = 0,
+  ): Promise<ApiResponse> {
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      offset: offset.toString(),
+    });
+    return this.makeRequest(`/profile/notifications?${params.toString()}`);
+  }
+
   async updateFcmToken(fcmToken: string): Promise<ApiResponse> {
     return this.makeRequest('/profile/fcm-token', {
       method: 'PUT',
