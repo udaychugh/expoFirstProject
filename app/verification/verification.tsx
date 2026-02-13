@@ -4,13 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/contexts/AuthContext';
 import ApiService from '@/services/api';
 import PrimaryButton from '@/components/PrimaryButton';
@@ -34,28 +32,28 @@ export default function Verification() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const takeSelfie = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    // const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Camera permission is required to take a selfie'
-      );
-      return;
-    }
+    // if (status !== 'granted') {
+    //   Alert.alert(
+    //     'Permission Required',
+    //     'Camera permission is required to take a selfie'
+    //   );
+    //   return;
+    // }
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
+    // const result = await ImagePicker.launchCameraAsync({
+    //   allowsEditing: true,
+    //   aspect: [1, 1],
+    //   quality: 0.8,
+    // });
 
-    if (!result.canceled) {
-      setVerificationData((prev) => ({
-        ...prev,
-        selfie: result.assets[0].uri,
-      }));
-    }
+    // if (!result.canceled) {
+    //   setVerificationData((prev) => ({
+    //     ...prev,
+    //     selfie: result.assets[0].uri,
+    //   }));
+    // }
   };
 
   const handleSubmitVerification = async () => {

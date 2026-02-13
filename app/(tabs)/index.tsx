@@ -17,6 +17,7 @@ import {
   Info,
   Filter,
 } from 'lucide-react-native';
+import * as Notifications from 'expo-notifications';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import ApiService from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -141,6 +142,27 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<FilterOptions>({});
+
+  // Check data for notification permission
+  useEffect(() => {
+    const checkNotificationPermission = async () => {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== 'granted') {
+        console.log('User cancelled notification permission');
+        return;
+      }
+    };
+
+    checkNotificationPermission();
+  }, []);
 
   const [isShortlisted, setIsShortlisted] = useState(false);
   const { processedProfileId } = useLocalSearchParams();
